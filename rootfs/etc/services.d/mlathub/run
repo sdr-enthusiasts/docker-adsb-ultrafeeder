@@ -1,0 +1,99 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash disable=SC2016
+
+# /usr/local/bin/readsb --net-bind-address=0.0.0.0 --quiet --write-output=/run/readsb --forward-mlat --gain=-10 --net --net-bo-port=30105 --net-connector=tar1090,30003,beast_in --net-connector=piaware,30105,beast_in --net-connector=rbfeeder,30105,beast_in --net-connector=radarvirtuel,30105,beast_in --net-connector=multifeeder,39000,beast_in --net-connector=multifeeder,39001,beast_in --net-connector=multifeeder,39002,beast_in --net-connector=multifeeder,39003,beast_in --net-connector=multifeeder,39004,beast_in --net-only --net-ro-port=30002 --net-sbs-port=30003
+
+if [[ -z "${MLAT_CONFIG}" ]]
+then
+    echo "[$(date)][mlathub] No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
+    sleep infinity
+fi
+
+if [[ -n "${MLATHUB_DISABLED}" ]]
+then
+    echo "[$(date)][mlathub] MLATHUB is disabled."
+    sleep infinity
+fi
+
+# Build the readsb command line based on options
+MLATHUB_BIN="/usr/local/bin/readsb"
+
+MLATHUB_CMD=("--net")
+MLATHUB_CMD+=("--quiet")
+MLATHUB_CMD+=("--net-only")
+MLATHUB_CMD+=("--mlat")
+MLATHUB_CMD+=("--forward-mlat")
+
+MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-39105}")
+MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUTPUT_PORT:-39003}")
+
+# We need to get the mlat results ports from the parameters:
+# parse MLAT_CONFIG string into mlat_configs array
+readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
+
+# Now loop through the MLAT_CONFIG items and start up an Mlat_client for each of them:
+mlat_result_sources=0
+for instance in "${mlat_configs[@]}"
+do
+    [[ -z "${instance}" ]] && continue || true
+    # put individual params into the $params array:
+    readarray -td "," params < <(printf '%s' "${instance}")
+
+    if [[ -n "${params[2]}" ]]
+    then
+        MLATHUB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
+        (( mlat_result_sources++ ))
+    fi
+done
+if ((mlat_result_sources == 0 ))
+then
+    echo "[$(date)][mlathub] No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
+    sleep infinity
+fi
+
+# Add any additional net_connectors:
+if [[ -n "$MLATHUB_NET_CONNECTOR" ]]; then
+    IFS=';' read -r -a MLATHUB_NET_CONNECTOR_ARRAY <<< "$MLATHUB_NET_CONNECTOR"
+    for NET_CONNECTOR_ELEMENT in "${MLATHUB_NET_CONNECTOR_ARRAY[@]}"
+    do
+        MLATHUB_CMD+=("--net-connector=${NET_CONNECTOR_ELEMENT// /}")
+    done
+fi
+
+if [ -n "${READSB_DEBUG}" ]; then
+    MLATHUB_CMD+=("--debug=$READSB_DEBUG")
+fi
+
+if [ -n "${LAT}" ]; then
+    MLATHUB_CMD+=(--lat "${LAT}")
+elif [ -n "${READSB_LAT}" ]; then
+    MLATHUB_CMD+=(--lat "${READSB_LAT}")
+fi
+
+if [ -n "${LONG}" ]; then
+    MLATHUB_CMD+=(--lon "${LONG}")
+elif [ -n "${READSB_LON}" ]; then
+    MLATHUB_CMD+=(--lon "${READSB_LON}")
+fi
+
+# Handle "--max-range=<dist>"
+if [[ -n "$READSB_MAX_RANGE" ]]; then
+    MLATHUB_CMD+=("--max-range=$READSB_MAX_RANGE")
+fi
+
+# Handle "--net-connector-delay=<seconds>"
+if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
+    MLATHUB_CMD+=("--net-connector-delay=$READSB_NET_CONNECTOR_DELAY")
+fi
+
+# Handle "--net-heartbeat=<rate>"
+if [[ -n "$READSB_NET_HEARTBEAT" ]]; then
+    MLATHUB_CMD+=("--net-heartbeat=$READSB_NET_HEARTBEAT")
+fi
+
+echo "[$(date)][mlathub] Starting MLATHUB with this command line: ${MLATHUB_BIN} ${MLATHUB_CMD[*]} $MLATHUB_EXTRA_ARGS"
+
+# shellcheck disable=SC2086
+"${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1 | \
+	mawk -W Interactive '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][mlathub] " $0}'
+

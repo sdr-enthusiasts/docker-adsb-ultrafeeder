@@ -1,0 +1,103 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash disable=SC2015,SC2016
+
+
+#---------------------------------------------------------------------------------------------
+# Copyright (C) 2023, Ramon F. Kolb (kx1t)
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------------------------
+
+APPNAME="mlat-client"
+echo "[$(date)][${APPNAME}] Started as an s6 service"
+
+MLAT_CMD="/usr/bin/mlat-client"
+
+RESTARTTIMER=15
+declare -A pid_array
+
+if [[ -z "${MLAT_CONFIG}" ]]
+then
+    echo "[$(date)][${APPNAME}] Warning: MLAT_CONFIG not defined - MLAT will be disabled."
+    sleep infinity
+fi
+
+if [[ -z "${MLAT_USER}" ]] && [[ -z "${UUID}" ]]
+then
+    echo "[$(date)][${APPNAME}] ERROR: either UUID or MLAT_USER must be defined - MLAT will be disabled."
+    sleep infinity
+fi
+
+# MLAT_CONFIG has the following format:
+# MLAT_CONFIG=mlatserver_1,mlatserver_port_1[,results_port_1[,extra_params_1]];mlatserver_2,mlatserver_port_2[,results_port_2[,extra_params_2]] etc
+
+# parse MLAT_CONFIG string into mlat_configs array
+readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
+
+# Now loop through the MLAT_CONFIG items and start up an Mlat_client for each of them:
+for instance in "${mlat_configs[@]}"
+do
+    [[ -z "${instance}" ]] && continue || true
+    # put individual params into the $params array:
+    readarray -td "," params < <(printf '%s' "${instance}")
+
+    # Check if the params array has values for the mandatory elements:
+    if [[ -z "${params[0]}" ]] || [[ -z "${params[1]}" ]]
+    then
+        echo "[$(date)][${APPNAME}] ERROR -- MLAT_CONFIG is malformed: \"${instance}\". Stopping MLAT execution."
+         # shellcheck disable=SC2046
+        kill $(ps -s $$ -o pid=)   
+        sleep infinity
+    fi
+
+    # Build the MLAT parameter string:
+    MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE}")
+    MLAT_PARAM+=(--input-connect localhost:30005)
+    MLAT_PARAM+=(--server "${params[0]}:${params[1]}")
+    MLAT_PARAM+=(--lat "${READSB_LAT}")
+    MLAT_PARAM+=(--lon "${READSB_LON}")
+    MLAT_PARAM+=(--alt "${READSB_ALT}")
+    # [[ -n "${UUID}" ]] && MLAT_PARAM+=(--user "${UUID}") || MLAT_PARAM+=(--user "${MLAT_USER}")
+    [[ -n "${MLAT_USER}" ]] && MLAT_PARAM+=(--user "${MLAT_USER}") || MLAT_PARAM+=(--user "${UUID}")
+    [[ -n "${params[2]}" ]] && MLAT_PARAM+=("--results beast,listen,${params[2]}") || true
+    [[ -n "${params[3]}" ]] && MLAT_PARAM+=("${params[3]}") || true
+
+    # shellcheck disable=SC2048,SC2086
+    execstring="$(echo ${MLAT_CMD} ${MLAT_PARAM[*]} | xargs)"
+
+    # run this Mlat_client instance in the background:
+    echo  "[$(date)][${APPNAME}] starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
+    { exec ${execstring} 2>&1 1>/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+    pid_array[$!]="${MLAT_PARAM[*]}"
+    sleep 5
+done
+
+# Now iterate over all MLAT-client instances and check if they are still running:
+while true
+do
+    for mlat_pid in "${!pid_array[@]}"
+    do
+        if ! kill -0 "${mlat_pid}" >/dev/null 2>&1
+        then
+            # it exited - let's restart:
+            sleep "${RESTARTTIMER}"
+            echo  "[$(date)][${APPNAME}] MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart."
+            # shellcheck disable=SC2086
+            execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
+            { exec ${execstring} 2>&1 1>/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="$(awk '{split($6,x,":"); print x[1]}' <<< "${pid_array[$mlat_pid]}")" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+            pid_array[$!]="${pid_array[${mlat_pid}]}"
+            unset "pid_array[${mlat_pid}]"
+        fi
+    done
+    sleep 10
+done

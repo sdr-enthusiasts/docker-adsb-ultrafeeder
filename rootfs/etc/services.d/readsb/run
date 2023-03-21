@@ -1,0 +1,297 @@
+#!/usr/bin/with-contenv bash
+# shellcheck shell=bash disable=SC2016
+
+#all-in-one
+
+mkdir -p /run/readsb
+
+# Build the readsb command line based on options
+READSB_BIN="/usr/local/bin/readsb"
+
+READSB_CMD=("--net")
+READSB_CMD+=("--quiet")
+
+if [ -n "${READSB_NET_ONLY}" ]; then
+    READSB_CMD+=("--net-only")
+fi
+
+if [ -n "${LAT}" ]; then
+    READSB_CMD+=(--lat "${LAT}")
+elif [ -n "${READSB_LAT}" ]; then
+    READSB_CMD+=(--lat "${READSB_LAT}")
+fi
+
+if [ -n "${LONG}" ]; then
+    READSB_CMD+=(--lon "${LONG}")
+elif [ -n "${READSB_LON}" ]; then
+    READSB_CMD+=(--lon "${READSB_LON}")
+fi
+
+if [ -n "${MLATHOST}" ]; then
+    READSB_CMD+=("--net-connector=${MLATHOST},${MLATPORT},beast_in")
+fi
+
+if [ -n "${BEASTHOST}" ]; then
+    READSB_CMD+=("--net-connector=${BEASTHOST},${BEASTPORT},beast_in")
+fi
+
+if [ -n "${UUID}" ]; then
+    READSB_CMD+=("--uuid-file=/run/uuid")
+fi
+
+READSB_CMD+=("--write-json=/run/readsb")
+READSB_CMD+=("--heatmap-dir=/var/globe_history")
+READSB_CMD+=("--heatmap=15")
+READSB_CMD+=("--write-state=/var/globe_history")
+READSB_CMD+=("--json-trace-interval=15")
+READSB_CMD+=("--json-reliable=1")
+
+READSB_CMD+=("--net-ri-port=30001")
+READSB_CMD+=("--net-ro-port=30002")
+READSB_CMD+=("--net-sbs-port=30003")
+READSB_CMD+=("--net-bi-port=30004,30104")
+READSB_CMD+=("--net-bo-port=30005")
+READSB_CMD+=("--net-beast-reduce-out-port=30006")
+READSB_CMD+=("--net-json-port=30047")
+READSB_CMD+=(--net-api-port=30152)
+# READSB_CMD+=(--forward-mlat)
+READSB_CMD+=(--net-sbs-in-port=32006)
+
+if [[ -n "${READSB_FORWARD_MLAT}" ]]; then
+    READSB_CMD+=("--forward-mlat")
+fi
+
+if [[ -n "$READSB_RX_LOCATION_ACCURACY" ]]; then
+    READSB_CMD+=("--json-location-accuracy=$READSB_RX_LOCATION_ACCURACY")
+fi
+
+if [[ -n "$READSB_JSON_INTERVAL" ]]; then
+    READSB_CMD+=("--write-json-every=$READSB_JSON_INTERVAL")
+fi
+
+if [ -n "${READSB_DEBUG}" ]; then
+    READSB_CMD+=("--debug=$READSB_DEBUG")
+fi
+
+# Handle --write-state-only-on-exit
+if [ -n "${READSB_WRITE_STATE_ONLY_ON_EXIT}" ]; then
+    READSB_CMD+=("--write-state-only-on-exit")
+fi
+
+# Handle "--max-range=<dist>"
+if [[ -n "$READSB_MAX_RANGE" ]]; then
+    READSB_CMD+=("--max-range=$READSB_MAX_RANGE")
+fi
+
+# Handle "--mlat"
+if [[ -n "$READSB_MLAT" ]]; then
+    READSB_CMD+=("--mlat")
+fi
+
+# Handle "--modeac"
+if [[ -n "$READSB_MODEAC" ]]; then
+    READSB_CMD+=("--modeac")
+fi
+
+# Handle "--stats-every=<sec>"
+if [[ -n "$READSB_STATS_EVERY" ]]; then
+    READSB_CMD+=("--stats-every=$READSB_STATS_EVERY")
+fi
+
+# Handle "--stats-range"
+if [[ -n "$READSB_STATS_RANGE" ]]; then
+    READSB_CMD+=("--stats-range")
+fi
+
+if [[ -n "$READSB_RANGE_OUTLINE_HOURS" ]]; then
+    READSB_CMD+=("--range-outline-hours=$READSB_RANGE_OUTLINE_HOURS")
+fi
+
+
+##### NETWORK OPTIONS #####
+#
+
+READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152")
+
+# Handle "--net-beast-reduce-interval=<seconds>"
+if [[ -n "$READSB_NET_BEAST_REDUCE_INTERVAL" ]]; then
+    READSB_CMD+=("--net-beast-reduce-interval=$READSB_NET_BEAST_REDUCE_INTERVAL")
+fi
+
+# Handle "--net-beast-reduce-out-port=<ports>"
+if [[ -n "$READSB_NET_BEAST_REDUCE_OUT_PORT" ]]; then
+    READSB_CMD+=("--net-beast-reduce-out-port=$READSB_NET_BEAST_REDUCE_OUT_PORT")
+fi
+
+if [[ -n "$READSB_NET_SBS_REDUCE" ]]; then
+    READSB_CMD+=("--net-sbs-reduce")
+fi
+
+if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_DIST" ]]; then
+    READSB_CMD+=("--net-beast-reduce-filter-dist=$READSB_NET_BEAST_REDUCE_FILTER_DIST")
+fi
+
+if [[ -n "$READSB_JSON_TRACE_INTERVAL" ]]; then
+    READSB_CMD+=("--json-trace-interval=$READSB_JSON_TRACE_INTERVAL")
+fi
+
+if [[ -n "$READSB_HEATMAP_INTERVAL" ]]; then
+    READSB_CMD+=("--heatmap=$READSB_HEATMAP_INTERVAL")
+fi
+
+if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_ALT" ]]; then
+    READSB_CMD+=("--net-beast-reduce-filter-alt=$READSB_NET_BEAST_REDUCE_FILTER_ALT")
+fi
+
+# Handle "--net-bi-port=<ports>"
+if [[ -n "$READSB_NET_BEAST_INPUT_PORT" ]]; then
+    READSB_CMD+=("--net-bi-port=$READSB_NET_BEAST_INPUT_PORT")
+fi
+
+# Handle "--net-bo-port=<ports>"
+if [[ -n "$READSB_NET_BEAST_OUTPUT_PORT" ]]; then
+    READSB_CMD+=("--net-bo-port=$READSB_NET_BEAST_OUTPUT_PORT")
+fi
+
+# Handle "--net-buffer=<n>"
+if [[ -n "$READSB_NET_BUFFER" ]]; then
+    READSB_CMD+=("--net-buffer=$READSB_NET_BUFFER")
+fi
+
+# Handle "--net-connector=<ip,port,protocol>"
+if [[ -n "$READSB_NET_CONNECTOR" ]]; then
+    IFS=';' read -r -a READSB_NET_CONNECTOR_ARRAY <<< "$READSB_NET_CONNECTOR"
+    for NET_CONNECTOR_ELEMENT in "${READSB_NET_CONNECTOR_ARRAY[@]}"
+    do
+        READSB_CMD+=("--net-connector=${NET_CONNECTOR_ELEMENT// /}")
+    done
+fi
+
+# Handle "--net-connector-delay=<seconds>"
+if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
+    READSB_CMD+=("--net-connector-delay=$READSB_NET_CONNECTOR_DELAY")
+fi
+
+# Handle "--net-heartbeat=<rate>"
+if [[ -n "$READSB_NET_HEARTBEAT" ]]; then
+    READSB_CMD+=("--net-heartbeat=$READSB_NET_HEARTBEAT")
+fi
+
+# Handle "--net-ri-port=<ports>"
+if [[ -n "$READSB_NET_RAW_INPUT_PORT" ]]; then
+    READSB_CMD+=("--net-ri-port=$READSB_NET_RAW_INPUT_PORT")
+fi
+
+# Handle "--net-ro-interval=<rate>"
+if [[ -n "$READSB_NET_RAW_OUTPUT_INTERVAL" ]]; then
+    READSB_CMD+=("--net-ro-interval=$READSB_NET_RAW_OUTPUT_INTERVAL")
+fi
+
+# Handle "--net-ri-port=<ports>"
+if [[ -n "$READSB_NET_RAW_OUTPUT_PORT" ]]; then
+    READSB_CMD+=("--net-ro-port=$READSB_NET_RAW_OUTPUT_PORT")
+fi
+
+# Handle "--net-ro-size=<size>"
+if [[ -n "$READSB_NET_RAW_OUTPUT_SIZE" ]]; then
+    READSB_CMD+=("--net-ro-size=$READSB_NET_RAW_OUTPUT_SIZE")
+fi
+
+# Handle "--net-sbs-in-port=<ports>"
+if [[ -n "$READSB_NET_SBS_INPUT_PORT" ]]; then
+    READSB_CMD+=("--net-sbs-in-port=$READSB_NET_SBS_INPUT_PORT")
+fi
+
+# Handle "--net-sbs-port=<ports>"
+if [[ -n "$READSB_NET_SBS_OUTPUT_PORT" ]]; then
+    READSB_CMD+=("--net-sbs-port=$READSB_NET_SBS_OUTPUT_PORT")
+fi
+
+# Handle "--net-verbatim"
+if [[ -n "$REASSB_NET_VERBATIM" ]]; then
+    READSB_CMD+=("--net-verbatim")
+fi
+
+# Handle "--net-vrs-port=<ports>"
+if [[ -n "$READSB_NET_VRS_PORT" ]]; then
+    READSB_CMD+=("--net-vrs-port=$READSB_NET_VRS_PORT")
+fi
+
+# make sure the db file exists, and if it does, use it
+if [[ -e $TAR1090_INSTALL_DIR/aircraft.csv.gz ]]; then
+    if [[ "$TAR1090_ENABLE_AC_DB" == "true" ]]; then
+        READSB_CMD+=("--db-file=$TAR1090_INSTALL_DIR/aircraft.csv.gz")
+    fi
+fi
+
+# Handle "--device-type"
+if [[ -n "$READSB_DEVICE_TYPE" ]]; then
+    READSB_CMD+=("--device-type=$READSB_DEVICE_TYPE")
+fi
+
+if [[ -n "$READSB_GAIN" ]]; then
+    READSB_CMD+=("--gain=$READSB_GAIN")
+fi
+
+##### RTL-SDR OPTIONS #####
+
+# Handle "--device=<index|serial>"
+if [[ -n "$READSB_RTLSDR_DEVICE" ]]; then
+    READSB_CMD+=("--device=$READSB_RTLSDR_DEVICE")
+fi
+
+# Handle "--enable-agc"
+if [[ -n "$READSB_RTLSDR_ENABLE_AGC" ]]; then
+    READSB_CMD+=("--enable-agc")
+fi
+
+# Handle "--ppm=<correction>"
+if [[ -n "$READSB_RTLSDR_PPM" ]]; then
+    READSB_CMD+=("--ppm=$READSB_RTLSDR_PPM")
+fi
+
+##### MODE-S BEAST OPTIONS #####
+
+# Handle "--beast-crc-off"
+if [[ -n "$READSB_BEAST_CRC_OFF" ]]; then
+    READSB_CMD+=("--beast-crc-off")
+fi
+
+# Handle "--beast-df045-on"
+if [[ -n "$READSB_BEAST_DF045_ON" ]]; then
+    READSB_CMD+=("--beast-df045-on")
+fi
+
+# Handle "--beast-df1117-on"
+if [[ -n "$READSB_BEAST_DF1117_ON" ]]; then
+    READSB_CMD+=("--beast-df1117-on")
+fi
+
+# Handle "--beast-fec-off"
+if [[ -n "$READSB_BEAST_FEC_OFF" ]]; then
+    READSB_CMD+=("--beast-fec-off")
+fi
+
+# Handle "--beast-mlat-off"
+if [[ -n "$READSB_BEAST_MLAT_OFF" ]]; then
+    READSB_CMD+=("--beast-mlat-off")
+fi
+
+# Handle "--beast-modeac"
+if [[ -n "$READSB_BEAST_MODEAC" ]]; then
+    READSB_CMD+=("--beast-modeac")
+fi
+
+# Handle "--beast-serial=<path>"
+if [[ -n "$READSB_BEAST_SERIAL" ]]; then
+    READSB_CMD+=("--beast-serial=$READSB_BEAST_SERIAL")
+fi
+
+if [[ -n "$READSB_BEAST_BAUDRATE" ]]; then
+    READSB_CMD+=("--beast-baudrate=$READSB_BEAST_BAUDRATE")
+fi
+
+# shellcheck disable=SC2086
+"${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 | \
+	mawk -W Interactive '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][readsb] " $0}'
+
