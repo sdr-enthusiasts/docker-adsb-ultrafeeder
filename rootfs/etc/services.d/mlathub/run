@@ -35,6 +35,7 @@ readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
 mlat_result_sources=0
 for instance in "${mlat_configs[@]}"
 do
+    # shellcheck disable=SC2015
     [[ -z "${instance}" ]] && continue || true
     # put individual params into the $params array:
     readarray -td "," params < <(printf '%s' "${instance}")

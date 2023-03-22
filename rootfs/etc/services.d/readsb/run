@@ -111,7 +111,7 @@ fi
 ##### NETWORK OPTIONS #####
 #
 
-READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152")
+READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152}")
 
 # Handle "--net-beast-reduce-interval=<seconds>"
 if [[ -n "$READSB_NET_BEAST_REDUCE_INTERVAL" ]]; then
