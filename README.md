@@ -119,6 +119,10 @@ Some common ports are as follows (which may or may not be in use depending on yo
 | `30005/tcp` | Beast protocol output |
 | `30006/tcp` | Beast reduce protocol output |
 | `30047/tcp` | Json position output |
+| `31003/tcp` | MLATHUB SBS/Basestation protocol output |
+| `31004/tcp` | MLATHUB Beast protocol input |
+| `31005/tcp` | MLATHUB Beast protocol output |
+
 
 Json position output:
 
@@ -330,19 +334,38 @@ Where the default value is "Unset", `readsb`'s default will be used.
 | `READSB_STATS_RANGE` | Set this to any value to collect range statistics for polar plot. | `--stats-range` |  Unset |
 | `READSB_RANGE_OUTLINE_HOURS` | Change which past timeframe the range outline is based on | `--range-outline-hours` |  `24` |
 
+## Configuring the built-in MLAT Hub
+
+An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
+
+* collect the MLAT results from all of these services
+* feed them back to the built-in `tar1090` graphical interface
+* ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
+* make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
+* create outbound connections using any supported format to send your Beast data wherever you want
+
+Generally, there is little to configure, but there are a few parameters that you can set or change:
+
+| Variable | Description | Default if omitted|
+|----------|-------------|--------------------------------|
+| `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31004` |
+| `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
+| `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the "`READSB_NET_CONNECTOR` syntax " section above. | Unset |
+
 ## Message decoding introspection
 
 You can look at individual messages and what information they contain, either for all or for an individual aircraft by hex:
 
 ```shell
 # only for hex 3D3ED0
-docker exec -it tar1090 /usr/local/bin/viewadsb --show-only 3D3ED0
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --show-only 3D3ED0
 
 # for all aircraft
-docker exec -it tar1090 /usr/local/bin/viewadsb --no-interactive
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --no-interactive
 
 # show position / CPR debugging for hex 3D3ED0
-docker exec -it tar1090 /usr/local/bin/viewadsb --cpr-focus 3D3ED0
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 ```
 
 ## Configuring `graphs1090`

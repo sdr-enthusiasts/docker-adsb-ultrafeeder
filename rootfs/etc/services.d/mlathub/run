@@ -18,20 +18,25 @@ fi
 # Build the readsb command line based on options
 MLATHUB_BIN="/usr/local/bin/readsb"
 
+# set some basic options:
 MLATHUB_CMD=("--net")
 MLATHUB_CMD+=("--quiet")
 MLATHUB_CMD+=("--net-only")
 MLATHUB_CMD+=("--mlat")
 MLATHUB_CMD+=("--forward-mlat")
 
-MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-39105}")
-MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUTPUT_PORT:-39003}")
+# send MLAT data to the main readsb/tar1090 of this container:
+ MLATHUB_CMD+=("--net-connector=localhost,30004,beast_reduce_out")
+
+# define some more ports:
+MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUT_PORT:-31003}")
+MLATHUB_CMS+=("--net-bi-port=${MLATHUB_BEAST_IN_PORT:-31004}")
+MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-31005}")
 
 # We need to get the mlat results ports from the parameters:
 # parse MLAT_CONFIG string into mlat_configs array
 readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
-
-# Now loop through the MLAT_CONFIG items and start up an Mlat_client for each of them:
+# Now loop through the MLAT_CONFIG items and add a net-connector for each of them:
 mlat_result_sources=0
 for instance in "${mlat_configs[@]}"
 do
