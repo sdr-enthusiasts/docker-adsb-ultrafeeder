@@ -64,9 +64,25 @@ do
     MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE}")
     MLAT_PARAM+=(--input-connect localhost:30005)
     MLAT_PARAM+=(--server "${params[0]}:${params[1]}")
-    MLAT_PARAM+=(--lat "${READSB_LAT}")
-    MLAT_PARAM+=(--lon "${READSB_LON}")
-    MLAT_PARAM+=(--alt "${READSB_ALT}")
+
+    if [ -n "${LAT}" ]; then
+        MLAT_PARAM+=(--lat "${LAT}")
+    elif [ -n "${READSB_LAT}" ]; then
+        MLAT_PARAM+=(--lat "${READSB_LAT}")
+    fi
+
+    if [ -n "${LONG}" ]; then
+        MLAT_PARAM+=(--lon "${LONG}")
+    elif [ -n "${READSB_LON}" ]; then
+        MLAT_PARAM+=(--lon "${READSB_LON}")
+    fi
+
+    if [ -n "${ALT}" ]; then
+        MLAT_PARAM+=(--alt "${ALT}")
+    elif [ -n "${READSB_ALT}" ]; then
+        MLAT_PARAM+=(--alt "${READSB_ALT}")
+    fi
+
     # [[ -n "${UUID}" ]] && MLAT_PARAM+=(--user "${UUID}") || MLAT_PARAM+=(--user "${MLAT_USER}")
     [[ -n "${MLAT_USER}" ]] && MLAT_PARAM+=(--user "${MLAT_USER}") || MLAT_PARAM+=(--user "${UUID}")
     [[ -n "${params[2]}" ]] && MLAT_PARAM+=("--results beast,listen,${params[2]}") || true
