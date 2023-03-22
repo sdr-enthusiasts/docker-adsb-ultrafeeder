@@ -123,7 +123,6 @@ Some common ports are as follows (which may or may not be in use depending on yo
 | `31004/tcp` | MLATHUB Beast protocol input |
 | `31005/tcp` | MLATHUB Beast protocol output |
 
-
 Json position output:
 
 * outputs an aircraft object for every new position received for an aircraft if the --json-trace-interval has elapsed for that aircraft
