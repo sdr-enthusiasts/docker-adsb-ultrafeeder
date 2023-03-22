@@ -1,6 +1,6 @@
-FROM ghcr.io/sdr-enthusiasts/docker-tar1090
+FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
-LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-multifeeder"
+LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-adsb-all-in-one"
 
 ENV URL_MLAT_CLIENT_REPO="https://github.com/adsbxchange/mlat-client.git" \
     PRIVATE_MLAT="false" \
