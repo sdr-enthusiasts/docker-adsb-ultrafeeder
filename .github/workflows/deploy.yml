@@ -1,37 +1,24 @@
 ---
-name: Deploy Main
+name: Deploy
 
 on:
   workflow_dispatch:
     inputs:
       reason:
-        required: false
+        required: true
         description: 'Reason for running this workflow'
+
   push:
     branches:
       - main
-    # Don't trigger if it's just a documentation update
-    paths-ignore:
-      - '**.md'
-      - '**.MD'
-      - '**.yml'
-      - 'LICENSE'
-      - '.gitattributes'
-      - '.gitignore'
-      - '.dockerignore'
+    # Trigger only on specific files being updated.
 
-# Set workflow-wide environment variables
-#  - REPO: repo name on dockerhub
-#  - IMAGE: image name on dockerhub
-env:
-#  DOCKERHUB_REPO: sdr-enthusiasts
-#  DOCKERHUB_IMAGE: vrs
-  GHCR_IMAGE: sdr-enthusiasts/docker-adsb-all-in-one
-  GHCR_REGISTRY: ghcr.io
-  GH_LABEL: main
-  GHCR_TAG: latest
+    paths:
+      - Dockerfile
+      - rootfs/**
 
 jobs:
+
   workflow-dispatch:
     name: Triggered via Workflow Dispatch?
     # only run this step if workflow dispatch triggered
@@ -47,65 +34,17 @@ jobs:
         run: |
           echo "Workflow dispatch reason: $INPUTS_REASON"
 
-  hadolint:
-    name: Run hadolint against docker files
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Pull hadolint/hadolint:latest Image
-        run: docker pull hadolint/hadolint:latest
-      - name: Run hadolint against Dockerfiles
-        run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
-
-  deploy_ghcr_multiarch:
-    name: Deploy ghcr.io (Multi-Arch)
-    needs: [hadolint]
-    runs-on: ubuntu-latest
-    permissions:
-      packages: write
-    steps:
-
-      # Check out our code
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-          ref: ${{ env.GH_LABEL }}
-
-      # Log into ghcr (so we can push images)
-      - name: Login to ghcr.io
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.GHCR_REGISTRY }}
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Get metadata from repo
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
-
-      # Set up QEMU for multi-arch builds
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      # Set up buildx for multi platform builds
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          driver-opts: image=moby/buildkit:v0.10.6
-
-      # Build "latest"
-      - name: Build & Push - latest
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          file: ./Dockerfile
-          no-cache: true
-          platforms: linux/amd64,linux/arm/v7,linux/arm64,linux/i386
-          push: true
-          tags: ghcr.io/${{ env.GHCR_IMAGE }}:${{ env.GHCR_TAG }}
-          labels: ${{ steps.meta.outputs.labels }}
+  deploy:
+    name: Deploy
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
+    with:
+      push_enabled: true
+      push_destinations: ghcr.io;dockerhub
+      ghcr_repo_owner: ${{ github.repository_owner }}
+      ghcr_repo: ${{ github.repository }}
+      dockerhub_profile: mikenye
+      dockerhub_repo: tar1090
+      get_version_method: git_commit_hash_short
+    secrets:
+      ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
