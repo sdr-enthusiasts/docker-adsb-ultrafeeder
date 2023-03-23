@@ -1,12 +1,12 @@
-# sdr-enthusiasts/docker-adsb-all-in-one
+# sdr-enthusiasts/docker-adsb-ultrafeeder
 
-`adsb-all-in-one` is a ADS-B data collector container that can be used to:
+`adsb-ultrafeeder` is a ADS-B data collector container that can be used to:
 
 * retrieve ADS-B data from your SDR or other device
 * display it on a local map, including options to show tracks, heatmaps, and system performance graphs
 * forward the data to one or more aggregators using BEAST/BEAST-REDUCE/BEAST-REDUCE-PLUS format
 * send MLAT data to these aggregators
-* receive and optionally consolidate MLAT results data (built-in `mlatuhb`)
+* receive and consolidate MLAT results data (built-in `mlathub`)
 * Interface with external visualization tools such as Grafana using statistics data available in InfluxDB and Prometheus format
 
 In order to accomplish this, the container makes use of the following underlying technologies:
@@ -19,53 +19,11 @@ In order to accomplish this, the container makes use of the following underlying
 
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
 
-## Up-and-Running with `docker run`
-
-```bash
-docker run -d \
-    --name=tar1090 \
-    -p 8078:80 \
-    -e TZ=<TIMEZONE> \
-    -e BEASTHOST=<BEASTHOST> \
-    -e MLATHOST=<MLATHOST> \
-    -e LAT=xx.xxxxx \
-    -e LONG=xx.xxxxx \
-    -v /opt/adsb/tar1090/graphs1090:/var/lib/collectd \
-    --tmpfs=/run:exec,size=64M \
-    --tmpfs=/var/log \
-    ghcr.io/sdr-enthusiasts/docker-tar1090:latest
-```
-
-Replacing `TIMEZONE` with your timezone, `BEASTHOST` with the IP address of a host that can provide Beast data, and `MLATHOST` with the IP address of a host that can provide MLAT data.
-
-For example:
-
-```bash
-docker run -d \
-    --name=tar1090 \
-    -p 8078:80 \
-    -e TZ=Australia/Perth \
-    -e BEASTHOST=readsb \
-    -e MLATHOST=adsbx \
-    -e LAT=-33.33333 \
-    -e LONG=111.11111 \
-    -v /opt/adsb/tar1090/graphs1090:/var/lib/collectd \
-    --tmpfs=/run:exec,size=64M \
-    --tmpfs=/var/log \
-    ghcr.io/sdr-enthusiasts/docker-tar1090:latest
-```
-
-You should now be able to browse to:
-
-* <http://dockerhost:8078/> to access the tar1090 web interface
-* <http://dockerhost:8078/?replay> to see a replay of past data
-* <http://dockerhost:8078/?heatmap> to see the heatmap for the past 24 hours.
-* <http://dockerhost:8078/?heatmap&realHeat> to see a different heatmap for the past 24 hours.
-* <http://dockerhost:8078/graphs1090/> to see performance graphs
+## `docker-compose.yml` configuration
 
 ## Up-and-Running with `docker-compose`
 
-An example `docker-compose.xml` file is below:
+An example `docker-compose.xml` file can be found [in this repository](docker-compose.yml). Here are a few basic elements:
 
 ```yaml
 version: '3.8'
@@ -79,7 +37,6 @@ services:
     environment:
       - TZ=Australia/Perth
       - BEASTHOST=readsb
-      - MLATHOST=adsbx
       - LAT=-33.33333
       - LONG=111.11111
     volumes:
@@ -88,6 +45,8 @@ services:
       - /opt/adsb/tar1090/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
     # - /run/airspy_adsb:/run/airspy_adsb
+    devices:
+      - /dev/usb:/dev/usb
     ports:
       - 8078:80
     tmpfs:
@@ -102,8 +61,6 @@ You should now be able to browse to:
 * <http://dockerhost:8078/?heatmap> to see the heatmap for the past 24 hours.
 * <http://dockerhost:8078/?heatmap&realHeat> to see a different heatmap for the past 24 hours.
 * <http://dockerhost:8078/graphs1090/> to see performance graphs
-
-*Note*: the example above excludes `MLATHOST` as `readsb` alone cannot provide MLAT data. You'll need a feeder container for this.
 
 ## Ports
 
@@ -123,6 +80,8 @@ Some common ports are as follows (which may or may not be in use depending on yo
 | `31004/tcp` | MLATHUB Beast protocol input |
 | `31005/tcp` | MLATHUB Beast protocol output |
 
+The container's web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive. In the example above, the container's website is made available at port 8078 on the host system.
+
 Json position output:
 
 * outputs an aircraft object for every new position received for an aircraft if the --json-trace-interval has elapsed for that aircraft
@@ -135,45 +94,145 @@ Aircraft.json:
 * <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 * available on the same port as the web interface, example: `http://192.168.x.yy:8087/data/aircraft.json`
 
-### Outgoing
-
-This container will try to connect to the `BEASTHOST` on TCP port `30005` by default. This can be changed by setting the `BEASTPORT` environment variable.
-
-If `MLATHOST` is set, this container will try to connecto the `MLATHOST` on TCP port `30105` by default. This can be changed to setting the `MLATPORT` environment variable.
-
-### Incoming
-
-This container accepts HTTP connections on TCP port `80` by default. You can change this with the container's port mapping. In the examples above, this has been changed to `8078`.
-
 ## Runtime Environment Variables
 
-### Container Configuration
+The sections below describe how to configure each part of the container functionality. Each section describes what's needed to come up with a minimally viable configuration, followed by additional / optional parameters that can also be set.
+
+### General Configuration
+
+#### Basic Ultrafeeder Parameters
+
+##### Mandatory Parameters
+
+The following parameters must be set (mandatory) for the container to function:
 
 | Environment Variable | Purpose | Default |
 |----------------------|---------|---------|
-| `BEASTHOST` | Required. IP/Hostname of a Mode-S/Beast provider (`dump1090`/`readsb`) | |
-| `BEASTPORT` | Optional. TCP port number of Mode-S/Beast provider (`dump1090`/`readsb`) | `30005` |
-| `LAT` | Optional. The latitude of your antenna | |
-| `LONG` | Optional. The longitude of your antenna | |
-| `MLATHOST` | Optional. IP/Hostname of an MLAT provider (`mlat-client`) | |
-| `MLATPORT` | Optional. TCP port number of an MLAT provider (`mlat-client`) | 30105 |
-| `TZ` | Optional. Your local timezone in [TZ-database-name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format | |
-| `HEYWHATSTHAT_PANORAMA_ID` | Optional. Your `heywhatsthat.com` panorama ID. See <https://github.com/wiedehopf/tar1090#heywhatsthatcom-range-outline>. | |
-| `HEYWHATSTHAT_ALTS` | Optional. Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please | `12192m` (=40000 ft) |
-| `HTTP_ACCESS_LOG` | Optional. Set to `true` to display HTTP server access logs. | `false` |
-| `HTTP_ERROR_LOG` | Optional. Set to `false` to hide HTTP server error logs. | `true` |
-| `READSB_MAX_RANGE` | Optional. Maximum range (in nautical miles). | `300` |
+| `LAT` or `READSB_LAT` | The latitude of your antenna | |
+| `LONG` or `READSB_LON` | The longitude of your antenna | |
+| `ALT` or `READSB_ALT` | The altitude of your antenna over ground level. For example, `15m` or `45ft` | |
+| `TZ` | Your local timezone in [TZ-database-name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format | |
+
+##### Optional Parameters
+
+| Variable | Description | Controls which `readsb` option | Default |
+|----------|-------------|--------------------------------|---------|
 | `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to any value to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset |
 | `READSB_EXTRA_ARGS` | Optional, allows to specify extra parameters for readsb | Unset |
 | `READSB_DEBUG` | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check | Unset |
 | `S6_SERVICES_GRACETIME` | Optional, set to 30000 when saving traces / globe_history | `3000` |
-| `ENABLE_AIRSPY` | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset |
+| `READSB_MAX_RANGE` | Optional. Maximum range (in nautical miles). | `300` |
+| `READSB_ENABLE_BIASTEE` | Set to any value to enable bias tee on supporting interfaces | | Unset |
+| `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location in metadata: 0=no location, 1=approximate, 2=exact | `--rx-location-accuracy=<n>` | `2` |
+| `READSB_HEATMAP_INTERVAL` | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value) | `--heatmap=<sec>` | `15` |
+| `READSB_MAX_RANGE` | Absolute maximum range for position decoding (in nm) | `--max-range=<dist>` | `300` |
+| `READSB_STATS_EVERY` | Number of seconds between showing and resetting stats. | `--stats-every=<sec>` | Unset |
+| `READSB_STATS_RANGE` | Set this to any value to collect range statistics for polar plot. | `--stats-range` |  Unset |
+| `READSB_RANGE_OUTLINE_HOURS` | Change which past timeframe the range outline is based on | `--range-outline-hours` |  `24` |
+| `READSB_EXTRA_ARGS` | Optional, allows to specify extra parameters for readsb | | Unset |
+| `S6_SERVICES_GRACETIME` | Optional, set to 30000 when saving traces / globe_history | | `3000` |
 
-READSB_EXTRA_ARGS just passes arguments to the commandline, you can check this file for more options for wiedehofps readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
+`READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehofp's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 
-If you want to save historic data with tar1090, see a modified mode of operation at the end of the readme
+### Getting ADSB data to the Ultrafeeder
 
-### `tar1090` Configuration
+There are two ways to provide ADSB data to the Ultrafeeder:
+
+* provide the container with access to a SDR or other hardware device that collects ADSB data
+* allow the container to connect to a ADSB data source in Beast, Raw, or SBS format
+
+These methods are not mutually exclusive - you can use both at the same time if you want.
+
+#### Connecting to a SDR or other hardware device
+
+If you want to connect your SDR to the container, here's how to do that:
+
+##### Mandatory parameters
+
+| Variable | Description | Controls which `readsb` option | Default |
+|----------|-------------|--------------------------------|---------|
+| `READSB_DEVICE_TYPE` | If using an SDR, set this to `rtlsdr`, `modesbeast`, `gnshulc` depending on the model of your SDR. If not using an SDR, leave un-set. | `--device-type=<type>` | Unset |
+| `READSB_RTLSDR_DEVICE` | Select device by serial number. | `--device=<serial>` | Unset |
+| `READSB_BEAST_SERIAL` | only when type `modesbeast` or `gnshulc` is used: Path to Beast serial device. | `--beast-serial=<path>` | `/dev/ttyUSB0` |
+
+##### Optional/Additional Parameters
+
+| Variable | Description | Controls which `readsb` option | Default |
+|----------|-------------|--------------------------------|---------|
+| `READSB_GAIN` | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. | `--gain=<db>` | Max gain |
+| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/README.MD#estimating-ppm)  | `--ppm=<correction>` | Unset |
+
+#### Connecting to external ADSB data sources
+
+In addition to (or instead of) connecting to a SDR or hardware device to get ADSB data, the container also supports ingesting data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
+
+##### Mandatory parameters
+
+| Environment Variable | Purpose | Default |
+|----------------------|---------|---------|
+| `BEASTHOST` | IP/Hostname of a Mode-S/Beast provider (`dump1090`/`readsb`) | |
+| `BEASTPORT` | TCP port number of Mode-S/Beast provider (`dump1090`/`readsb`) | `30005` |
+| `MLATHOST` | Legacy parameter. IP/Hostname of an MLAT provider (`mlat-client`). Note - using this parameter will not make the MLAT data part of the consolidated mlathub. The preferred way of ingesting MLAT results is using the `mlathub` functionality of the container, see below for details | |
+| `MLATPORT` | Legacy parameter used with `MLATHOST`. TCP port number of an MLAT provider (`mlat-client`) | 30105 |
+
+###### Alternate Configuration Method with `READSB_NET_CONNECTOR`
+
+Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure outgoing connections. The variable takes a semicolon (`;`) separated list of `ip,port,protocol`, where:
+
+* `ip` is an IP address. Specify an IP/hostname/containername for outgoing connections.
+* `port` is a TCP port number
+* `protocol` can be one of the following:
+  * `beast_out`: Beast-format output
+  * `beast_reduce_out`: Beast-format output using reduced reporting frequencies
+  * `beast_reduce_plus_out`: Like `beast_reduce_out`, but including UUID for use by aggregators like adsb.lol/one/fi, etc.
+  * `beast_in`: Beast-format input
+  * `raw_out`: Raw output
+  * `raw_in`: Raw input
+  * `sbs_out`: SBS-format output
+  * `vrs_out`: SBS-format output
+
+NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use `READSB_NET_CONNECTOR` to ingest UAT data from `dump978`. See example below
+
+```yaml
+    environment:
+    ...
+      - READSB_NET_CONNECTOR=dump978,37981,raw_in;another-data-aggregator.com,30005,beast_reduce_plus_out
+    ...
+```
+
+##### Optional Networking Parameters
+
+There are many optional parameters relating to the ingestion of data and the general networking functioning of the `readsb` program that implements this functionality.
+
+| Variable | Description | Controls which `readsb` option | Default |
+|----------|-------------|--------------------------------|---------|
+| `READSB_NET_API_PORT` | <https://github.com/wiedehopf/readsb/blob/dev/README-json.md#--net-api-port-query-formats> | `--net-api-port=<ports>` | `30152` |
+| `READSB_NET_BEAST_REDUCE_INTERVAL` | BeastReduce position update interval, longer means less data (valid range: `0.000` - `14.999`) | `--net-beast-reduce-interval=<seconds>` | `0.125` |
+| `READSB_NET_BEAST_REDUCE_FILTER_DIST` | Restrict beast-reduce output to aircraft in a radius of X nmi | `--net-beast-reduce-filter-dist=<nmi>` | Unset |
+| `READSB_NET_BEAST_REDUCE_FILTER_ALT` | Restrict beast-reduce output to aircraft below X ft | `--net-beast-reduce-filter-alt=<ft>` | Unset |
+| `READSB_NET_BEAST_REDUCE_OUT_PORT` | TCP BeastReduce output listen ports (comma separated) | `--net-beast-reduce-out-port=<ports>` | Unset |
+| `READSB_NET_BEAST_INPUT_PORT`| TCP Beast input listen ports | `--net-bi-port=<ports>` | `30004,30104` |
+| `READSB_NET_BEAST_OUTPUT_PORT` | TCP Beast output listen ports | `--net-bo-port=<ports>` | `30005` |
+| `READSB_NET_BUFFER` | TCP buffer size 64Kb * (2^n) | `--net-buffer=<n>` | `2` (256Kb) |
+| `READSB_NET_RAW_OUTPUT_INTERVAL` | TCP output flush interval in seconds (maximum interval between two network writes of accumulated data). | `--net-ro-interval=<rate>` | `0.05` |
+| `READSB_NET_RAW_OUTPUT_SIZE` | TCP output flush size (maximum amount of internally buffered data before writing to network). | `--net-ro-size=<size>` | `1200` |
+| `READSB_NET_CONNECTOR_DELAY` | Outbound re-connection delay. | `--net-connector-delay=<seconds>` | `30` |
+| `READSB_NET_HEARTBEAT` | TCP heartbeat rate in seconds (0 to disable). | `--net-heartbeat=<rate>` | `60` |
+| `READSB_NET_RAW_INPUT_PORT` | TCP raw input listen ports. | `--net-ri-port=<ports>` | `30001` |
+| `READSB_NET_RAW_OUTPUT_PORT` | TCP raw output listen ports. | `--net-ro-port=<ports>` | `30002` |
+| `READSB_NET_SBS_INPUT_PORT` | TCP BaseStation input listen ports. | `--net-sbs-in-port=<ports>` | Unset |
+| `READSB_NET_SBS_OUTPUT_PORT` | TCP BaseStation output listen ports. | `--net-sbs-port=<ports>` | `30003` |
+| `REASSB_NET_VERBATIM` | Set this to any value to forward messages unchanged. | `--net-verbatim` | Unset |
+| `READSB_NET_VRS_PORT` | TCP VRS JSON output listen ports. | `--net-vrs-port=<ports>` | Unset |
+| `READSB_WRITE_STATE_ONLY_ON_EXIT` | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb` | `--write-state-only-on-exit` | Unset |
+| `READSB_JSON_INTERVAL` | Update interval for the webinterface in seconds / interval between aircraft.json writes | `--write-json-every=<sec>` | `1.0` |
+| `READSB_JSON_TRACE_INTERVAL` | Per plane interval for json position output and trace interval for globe history | `--json-trace-interval=<sec>` | `15` |
+
+### Web Gui (`tar1090`) Configuration
+
+The Container creates an interactive web interface displaying the aircraft, based on Wiedehopf's widely used [tar1090](https://github.com/wiedehopf/tar1090) software.
+
+The web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive.
 
 All of the variables below are optional.
 
@@ -186,11 +245,15 @@ All of the variables below are optional.
 | `INTERVAL` | Interval at which the track history is saved | `8` |
 | `HISTORY_SIZE` | How many points in time are stored in the track history | `450` |
 | `ENABLE_978` | Change to yes to enable UAT/978 display in `tar1090`. This will also enable UAT-specific graphs in graphs1090 | `no` |
-| `URL_978` | The URL needs to point at where you would normally find the skyview978 webinterface | `http://127.0.0.1/skyaware978` |
+| `URL_978` | The URL needs to point at where you would normally find the skyview978 webinterface, for example `http://192.168.0.29/skyaware978`. Note -- do not use `localhost` or `127.0.0.1 | |
 | `GZIP_LVL` | `1`-`9` are valid, lower lvl: less CPU usage, higher level: less network bandwidth used when loading the page | `3` |
 | `PTRACKS` | Shows the last `$PTRACKS` hours of traces you have seen at the `?pTracks` URL | `8` |
 | `TAR1090_FLIGHTAWARELINKS` | Set to any value to enable FlightAware links in the web interface | `null` |
-| `TAR1090_ENABLE_AC_DB` | Set to `true` to enable extra information, such as aircraft type and registration, to be included in in `aircraft.json` output. Will use more memory; use caution on older Pis or similiar devices. | `false` |
+| `TAR1090_ENABLE_AC_DB` | Set to `true` to enable extra information, such as aircraft type and registration, to be included in in `aircraft.json` output. Will use more memory; use caution on older Pis or similar devices. | `false` |
+| `HEYWHATSTHAT_PANORAMA_ID` | Your `heywhatsthat.com` panorama ID. See <https://github.com/wiedehopf/tar1090#heywhatsthatcom-range-outline> | |
+| `HEYWHATSTHAT_ALTS` | Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please | `12192m` (=40000 ft) |
+| `HTTP_ACCESS_LOG` | Optional. Set to `true` to display HTTP server access logs. | `false` |
+| `HTTP_ERROR_LOG` | Optional. Set to `false` to hide HTTP server error logs. | `true` |
 
 * For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 * TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>
@@ -244,132 +307,9 @@ All of the variables below are optional.
 | `TAR1090_RANGERINGSDISTANCES` | Distances to display range rings, in miles, nautical miles, or km (depending settings value '`TAR1090_DISPLAYUNITS`'). Accepts a comma separated list of numbers (no spaces, no quotes). | `100,150,200,250` |
 | `TAR1090_RANGERINGSCOLORS` | Colours for each of the range rings specified in `TAR1090_RANGERINGSDISTANCES`. Accepts a comma separated list of hex colour values, each enclosed in single quotes (eg `TAR1090_RANGERINGSCOLORS='#FFFFF','#00000'`). No spaces. | Blank |
 
-### `timelapse1090` Configuration
+### Configuring `graphs1090`
 
-Legacy: consider using <http://dockerhost:port/?replay> instead
-
-| Environment Variable | Purpose | Default |
-|----------------------|---------|---------|
-| `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds | `10` |
-| `TIMELAPSE1090_HISTORY` | Time saved in hours | `24` |
-
-## Paths
-
-No paths need to be mapped through to persistent storage. However, if you don't want to lose your range outline and aircraft tracks/history and heatmap / replay data on container restart, you can optionally map these paths:
-
-| Path | Purpose |
-|------|---------|
-| `/var/globe_history` | Holds range outline data, heatmap / replay data and traces if enabled.  
-*Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path.* |
-| `/var/timelapse1090` | Holds timelapse1090 data if enabled |
-| `/var/lib/collectd`  | Holds graphs1090 & performance data |
-
-### `readsb` Network Options
-
-This container uses the readsb fork by wiedehopf as a backend to tar1090: <https://github.com/wiedehopf/readsb>
-
-Where the default value is "Unset", `readsb`'s default will be used.
-
-| Variable | Description | Controls which `readsb` option | Default |
-|----------|-------------|--------------------------------|---------|
-| `READSB_NET_CONNECTOR` | See "`READSB_NET_CONNECTOR` syntax" below. | `--net-connector=<ip,port,protocol>` | Unset |
-| `READSB_NET_API_PORT` | <https://github.com/wiedehopf/readsb/blob/dev/README-json.md#--net-api-port-query-formats> | `--net-api-port=<ports>` | `30152` |
-| `READSB_NET_BEAST_REDUCE_INTERVAL` | BeastReduce position update interval, longer means less data (valid range: `0.000` - `14.999`) | `--net-beast-reduce-interval=<seconds>` | `0.125` |
-| `READSB_NET_BEAST_REDUCE_FILTER_DIST` | Restrict beast-reduce output to aircraft in a radius of X nmi | `--net-beast-reduce-filter-dist=<nmi>` | Unset |
-| `READSB_NET_BEAST_REDUCE_FILTER_ALT` | Restrict beast-reduce output to aircraft below X ft | `--net-beast-reduce-filter-alt=<ft>` | Unset |
-| `READSB_NET_BEAST_REDUCE_OUT_PORT` | TCP BeastReduce output listen ports (comma separated) | `--net-beast-reduce-out-port=<ports>` | Unset |
-| `READSB_NET_BEAST_INPUT_PORT`| TCP Beast input listen ports | `--net-bi-port=<ports>` | `30004,30104` |
-| `READSB_NET_BEAST_OUTPUT_PORT` | TCP Beast output listen ports | `--net-bo-port=<ports>` | `30005` |
-| `READSB_NET_BUFFER` | TCP buffer size 64Kb * (2^n) | `--net-buffer=<n>` | `2` (256Kb) |
-| `READSB_NET_RAW_OUTPUT_INTERVAL` | TCP output flush interval in seconds (maximum interval between two network writes of accumulated data). | `--net-ro-interval=<rate>` | `0.05` |
-| `READSB_NET_RAW_OUTPUT_SIZE` | TCP output flush size (maximum amount of internally buffered data before writing to network). | `--net-ro-size=<size>` | `1200` |
-| `READSB_NET_CONNECTOR_DELAY` | Outbound re-connection delay. | `--net-connector-delay=<seconds>` | `30` |
-| `READSB_NET_HEARTBEAT` | TCP heartbeat rate in seconds (0 to disable). | `--net-heartbeat=<rate>` | `60` |
-| `READSB_NET_RAW_INPUT_PORT` | TCP raw input listen ports. | `--net-ri-port=<ports>` | `30001` |
-| `READSB_NET_RAW_OUTPUT_PORT` | TCP raw output listen ports. | `--net-ro-port=<ports>` | `30002` |
-| `READSB_NET_SBS_INPUT_PORT` | TCP BaseStation input listen ports. | `--net-sbs-in-port=<ports>` | Unset |
-| `READSB_NET_SBS_OUTPUT_PORT` | TCP BaseStation output listen ports. | `--net-sbs-port=<ports>` | `30003` |
-| `REASSB_NET_VERBATIM` | Set this to any value to forward messages unchanged. | `--net-verbatim` | Unset |
-| `READSB_NET_VRS_PORT` | TCP VRS JSON output listen ports. | `--net-vrs-port=<ports>` | Unset |
-| `READSB_WRITE_STATE_ONLY_ON_EXIT` | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb` | `--write-state-only-on-exit` | Unset |
-
-#### `READSB_NET_CONNECTOR` syntax
-
-This variable allows you to configure outgoing connections. The variable takes a semicolon (`;`) separated list of `ip,port,protocol`, where:
-
-* `ip` is an IP address. Specify an IP/hostname/containername for outgoing connections.
-* `port` is a TCP port number
-* `protocol` can be one of the following:
-  * `beast_out`: Beast-format output
-  * `beast_in`: Beast-format input
-  * `raw_out`: Raw output
-  * `raw_in`: Raw input
-  * `sbs_out`: SBS-format output
-  * `vrs_out`: SBS-format output
-
-For example, to pull in MLAT results (so the performance graphs in the web interface show MLAT numbers), you could do the following:
-
-```yaml
-    environment:
-    ...
-      - READSB_NET_CONNECTOR=piaware,30105,beast_in;adsbx,30105,beast_in;rbfeeder,30105,beast_in
-    ...
-```
-
-### `readsb` General Options
-
-Where the default value is "Unset", `readsb`'s default will be used.
-
-| Variable | Description | Controls which `readsb` option | Default |
-|----------|-------------|--------------------------------|---------|
-| `READSB_ENABLE_BIASTEE` | Set to any value to enable bias tee on supporting interfaces | | Unset |
-| `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location in metadata: 0=no location, 1=approximate, 2=exact | `--rx-location-accuracy=<n>` | `2` |
-| `READSB_JSON_INTERVAL` | Update interval for the webinterface in seconds / interval between aircraft.json writes | `--write-json-every=<sec>` | `1.0` |
-| `READSB_JSON_TRACE_INTERVAL` | Per plane interval for json position output and trace interval for globe history | `--json-trace-interval=<sec>` | `15` |
-| `READSB_HEATMAP_INTERVAL` | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value) | `--heatmap=<sec>` | `15` |
-| `READSB_MAX_RANGE` | Absolute maximum range for position decoding (in nm) | `--max-range=<dist>` | `300` |
-| `READSB_MLAT` | Set this to add timestamps to AVR / RAW output | `--mlat` | Unset |
-| `READSB_STATS_EVERY` | Number of seconds between showing and resetting stats. | `--stats-every=<sec>` | Unset |
-| `READSB_STATS_RANGE` | Set this to any value to collect range statistics for polar plot. | `--stats-range` |  Unset |
-| `READSB_RANGE_OUTLINE_HOURS` | Change which past timeframe the range outline is based on | `--range-outline-hours` |  `24` |
-
-## Configuring the built-in MLAT Hub
-
-An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
-
-* collect the MLAT results from all of these services
-* feed them back to the built-in `tar1090` graphical interface
-* ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
-* make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
-* create outbound connections using any supported format to send your Beast data wherever you want
-
-Generally, there is little to configure, but there are a few parameters that you can set or change:
-
-| Variable | Description | Default if omitted|
-|----------|-------------|--------------------------------|
-| `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31004` |
-| `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
-| `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
-| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the "`READSB_NET_CONNECTOR` syntax " section above. | Unset |
-
-## Message decoding introspection
-
-You can look at individual messages and what information they contain, either for all or for an individual aircraft by hex:
-
-```shell
-# only for hex 3D3ED0
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --show-only 3D3ED0
-
-# for all aircraft
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --no-interactive
-
-# show position / CPR debugging for hex 3D3ED0
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
-```
-
-## Configuring `graphs1090`
-
-### `graphs1090` Environment Parameters
+#### `graphs1090` Environment Parameters
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -387,8 +327,9 @@ docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 | `GRAPHS1090_ETHERNET_DEVICE` | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_WIFI_DEVICE` | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_DISABLE` | Set to any value to disable the GRAPHS1090 web page | Unset |
+| `ENABLE_AIRSPY` | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset |
 
-### Enabling UAT data
+#### Enabling UAT data
 
 ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the USA only. To display the corresponding graphs, you should:
 
@@ -403,7 +344,7 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 
 Note that you **must** configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
 
-### Enabling AirSpy graphs
+#### Enabling AirSpy graphs
 
 Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the following:
 
@@ -421,7 +362,7 @@ Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the 
       ...
 ```
 
-### Enabling Disk IO and IOPS data
+#### Enabling Disk IO and IOPS data
 
 To allow the container access to the Disk IO data, you should map the following volume:
 
@@ -431,7 +372,7 @@ To allow the container access to the Disk IO data, you should map the following 
       ...
 ```
 
-### Configuring the Core Temperature graphs
+#### Configuring the Core Temperature graphs
 
 By default, the system will use the temperature available at Thermal Zone 0. This generally works well on Raspberry Pi devices, and no additional changes are needed.
 
@@ -470,6 +411,63 @@ Note that you will have to add `- privileged: true` capabilities to the containe
 
 Note - on some systems (DietPi comes to mind), `/sys/class/thermal/` may not be available.
 
+### `timelapse1090` Configuration
+
+Legacy: **We recommend AGAINST enabling this feature** as it has been replaced with <http://dockerhost:port/?replay>. `timelapse1090` writes a lot of data to disk, which could shorten the lifespan of your Raspiberry Pi SD card. The replacement functionality is better and doesn't cause any additional disk writes.
+
+| Environment Variable | Purpose | Default |
+|----------------------|---------|---------|
+| `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to any value to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/> | Unset |
+| `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds | `10` |
+| `TIMELAPSE1090_HISTORY` | Time saved in hours | `24` |
+
+## Paths
+
+No paths need to be mapped through to persistent storage. However, if you don't want to lose your range outline and aircraft tracks/history and heatmap / replay data on container restart, you can optionally map these paths:
+
+| Path | Purpose |
+|------|---------|
+| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history` | Holds range outline data, heatmap / replay data and traces if enabled.  
+*Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path.* |
+| `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090` | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above) |
+| `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`  | Holds graphs1090 & performance data |
+| `/proc/diskstats:/proc/diskstats:ro` | Makes disk statistics available to `graphs1090` |
+| `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro` | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](####-Configuring-the-Core-Temperature-graphs) |
+
+### Configuring the built-in MLAT Hub
+
+An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
+
+* collect the MLAT results from all of these services
+* feed them back to the built-in `tar1090` graphical interface
+* ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
+* make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
+* create outbound connections using any supported format to send your Beast data wherever you want
+
+Generally, there is little to configure, but there are a few parameters that you can set or change:
+
+| Variable | Description | Default if omitted|
+|----------|-------------|--------------------------------|
+| `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31003` |
+| `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
+| `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](######-Alternate-Configuration-Method-with-READSB-NET-CONNECTOR) above. | Unset |
+
+## Message decoding introspection
+
+You can look at individual messages and what information they contain, either for all or for an individual aircraft by hex:
+
+```shell
+# only for hex 3D3ED0
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --show-only 3D3ED0
+
+# for all aircraft
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --no-interactive
+
+# show position / CPR debugging for hex 3D3ED0
+docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
+```
+
 ## Logging
 
 All logs are to the container's stdout and can be viewed with `docker logs -t [-f] container`.
@@ -479,61 +477,3 @@ All logs are to the container's stdout and can be viewed with `docker logs -t [-
 Please feel free to [open an issue on the project's GitHub](https://github.com/sdr-enthusiasts/docker-tar1090/issues).
 
 We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join](https://discord.gg/sTf9uYF) and converse.
-
-## Using tar1090 with an SDR
-
-| Variable | Description | Controls which `readsb` option | Default |
-|----------|-------------|--------------------------------|---------|
-| `READSB_GAIN` | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. | `--gain=<db>` | Max gain |
-| `READSB_DEVICE_TYPE` | If using an SDR, set this to `rtlsdr`, `modesbeast`, `gnshulc` depending on the model of your SDR. If not using an SDR, leave un-set. | `--device-type=<type>` | Unset |
-| `READSB_RTLSDR_DEVICE` | Select device by serial number. | `--device=<serial>` | Unset |
-| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See section [Estimating PPM](https://github.com/docker-readsb/README.MD#estimating-ppm) below | `--ppm=<correction>` | Unset |
-| `READSB_BEAST_SERIAL` | only when type `modesbeast` or `gnshulc` is used: Path to Beast serial device. | `--beast-serial=<path>` | `/dev/ttyUSB0` |
-
-Example (devices: section is mandatory)
-
-```yaml
-version: '3.8'
-
-services:
-
-  tar1090:
-    image: ghcr.io/sdr-enthusiasts/docker-tar1090:latest
-    tty: true
-    container_name: tar1090
-    hostname: tar1090
-    restart: always
-    environment:
-      - TZ=Australia/Perth
-      - LAT=-33.33333
-      - LONG=111.11111
-      - READSB_DEVICE_TYPE=rtlsdr
-      - READSB_GAIN=43.9
-      - READSB_RTLSDR_DEVICE=0
-    ports:
-      - 8078:80
-    tmpfs:
-      - /run:exec,size=64M
-      - /var/log
-
-    devices:
-      - /dev/bus/usb:/dev/bus/usb
-```
-
-## globe-history or sometimes ironically called destroy-sd-card
-
-See also: <https://github.com/wiedehopf/tar1090#0800-destroy-sd-card>
-
-```yaml
-    environment:
-    ...
-      - READSB_EXTRA_ARGS=--write-json-globe-index --write-globe-history /var/globe_history
-    ...
-    volumes:
-      - /hostpath/to/your/globe_history:/var/globe_history
-```
-
-The first part of the mount before the : is the path on the docker host, don't change the 2nd part.
-Using this volume gives you persistence for the history / heatmap / range outline
-
-Note that this mode will make T not work as before for displaying all tracks as tracks are only loaded when you click them.
