@@ -26,7 +26,7 @@ on:
 env:
 #  DOCKERHUB_REPO: sdr-enthusiasts
 #  DOCKERHUB_IMAGE: vrs
-  GHCR_IMAGE: sdr-enthusiasts/docker-adsb-all-in-one
+  GHCR_IMAGE: sdr-enthusiasts/docker-adsb-ultrafeeder
   GHCR_REGISTRY: ghcr.io
   GH_LABEL: main
   GHCR_TAG: latest
