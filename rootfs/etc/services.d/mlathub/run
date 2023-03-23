@@ -97,6 +97,15 @@ if [[ -n "$READSB_NET_HEARTBEAT" ]]; then
     MLATHUB_CMD+=("--net-heartbeat=$READSB_NET_HEARTBEAT")
 fi
 
+if (( $(ps -o etimes= -p 1) < 30 ))
+then
+    echo "[$(date)][mlathub] Delaying MLAT hub start until container is established..."
+    while (( $(ps -o etimes= -p 1) < 30 ))
+    do
+        sleep 5
+    done
+fi
+
 echo "[$(date)][mlathub] Starting MLATHUB with this command line: ${MLATHUB_BIN} ${MLATHUB_CMD[*]} $MLATHUB_EXTRA_ARGS"
 
 # shellcheck disable=SC2086
