@@ -5,6 +5,7 @@ services:
     image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest
     tty: true
     container_name: ultrafeeder
+    hostname: ultrafeeder
     restart: unless-stopped
     device_cgroup_rules:
       - 'c 189:* rwm'
