@@ -30,9 +30,10 @@ version: '3.8'
 
 services:
   tar1090:
-    image: ghcr.io/sdr-enthusiasts/docker-adsb-all-in-one:latest
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest
     tty: true
-    container_name: adsb-all-in-one
+    container_name: ultrafeeder
+    hostname: ultrafeeder
     restart: always
     environment:
       - TZ=Australia/Perth
@@ -161,6 +162,34 @@ If you want to connect your SDR to the container, here's how to do that:
 |----------|-------------|--------------------------------|---------|
 | `READSB_GAIN` | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. | `--gain=<db>` | Max gain |
 | `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/README.MD#estimating-ppm)  | `--ppm=<correction>` | Unset |
+
+###### AutoGain for RTLSDR Devices
+
+If you have set `READSB_GAIN=autogain`, then the system will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
+
+There are 2 distinct periods in which the container will attempt to figure out the gain:
+
+* The initial period of 90 minutes, in which a measurement is taken every 5 minutes
+* The subsequent period, in which a measurement is taken once every day
+
+Please note that in order for the initial period to complete, the container must run for 90 minutes without restarting.
+
+When taking measurements, if the percentage of "strong signals" (i.e., ADSB messages with RSSI > 3 dB) is larger than 7%, AutoGain will reduce the receiver's gain by 1 setting. Similarly, if the percentage of strong signals is smaller than 0.5%, AutoGain will increment the receiver's gain by 1 setting. When AutoGain changes the gain value, the `readsb` component of the container will restart. This may show as a disconnect / reconnected in container logs.
+
+Although not recommended, you can change the measurement intervals and low/high cutoffs with these parameters:
+
+| Environment Variable | Purpose | Default |
+|----------------------|---------|---------|
+| `READSB_AUTOGAIN_INITIAL_INTERVAL` | The measurement interval to optimize gain during the initial period of 90 minutes (in seconds) | `300` |
+| `READSB_AUTOGAIN_SUBSEQUENT_INTERVAL` | The measurement interval to optimize gain during the subsequent period (in seconds) | `86400` |
+| `READSB_AUTOGAIN_LOW_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is below this number, gain will be increased | `0.5` |
+| `READSB_AUTOGAIN_HIGH_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is above this number, gain will be decreased | `0.5` |
+
+If you need to reset AutoGain and start over determining the gain, you can do so with this command:
+
+```bash
+docker exec -it ultrafeeder /usr/local/bin/autogain1090 reset
+```
 
 #### Connecting to external ADSB data sources
 
@@ -326,7 +355,7 @@ All of the variables below are optional.
 | `GRAPHS1090_DISK_DEVICE` | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_ETHERNET_DEVICE` | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_WIFI_DEVICE` | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device | Unset |
-| `GRAPHS1090_DISABLE` | Set to any value to disable the GRAPHS1090 web page | Unset |
+| `GRAPHS1090_DISABLE` | Set to any value to disable the GRAPHS1090 web page and data collection | Unset |
 | `ENABLE_AIRSPY` | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset |
 
 #### Enabling UAT data

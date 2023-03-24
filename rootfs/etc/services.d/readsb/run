@@ -229,8 +229,15 @@ if [[ -n "$READSB_DEVICE_TYPE" ]]; then
     READSB_CMD+=("--device-type=$READSB_DEVICE_TYPE")
 fi
 
+# Handle "--gain"
 if [[ -n "$READSB_GAIN" ]]; then
-    READSB_CMD+=("--gain=$READSB_GAIN")
+    if [[ "${READSB_GAIN,,}" == "autogain" ]] && [[ -f /var/globe_history/autogain/gain ]]; then
+        read -r gain < /var/globe_history/autogain/gain
+        READSB_CMD+=("--gain=$gain") 
+    elif [[ -n "$READSB_GAIN" ]]; then
+        [[ "${READSB_GAIN,,}" == "autogain" ]] && gain="49.6" || gain="${READSB_GAIN}"
+        READSB_CMD+=("--gain=$gain")
+    fi
 fi
 
 ##### RTL-SDR OPTIONS #####
