@@ -29,9 +29,24 @@ It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm
 
 Once you have [installed Docker](https://github.com/sdr-enthusiasts/docker-install), you can follow these lines of code to get up and running in very little time:
 
-```
+```bash
 sudo mkdir -p -m 777 /opt/adsb
-wget 
+cd /opt/adsb
+wget https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/docker-compose.yml
+wget https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/.env
+```
+
+Then edit the `docker-compose.yml` and  `.env` files and make any changes as needed. Please configure ALL variables in `.env`:
+
+```bash
+nano docker-compose.yml
+nano .env
+```
+
+Finally, bring up the stack. This may take a minute as it will automatically download the container and start it up:
+
+```bash
+docker compose up -d
 ```
 
 ## Ports
