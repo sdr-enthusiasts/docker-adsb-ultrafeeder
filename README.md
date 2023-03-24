@@ -460,7 +460,7 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 | `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090` | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above) |
 | `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`  | Holds graphs1090 & performance data |
 | `/proc/diskstats:/proc/diskstats:ro` | Makes disk statistics available to `graphs1090` |
-| `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro` | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](####-Configuring-the-Core-Temperature-graphs) |
+| `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro` | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](#configuring-the-core-temperature-graphs) |
 
 ### Configuring the built-in MLAT Hub
 
@@ -479,7 +479,7 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31003` |
 | `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
 | `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
-| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](######-Alternate-Configuration-Method-with-READSB-NET-CONNECTOR) above. | Unset |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
 
 ## Message decoding introspection
 
