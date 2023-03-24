@@ -17,51 +17,22 @@ In order to accomplish this, the container makes use of the following underlying
 * Wiedehopf's [graphs1090](https://github.com/wiedehopf/graphs1090)
 * [MLAT Client](https://github.com/adsbxchange/mlat-client.git)
 
+
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
 
-## `docker-compose.yml` configuration
+## `docker-compose.yml` and `.env` configuration
 
-## Up-and-Running with `docker-compose`
+## Up-and-Running Quickly with `docker-compose`
 
-An example `docker-compose.xml` file can be found [in this repository](docker-compose.yml). Here are a few basic elements:
+* An example [`docker-compose.xml`](docker-compose.yml) file can be found in this repository.
+* The accompanying environment variable values are defined in the [`.env`](.env) file in this repository
 
-```yaml
-version: '3.8'
+Once you have [installed Docker](https://github.com/sdr-enthusiasts/docker-install), you can follow these lines of code to get up and running in very little time:
 
-services:
-  tar1090:
-    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest
-    tty: true
-    container_name: ultrafeeder
-    hostname: ultrafeeder
-    restart: always
-    environment:
-      - TZ=Australia/Perth
-      - BEASTHOST=readsb
-      - LAT=-33.33333
-      - LONG=111.11111
-    volumes:
-      - /opt/adsb/tar1090/globe_history:/var/globe_history
-      - /opt/adsb/tar1090/timelapse1090:/var/timelapse1090
-      - /opt/adsb/tar1090/graphs1090:/var/lib/collectd
-      - /proc/diskstats:/proc/diskstats:ro
-    # - /run/airspy_adsb:/run/airspy_adsb
-    devices:
-      - /dev/usb:/dev/usb
-    ports:
-      - 8078:80
-    tmpfs:
-      - /run:exec,size=64M
-      - /var/log
 ```
-
-You should now be able to browse to:
-
-* <http://dockerhost:8078/> to access the tar1090 web interface.
-* <http://dockerhost:8078/?replay> to see a replay of past data
-* <http://dockerhost:8078/?heatmap> to see the heatmap for the past 24 hours.
-* <http://dockerhost:8078/?heatmap&realHeat> to see a different heatmap for the past 24 hours.
-* <http://dockerhost:8078/graphs1090/> to see performance graphs
+sudo mkdir -p -m 777 /opt/adsb
+wget 
+```
 
 ## Ports
 
@@ -209,19 +180,20 @@ In addition to (or instead of) connecting to a SDR or hardware device to get ADS
 
 ###### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
-Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure outgoing connections. The variable takes a semicolon (`;`) separated list of `ip,port,protocol`, where:
+Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure incoming and outgoing connections. The variable takes a semicolon (`;`) separated list of `host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]`, where:
 
-* `ip` is an IP address. Specify an IP/hostname/containername for outgoing connections.
+* `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
 * `port` is a TCP port number
 * `protocol` can be one of the following:
+  * `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
+  * `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
   * `beast_out`: Beast-format output
-  * `beast_reduce_out`: Beast-format output using reduced reporting frequencies
-  * `beast_reduce_plus_out`: Like `beast_reduce_out`, but including UUID for use by aggregators like adsb.lol/one/fi, etc.
   * `beast_in`: Beast-format input
   * `raw_out`: Raw output
   * `raw_in`: Raw input
   * `sbs_out`: SBS-format output
   * `vrs_out`: SBS-format output
+* `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
 
 NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use `READSB_NET_CONNECTOR` to ingest UAT data from `dump978`. See example below
 
@@ -453,6 +425,18 @@ Legacy: **We recommend AGAINST enabling this feature** as it has been replaced w
 | `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds | `10` |
 | `TIMELAPSE1090_HISTORY` | Time saved in hours | `24` |
 
+## Web Pages
+
+If you have configured the container as described above, you should be able to browse to the following web pages:
+You should now be able to browse to:
+
+* <http://dockerhost/> to access the tar1090 web interface.
+* <http://dockerhost/?replay> to see a replay of past data
+* <http://dockerhost/?heatmap> to see the heatmap for the past 24 hours
+* <http://dockerhost/?heatmap&realHeat> to see a different heatmap for the past 24 hours
+* <http://dockerhost/?pTracks> to see the tracks of all planes for the past 24 hours
+* <http://dockerhost/graphs1090/> to see performance graphs
+
 ## Paths
 
 No paths need to be mapped through to persistent storage. However, if you don't want to lose your range outline and aircraft tracks/history and heatmap / replay data on container restart, you can optionally map these paths:
@@ -491,13 +475,13 @@ You can look at individual messages and what information they contain, either fo
 
 ```shell
 # only for hex 3D3ED0
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --show-only 3D3ED0
+docker exec -it ultrafeeder /usr/local/bin/viewadsb --show-only 3D3ED0
 
 # for all aircraft
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --no-interactive
+docker exec -it ultrafeeder /usr/local/bin/viewadsb --no-interactive
 
 # show position / CPR debugging for hex 3D3ED0
-docker exec -it adsb-superfeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
+docker exec -it ultrafeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 ```
 
 ## Logging
