@@ -7,6 +7,8 @@ services:
     container_name: ultrafeeder
     hostname: ultrafeeder
     restart: unless-stopped
+    device_cgroup_rules:
+      - 'c 189:* rwm'
     ports:
       - 80:80
       - 30003:30003
@@ -83,6 +85,7 @@ services:
       - /opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090
       - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
+      - /dev:/dev:ro
     tmpfs:
       - /run:exec,size=256M
       - /tmp:size=128M
