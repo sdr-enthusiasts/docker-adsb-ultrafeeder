@@ -17,14 +17,11 @@ In order to accomplish this, the container makes use of the following underlying
 * Wiedehopf's [graphs1090](https://github.com/wiedehopf/graphs1090)
 * [MLAT Client](https://github.com/adsbxchange/mlat-client.git)
 
-
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
-
-## `docker-compose.yml` and `.env` configuration
 
 ## Up-and-Running Quickly with `docker-compose`
 
-* An example [`docker-compose.xml`](docker-compose.yml) file can be found in this repository.
+* An example [`docker-compose.yml`](docker-compose.yml) file can be found in this repository.
 * The accompanying environment variable values are defined in the [`.env`](.env) file in this repository
 
 Once you have [installed Docker](https://github.com/sdr-enthusiasts/docker-install), you can follow these lines of code to get up and running in very little time:
