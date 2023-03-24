@@ -54,7 +54,7 @@ fi
 
 if ! awk "BEGIN{ exit  ($total < 1000) }"; then
     echo "The decoder hasn't been running long enough, wait a bit!"
-    exit 1
+    exit 0
 fi
 
 
@@ -104,13 +104,13 @@ fi
 
 
 if ! awk "BEGIN{ exit ($strong > $low) }" && ! awk "BEGIN{ exit ($strong < $high) }"; then
-	echo "No gain change needed, percentage of messages >-3dB is in nominal range. (${strong}%)"
+	echo "No gain change needed, ${strong}% percentage of messages >-3dB is in nominal range. (${low}% < ${strong}% < ${high}%)"
 	exit 0
 
 fi
 
 if ! awk "BEGIN{ exit ($strong < $low) }" && [[ $gain_index == 28 ]]; then
-    echo "Gain already at maximum! (${strong}% messages >-3dB)"
+    echo "Could have used some more gain, but gain is already at maximum! Strong (>-3dB) messages ${strong}% < ${low}%"
     exit 0
 fi
 
@@ -120,7 +120,7 @@ if ! awk "BEGIN{ exit ($strong < $low) }"; then
 fi
 
 if ! awk "BEGIN{ exit ($strong > $high) }" && [[ $gain_index == 0 ]]; then
-    echo "Gain already at minimum! (${strong}% messages >-3dB)"
+    echo "Could have used some lower gain, but gain already at minimum! Strong (>-3dB) messages ${strong}% > ${high}%"
     exit 0
 fi
 
@@ -131,7 +131,10 @@ fi
 
 gain="${ga[$gain_index]}"
 
-if [[ $gain == "" ]]; then echo "Gain already at maximum! (${strong}% messages >-3dB)"; exit 0; fi
+if [[ $gain == "" ]] || [[ $gain == "-10" ]]; then
+    echo "Could have used some more gain, but gain is already at maximum! Strong (>-3dB) messages ${strong}% < ${low}%"
+    exit 0
+fi
 
 # Set the gain -- updated for docker-tar1090 use by kx1t
 echo "$gain" > /var/globe_history/autogain/gain
@@ -141,4 +144,8 @@ pkill readsb
 echo 0 > $tmp/strong
 echo 0 > $tmp/total
 
-echo "$action gain to $gain (${strong}% messages >-3dB)"
+if [[ "$action" == "Increasing" ]]; then
+    echo "Increasing gain to $gain (${strong}% messages >-3dB exceed lower boundary of ${low}%)"
+elif [[ "$action" == "Decreasing" ]]; then
+    echo "Decreasing gain to $gain (${strong}% messages >-3dB exceed upper boundary of ${high}%)"
+fi
