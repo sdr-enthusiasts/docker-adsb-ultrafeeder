@@ -169,8 +169,8 @@ If you have set `READSB_GAIN=autogain`, then the system will take signal strengt
 
 There are 2 distinct periods in which the container will attempt to figure out the gain:
 
-* The initial period of 90 minutes, in which a measurement is taken every 5 minutes
-* The subsequent period, in which a measurement is taken once every day
+* The initial period of 2 hours, in which an adjustment is done every 5 minutes
+* The subsequent period, in which an adjustment is done once every day
 
 Please note that in order for the initial period to complete, the container must run for 90 minutes without restarting.
 
@@ -182,10 +182,11 @@ Although not recommended, you can change the measurement intervals and low/high 
 
 | Environment Variable | Purpose | Default |
 |----------------------|---------|---------|
+| `READSB_AUTOGAIN_INITIAL_TIMEPERIOD` | How long the Initial Time Period should last (in seconds) | `7200` |
 | `READSB_AUTOGAIN_INITIAL_INTERVAL` | The measurement interval to optimize gain during the initial period of 90 minutes (in seconds) | `300` |
 | `READSB_AUTOGAIN_SUBSEQUENT_INTERVAL` | The measurement interval to optimize gain during the subsequent period (in seconds) | `86400` |
-| `READSB_AUTOGAIN_LOW_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is below this number, gain will be increased | `0.5` |
-| `READSB_AUTOGAIN_HIGH_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is above this number, gain will be decreased | `7.0` |
+| `READSB_AUTOGAIN_LOW_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is below this number, gain will be increased | `2.5` |
+| `READSB_AUTOGAIN_HIGH_PCT` | If the percentage of "strong signals" (stronger than 3dBFS RSSI) is above this number, gain will be decreased | `6.0` |
 
 If you need to reset AutoGain and start over determining the gain, you can do so with this command:
 

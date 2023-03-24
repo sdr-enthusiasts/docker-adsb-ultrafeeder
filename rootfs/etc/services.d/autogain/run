@@ -11,6 +11,7 @@
 
 READSB_AUTOGAIN_INITIAL_INTERVAL="${READSB_AUTOGAIN_INITIAL_INTERVAL:-300}"
 READSB_AUTOGAIN_SUBSEQUENT_INTERVAL="${READSB_AUTOGAIN_SUBSEQUENT_INTERVAL:-86400}"
+READSB_AUTOGAIN_INITIAL_TIMEPERIOD="${READSB_AUTOGAIN_INITIAL_TIMEPERIOD:-7200}"
 
 if [[ "${READSB_GAIN,,}" != "autogain" ]]; then
     # Autogain is not enabled, so let's do nothing forever
@@ -26,8 +27,8 @@ mkdir -p /var/globe_history/autogain
 
 # Do special things if it's the first time AUTOGAIN is running
 if [[ ! -f /var/globe_history/autogain/autogain_initialized ]]; then
-    # run autogain every $READSB_AUTOGAIN_INITIAL_INTERVAL minutes for 90 minutes
-    for (( i=0; i<$((5400/READSB_AUTOGAIN_INITIAL_INTERVAL)); i++ ))
+    # run autogain every $READSB_AUTOGAIN_INITIAL_INTERVAL secs (default 5 mins) for $READSB_AUTOGAIN_INITIAL_TIMEPERIOD secs (default 2 hours)
+    for (( i=0; i<$(( READSB_AUTOGAIN_INITIAL_TIMEPERIOD / READSB_AUTOGAIN_INITIAL_INTERVAL )); i++ ))
     do
         sleep "$READSB_AUTOGAIN_INITIAL_INTERVAL"   # sleep first to give readsb the opportunity to collect some initial data
         /usr/local/bin/autogain1090 2>&1 | mawk -W Interactive '{print "[autogain] " $0}'
