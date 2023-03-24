@@ -52,7 +52,7 @@ services:
           feed.adsb.one,64006,39002;
           mlat.planespotters.net,31090,39003;
           feed.theairtraffic.com,31090,39004
-      - MLAT_USER=${MULTIFEEDER_MLAT_NAME}
+      - MLAT_USER=${FEEDER_NAME}
       # MLATHUB automatically gets MLAT results data from the feeders defined in MLAT_CONFIG,
       # and additionally from the Net Connectors defined with MLATHUB_NET_CONNECTOR
       - MLATHUB_NET_CONNECTOR=
