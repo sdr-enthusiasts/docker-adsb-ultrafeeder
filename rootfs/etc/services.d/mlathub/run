@@ -56,7 +56,7 @@ then
 fi
 
 # handle MLATHUB_ENABLE_ADSB_INGEST (if set, connect to readsb as input)
-if [[ -n "$MLATHUB_ENABLE_ADSB_INGEST" ]; then
+if [[ -n "$MLATHUB_ENABLE_ADSB_INGEST" ]]; then
     MLATHUB_CMD+=("--net-connector=localhost,30006,beast_in")
 fi
 
