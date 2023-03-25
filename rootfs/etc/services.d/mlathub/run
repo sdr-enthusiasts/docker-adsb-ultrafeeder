@@ -55,6 +55,11 @@ then
     sleep infinity
 fi
 
+# handle MLATHUB_ENABLE_ADSB_INGEST (if set, connect to readsb as input)
+if [[ -n "$MLATHUB_ENABLE_ADSB_INGEST" ]; then
+    MLATHUB_CMD+=("--net-connector=localhost,30006,beast_in")
+fi
+
 # Add any additional net_connectors:
 if [[ -n "$MLATHUB_NET_CONNECTOR" ]]; then
     IFS=';' read -r -a MLATHUB_NET_CONNECTOR_ARRAY <<< "$MLATHUB_NET_CONNECTOR"

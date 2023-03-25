@@ -480,6 +480,7 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
 | `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
 | `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
+| `MLATHUB_ENABLE_ADSB_INGEST` | If set to any non-empty value, the MLATHUB will ingest the ADSB data from the readsb component and make it available on its output port. This is useful if you want to connect to external applications that want both ADSB and MLAT result data (for example, Planefence). Note -- do not use this option to feed external aggregators as they generally do not want to receive processed MLAT data. | Unset |
 
 ## Message decoding introspection
 
