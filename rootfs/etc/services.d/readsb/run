@@ -173,9 +173,7 @@ if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
 fi
 
 # Handle "--net-heartbeat=<rate>"
-if [[ -n "$READSB_NET_HEARTBEAT" ]]; then
-    READSB_CMD+=("--net-heartbeat=$READSB_NET_HEARTBEAT")
-fi
+READSB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
 
 # Handle "--net-ri-port=<ports>"
 if [[ -n "$READSB_NET_RAW_INPUT_PORT" ]]; then

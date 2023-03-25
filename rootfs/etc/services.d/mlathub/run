@@ -96,9 +96,8 @@ if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
 fi
 
 # Handle "--net-heartbeat=<rate>"
-if [[ -n "${READSB_NET_HEARTBEAT:-30}" ]]; then
-    MLATHUB_CMD+=("--net-heartbeat=$READSB_NET_HEARTBEAT")
-fi
+MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
+
 
 if (( $(ps -o etimes= -p 1) < 30 ))
 then
