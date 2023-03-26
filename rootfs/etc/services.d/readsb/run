@@ -53,7 +53,7 @@ do
 
     if [[ -n "${params[2]}" ]]
     then
-        MLATHUB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
+        READSB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
     fi
 done
 

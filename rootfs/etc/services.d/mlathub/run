@@ -30,7 +30,7 @@ MLATHUB_CMD+=("--forward-mlat")
 
 # define some more ports:
 MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUT_PORT:-31003}")
-MLATHUB_CMS+=("--net-bi-port=${MLATHUB_BEAST_IN_PORT:-31004}")
+MLATHUB_CMD+=("--net-bi-port=${MLATHUB_BEAST_IN_PORT:-31004}")
 MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-31005}")
 
 # We need to get the mlat results ports from the parameters:
