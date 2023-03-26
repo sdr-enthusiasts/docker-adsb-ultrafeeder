@@ -482,6 +482,29 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
 | `MLATHUB_ENABLE_ADSB_INGEST` | If set to any non-empty value, the MLATHUB will ingest the ADSB data from the readsb component and make it available on its output port. This is useful if you want to connect to external applications that want both ADSB and MLAT result data (for example, Planefence). Note -- do not use this option to feed external aggregators as they generally do not want to receive processed MLAT data. | Unset |
 
+## Metrics
+
+This image contains [Telegraf](https://docs.influxdata.com/telegraf/), which will be used to capture metrics from `readsb` if an output is enabled.
+
+### Output to InfluxDBv2
+
+In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxdata.com/influxdb/) time-series database, the following environment variables can be used:
+
+| Variable | Description |
+| ---- | ---- |
+| `INFLUXDBV2_URL` | The URL of the InfluxDB instance |
+| `INFLUXDBV2_TOKEN` | The token for authentication |
+| `INFLUXDBV2_BUCKET` | Destination bucket to write into |
+
+### Output to Prometheus
+
+In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, the following environment variables can be used:
+
+| Variable | Description |
+| ---- | ---- |
+| `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
+
+
 ## Message decoding introspection
 
 You can look at individual messages and what information they contain, either for all or for an individual aircraft by hex:
