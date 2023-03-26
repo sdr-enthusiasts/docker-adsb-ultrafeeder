@@ -39,6 +39,24 @@ if [ -n "${UUID}" ]; then
     READSB_CMD+=("--uuid-file=/run/uuid")
 fi
 
+# ingest MLAT results data if MLAT clients have been defined:
+# parse MLAT_CONFIG string into mlat_configs array
+# note - it's OK for MLAT_CONFIG to be empty or unset
+readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
+# Now loop through the MLAT_CONFIG items and add a net-connector for each of them:
+for instance in "${mlat_configs[@]}"
+do
+    # shellcheck disable=SC2015
+    [[ -z "${instance}" ]] && continue || true
+    # put individual params into the $params array:
+    readarray -td "," params < <(printf '%s' "${instance}")
+
+    if [[ -n "${params[2]}" ]]
+    then
+        MLATHUB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
+    fi
+done
+
 READSB_CMD+=("--write-json=/run/readsb")
 READSB_CMD+=("--heatmap-dir=/var/globe_history")
 READSB_CMD+=("--heatmap=15")
@@ -54,10 +72,10 @@ READSB_CMD+=("--net-bo-port=30005")
 READSB_CMD+=("--net-beast-reduce-out-port=30006")
 READSB_CMD+=("--net-json-port=30047")
 READSB_CMD+=(--net-api-port=30152)
-# READSB_CMD+=(--forward-mlat)
 READSB_CMD+=(--net-sbs-in-port=32006)
 
 if [[ -n "${READSB_FORWARD_MLAT}" ]]; then
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregretors!"
     READSB_CMD+=("--forward-mlat")
 fi
 
@@ -298,5 +316,5 @@ fi
 
 # shellcheck disable=SC2086
 "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 | \
-	mawk -W Interactive '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][readsb] " $0}'
+	mawk -W Interactive '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][readsb] " $0}'
 

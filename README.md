@@ -252,6 +252,8 @@ The web interface is rendered to port `80` in the container. This can me mapped 
 
 All of the variables below are optional.
 
+Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them.
+
 #### `tar1090` Core Configuration
 
 | Environment Variable | Purpose | Default |
@@ -467,10 +469,11 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
 
 * collect the MLAT results from all of these services
-* feed them back to the built-in `tar1090` graphical interface
 * ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
 * make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
 * create outbound connections using any supported format to send your Beast data wherever you want
+
+Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them. Adding these sources only to `MLATHUB_NET_CONNECTOR` will make the data available on the MLATHUB, but won't display them on your `tar1090` map.
 
 Generally, there is little to configure, but there are a few parameters that you can set or change:
 
