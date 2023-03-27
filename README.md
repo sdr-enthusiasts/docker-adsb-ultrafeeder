@@ -115,6 +115,7 @@ The following parameters must be set (mandatory) for the container to function:
 | `READSB_RANGE_OUTLINE_HOURS` | Change which past timeframe the range outline is based on | `--range-outline-hours` |  `24` |
 | `READSB_EXTRA_ARGS` | Optional, allows to specify extra parameters for readsb | | Unset |
 | `S6_SERVICES_GRACETIME` | Optional, set to 30000 when saving traces / globe_history | | `3000` |
+| `LOGLEVEL` | `verbose` (all messages), `error` (errors only), `none` (minimal) | | `verbose` |
 
 `READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehofp's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 

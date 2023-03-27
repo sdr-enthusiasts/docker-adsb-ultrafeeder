@@ -113,6 +113,13 @@ fi
 echo "[$(date)][mlathub] Starting MLATHUB..."
 
 # shellcheck disable=SC2086
-"${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1 | \
+if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+    "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1 | \
 	mawk -W Interactive '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][mlathub] " $0}'
+elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+    "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1 >/dev/null | \
+	mawk -W Interactive '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][mlathub] " $0}'
+elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+    "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS >/dev/null 2>/dev/null 
+fi
 

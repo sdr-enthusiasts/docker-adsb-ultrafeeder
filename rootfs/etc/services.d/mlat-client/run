@@ -83,7 +83,6 @@ do
         MLAT_PARAM+=(--alt "${READSB_ALT}")
     fi
 
-    # [[ -n "${UUID}" ]] && MLAT_PARAM+=(--user "${UUID}") || MLAT_PARAM+=(--user "${MLAT_USER}")
     [[ -n "${MLAT_USER}" ]] && MLAT_PARAM+=(--user "${MLAT_USER}") || MLAT_PARAM+=(--user "${UUID}")
     [[ -n "${params[2]}" ]] && MLAT_PARAM+=("--results beast,listen,${params[2]}") || true
     [[ -n "${params[3]}" ]] && MLAT_PARAM+=("${params[3]}") || true
@@ -93,7 +92,15 @@ do
 
     # run this Mlat_client instance in the background:
     echo  "[$(date)][${APPNAME}] starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
-    { exec ${execstring} 2>&1 1>/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+
+    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+        { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+    elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+        { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+    elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+       { exec ${execstring} >/dev/null 2>/dev/null; } &
+    fi
+
     pid_array[$!]="${MLAT_PARAM[*]}"
     sleep 5
 done
@@ -107,10 +114,18 @@ do
         then
             # it exited - let's restart:
             sleep "${RESTARTTIMER}"
-            echo  "[$(date)][${APPNAME}] MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart."
+            [[ "$LOGLEVEL,," != "none" ]] && echo  "[$(date)][${APPNAME}] MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart." || true
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
-            { exec ${execstring} 2>&1 1>/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="$(awk '{split($6,x,":"); print x[1]}' <<< "${pid_array[$mlat_pid]}")" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+
+            if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+                { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+            elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+                { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+            elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+                { exec ${execstring} >/dev/null 2>/dev/null; } &
+            fi
+
             pid_array[$!]="${pid_array[${mlat_pid}]}"
             unset "pid_array[${mlat_pid}]"
         fi

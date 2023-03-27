@@ -315,6 +315,16 @@ if [[ -n "$READSB_BEAST_BAUDRATE" ]]; then
 fi
 
 # shellcheck disable=SC2086
-"${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 | \
-	mawk -W Interactive '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][readsb] " $0}'
+if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+    "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 | \
+	    mawk -W Interactive '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][readsb] " $0}'
+elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+    "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 1>/dev/null | \
+	    mawk -W Interactive '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][readsb] " $0}'
+elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+    "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null 
+fi
+
+
+
 
