@@ -19,6 +19,8 @@ In order to accomplish this, the container makes use of the following underlying
 
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
 
+![ultrafeeder container architecture](https://user-images.githubusercontent.com/15090643/227796243-476be64c-133b-42f4-9f3a-e44bb286a4b1.png)
+
 ## Up-and-Running Quickly with `docker-compose`
 
 * An example [`docker-compose.yml`](docker-compose.yml) file can be found in this repository.
