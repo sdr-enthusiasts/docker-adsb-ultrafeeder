@@ -1,0 +1,12 @@
+#!/usr/bin/with-contenv bash
+#shellcheck shell=bash
+
+if [[ -n "$PROMETHEUS_ENABLE" ]]; then
+    while [[ ! -f /run/readsb-prometheus.prom ]]
+    do
+        sleep 1
+    done
+    echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n$(cat /run/readsb-prometheus.prom)" | ncat -l 9274 > /dev/null 2>&1
+else
+    sleep infinity
+fi
