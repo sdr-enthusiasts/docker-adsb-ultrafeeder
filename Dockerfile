@@ -59,7 +59,7 @@ COPY rootfs/ /
 RUN set -x && \
     branch="##BRANCH##" && \
     [[ "${branch:0:1}" == "#" ]] && branch="main" || true && \
-    git clone --depth=1 -b $branch https://github.com/sdr-enthusiasts/docker-multifeeder.git /tmp/clone && \
+    git clone --depth=1 -b $branch https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder.git /tmp/clone && \
     pushd /tmp/clone && \
     echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(git rev-parse --short HEAD)_$(git branch --show-current)" > /.CONTAINER_VERSION && \
     popd && \
