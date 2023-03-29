@@ -314,6 +314,14 @@ if [[ -n "$READSB_BEAST_BAUDRATE" ]]; then
     READSB_CMD+=("--beast-baudrate=$READSB_BEAST_BAUDRATE")
 fi
 
+#####################
+# Handle --write-prom=<filepath> 
+
+if [[ -n "$PROMETHEUS_ENABLE" ]]; then 
+    READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
+fi
+
+
 # shellcheck disable=SC2086
 if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 | \
