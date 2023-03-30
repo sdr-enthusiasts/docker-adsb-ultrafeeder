@@ -50,7 +50,14 @@ docker compose up -d
 
 ## Ports
 
-Some common ports are as follows (which may or may not be in use depending on your configuration):
+Some common ports are as follows (which may or may not be in use depending on your configuration). You can override the port mappings with the parameters shown in the [Optional Networking Parameters section](#optional-networking-parameters).
+
+The general principle behind the port numbering, is:
+
+* `30xxx` ports are connected to the main instance `readsb` that decodes and processes the SDR data
+* `31xxx` ports are connected to the MLAT Hub
+* `92xx` ports are for Prometheus statistics output
+* `80` contains the Tar1090 web interface
 
 | Port | Details |
 |------|---------|
@@ -58,15 +65,25 @@ Some common ports are as follows (which may or may not be in use depending on yo
 | `30002/tcp` | Raw protocol output |
 | `30003/tcp` | SBS/Basestation protocol output |
 | `32006/tcp` | SBS/Basestation protocol input |
-| `30004/tcp` | Beast protocol input |
+| `30004/tcp`<br/>`30104/tcp` | Beast protocol input |
 | `30005/tcp` | Beast protocol output |
 | `30006/tcp` | Beast reduce protocol output |
 | `30047/tcp` | Json position output |
 | `31003/tcp` | MLATHUB SBS/Basestation protocol output |
 | `31004/tcp` | MLATHUB Beast protocol input |
 | `31005/tcp` | MLATHUB Beast protocol output |
+| `31006/tcp` | MLATHUB Beast-reduce protocol output |
+| `9273/tcp`  | Prometheus web interface with data from `readsb` |
+| `9274/tcp`  | Prometheus web interface with data from `Telegraf` |
+| `80/tcp`    | Tar1090 (map) web interface |
 
-The container's web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive. In the example above, the container's website is made available at port 8078 on the host system.
+Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
+
+```yaml
+    ports:
+      - 8080:80               # to expose the web interface
+      - 9273-9274:9273-9274   # to expose the statistics interface to Prometheus
+```
 
 Json position output:
 
@@ -86,7 +103,7 @@ The sections below describe how to configure each part of the container function
 
 ### General Configuration
 
-You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file::
+You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file:
 
 ```yaml
     device_cgroup_rules:
@@ -96,7 +113,7 @@ You need to make sure that the USB device can be accessed by the container. The 
       - /dev:/dev:ro
 ```
 
-The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. 
+The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle.
 
 #### Basic Ultrafeeder Parameters
 
@@ -549,3 +566,11 @@ All logs are to the container's stdout and can be viewed with `docker logs -t [-
 Please feel free to [open an issue on the project's GitHub](https://github.com/sdr-enthusiasts/docker-tar1090/issues).
 
 We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join](https://discord.gg/sTf9uYF) and converse.
+
+## Acknowledgements
+
+* The [SDR-Enthusiasts team](https://github.com/sdr-enthusiasts) ([Mike Nye](https://github.com/mikenye), [Fred Clausen](https://github.com/fredclausen)) for all the foot and leg work done to create the base images on which the container is built
+* [Wiedehopf](https://github.com/wiedehopf) for modifying, creating, maintaining, and adding features to many of the components of this container including [readsb](https://github.com/wiedehopf/readsb), [tar1090](https://github.com/wiedehopf/tar1090), [graphs1090](https://github.com/wiedehopf/graphs1090), [autogain](https://github.com/wiedehopf/adsb-scripts/wiki/Automatic-gain-optimization-for-readsb-and-dump1090-fa), and many more components
+* [John Norrbin](https://github.com/Johnex) for his ideas, testing, feature requests, more testing, nagging, pushing, prodding, and overall efforts to make this a high quality container and for the USB "hotplug" configuration
+* The community at the [SDR-Enthusiasts Discord Server](https://discord.gg/sTf9uYF) for helping out, testing, asking questions, and generally driving to make this a better product
+* Of course the Open Source community at large, including Salvatore Sanfilippo and Oliver Jowett (mutability) who wrote the excellent base code for `dump1090` from which much of this is derived
