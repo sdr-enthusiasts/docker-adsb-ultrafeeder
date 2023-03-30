@@ -30,13 +30,12 @@ Now recreate the ultrafeeder container (`docker-compose up -d ultrafeeder`) and 
 On the machine where you will run Prometheus and Grafana, create a docker-compose file in the `/opt/grafana` directory:
 
 ```bash
-mkdir -p -m777 /opt/grafana/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data  && cd /opt/grafana
+mkdir -p -m777 /opt/grafana/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data
+cd /opt/grafana
 cat > docker-compose.yml
 ```
 
 Now paste in the following text *):
-
-*) The volume definition structure is written this way purposely to ensure that the containers can place files in the persistent directories. Do not try to "directly" map volumes (`/opt/grafana/grafana/appdata:/var/lib/grafana`).
 
 <details>
   <summary>&lt;&dash;&dash; Click the arrow to see the <code>docker-compose.yml</code> text</summary>
@@ -96,13 +95,10 @@ services:
 
 </details>
 
-Once you have created and saved this `docker-compose.yml` file, give these commands to create the mapped volumes:
+*) The volume definition structure is written this way purposely to ensure that the containers can place files in the persistent directories. Do not try to "directly" map volumes (`/opt/grafana/grafana/appdata:/var/lib/grafana`).
 
-```bash
-sudo mkdir -p -m777 /opt/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data 
-```
+You should be able to see the following directories:
 
-Now, you should be able to see the following directories:
 - `/opt/grafana/grafana/appdata`
 - `/opt/grafana/prometheus/config`
 - `/opt/grafana/prometheus/data`
@@ -110,7 +106,6 @@ Now, you should be able to see the following directories:
 Download and create Grafana and Prometheus for the first time with this command:
 
 ```bash
-cd /opt/grafana
 docker compose up -d
 ```
 
