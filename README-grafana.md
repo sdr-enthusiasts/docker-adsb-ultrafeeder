@@ -30,7 +30,7 @@ Now recreate the ultrafeeder container (`docker-compose up -d ultrafeeder`) and 
 On the machine where you will run Prometheus and Grafana, create a docker-compose file in the `/opt/grafana` directory:
 
 ```bash
-mkdir -p -m777 /opt/grafana/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data
+sudo mkdir -p -m777 /opt/grafana/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data
 cd /opt/grafana
 cat > docker-compose.yml
 ```
