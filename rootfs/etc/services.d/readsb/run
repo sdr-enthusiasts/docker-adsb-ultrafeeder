@@ -45,24 +45,6 @@ then
             READSB_CMD+=("--net-connector=localhost,${MLATHUB_BEAST_REDUCE_OUT_PORT:-31006},beast_in")
 fi
 
-if MLAT clients have been defined:
-# parse MLAT_CONFIG string into mlat_configs array
-# note - it's OK for MLAT_CONFIG to be empty or unset
-readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
-# Now loop through the MLAT_CONFIG items and add a net-connector for each of them:
-for instance in "${mlat_configs[@]}"
-do
-    # shellcheck disable=SC2015
-    [[ -z "${instance}" ]] && continue || true
-    # put individual params into the $params array:
-    readarray -td "," params < <(printf '%s' "${instance}")
-
-    if [[ -n "${params[2]}" ]]
-    then
-        READSB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
-    fi
-done
-
 READSB_CMD+=("--write-json=/run/readsb")
 READSB_CMD+=("--heatmap-dir=/var/globe_history")
 READSB_CMD+=("--heatmap=15")
