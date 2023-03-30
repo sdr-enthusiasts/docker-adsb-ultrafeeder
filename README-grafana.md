@@ -30,17 +30,40 @@ Now recreate the ultrafeeder container (`docker-compose up -d ultrafeeder`) and 
 On the machine where you will run Prometheus and Grafana, create a docker-compose file in the `/opt/grafana` directory:
 
 ```bash
-mkdir -p -m777 /opt/grafana && cd /opt/grafana
+mkdir -p -m777 /opt/grafana/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data  && cd /opt/grafana
 cat > docker-compose.yml
 ```
 
-Now paste in the following text:
+Now paste in the following text *):
+
+*) The volume definition structure is written this way purposely to ensure that the containers can place files in the persistent directories. Do not try to "directly" map volumes (`/opt/grafana/grafana/appdata:/var/lib/grafana`).
 
 <details>
   <summary>&lt;&dash;&dash; Click the arrow to see the <code>docker-compose.yml</code> text</summary>
 
 ```yaml
 version: '3.9'
+
+volumes:
+  grafana:
+    driver: local
+    driver_opts:
+      type: none
+      device: "/opt/grafana/grafana/appdata"
+      o: bind
+  prom-config:
+    driver: local
+    driver_opts:
+      type: none
+      device: "/opt/grafana/prometheus/config"
+      o: bind
+  prom-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: "/opt/grafana/prometheus/data"
+      o: bind
+
 services:
   grafana:
     image: grafana/grafana-oss:latest
@@ -55,7 +78,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - /opt/grafana/grafana/appdata:/var/lib/grafana
+      - grafana:/var/lib/grafana
 
   prometheus:
     image: prom/prometheus
@@ -65,8 +88,8 @@ services:
     tmpfs:
       - /tmp
     volumes:
-      - /opt/grafana/prometheus/config:/etc/prometheus
-      - /opt/grafana/prometheus/data:/prometheus
+      - prom-config:/etc/prometheus
+      - prom-data:/prometheus
     ports:
       - 9090:9090
 ```
@@ -76,9 +99,7 @@ services:
 Once you have created and saved this `docker-compose.yml` file, give these commands to create the mapped volumes:
 
 ```bash
-docker compose up -d
-docker compose stop prometheus
-docker compose stop grafana
+sudo mkdir -p -m777 /opt/grafana/appdata /opt/grafana/prometheus/config /opt/grafana/prometheus/data 
 ```
 
 Now, you should be able to see the following directories:
@@ -86,53 +107,28 @@ Now, you should be able to see the following directories:
 - `/opt/grafana/prometheus/config`
 - `/opt/grafana/prometheus/data`
 
-## Step 3: Configuring Prometheus
-
-Prometheus needs to be told where to look for the data from the ultrafeeder. We will create a target prometheus configuration file that does this, please copy and paste the following:
-
-<details>
-  <summary>&lt;&dash;&dash; Click the arrow to see the shell script</summary>
-
+Download and create Grafana and Prometheus for the first time with this command:
 
 ```bash
-sudo touch /opt/grafana/prometheus/config/prometheus.yml
-sudo chmod a+rwx /opt/grafana/prometheus/config/prometheus.yml
-cat > /opt/grafana/prometheus/config/prometheus.yml <<EOF
-global:
-  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
-  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
-
-alerting:
-  alertmanagers:
-    - static_configs:
-        - targets:
-
-rule_files:
-
-scrape_configs:
-  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:9090"]
-  - job_name: 'readsb'
-    static_configs:
-      - targets: ['ip_of_ultrafeeder_machine:9273', 'ip_of_ultrafeeder_machine:9274']
-EOF
+cd /opt/grafana
+docker compose up -d
 ```
 
-</details>
+## Step 3: Configuring Prometheus
 
-Make sure to change `ip_of_ultrafeeder_machine` to the IP address or hostname of your ultrafeeder machine.
+Prometheus needs to be told where to look for the data from the ultrafeeder. We will create a target prometheus configuration file that does this, please copy and paste the following. Make sure to replace `ip_of_ultrafeeder_machine` with the IP address or hostname of the machine where `ultrafeeder` is running:
 
-Once the file has been updated, issue the command `docker compose up -d` in the application directory to apply the changes and bring up the `prometheus` and `grafana` containers.
+```bash
+docker exec -it prometheus sh -c "echo -e \"  - job_name: 'readsb'\n    static_configs:\n      - targets: ['ip_of_ultrafeeder_machine:9273', 'ip_of_ultrafeeder_machine:9274']\" >> /etc/prometheus/prometheus.yml"
+docker stop prometheus
+docker compose up -d
+```
 
-At this point we will need to add a collector definition to `prometheus` and restart with the new configuration.
+(If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana//prometheus/config/prometheus.yml` and fix it that way.)
 
-1. Issue the command `docker exec -it prometheus sh -c "echo -e \"  - job_name: 'readsb'\n    static_configs:\n      - targets: ['readsb:9273']\" >> /etc/prometheus/prometheus.yml"`
-2. Issue the command `docker stop prometheus`
-3. Issue the command `docker compose up -d`
+## Accessing Prometheus and Grafana via your browser
 
-You should also be able to point your web browser at:
+You should be able to point your web browser at:
 
 * `http://docker.host.ip.addr:9090/` to access the `prometheus` console.
 * `http://docker.host.ip.addr:3000/` to access the `grafana` console, use admin/admin as initial credentials, you should be prompted to change the password on first login.
