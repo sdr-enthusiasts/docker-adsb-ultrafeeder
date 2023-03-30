@@ -19,6 +19,7 @@ You *can* do it on a single system. We're assuming below that you are not. If yo
 ```yaml
     environment:
       - PROMETHEUS_ENABLE=true
+      - TAR1090_ENABLE_AC_DB=true
     ports:
       - 9273-9274:9273-9274
 ```
