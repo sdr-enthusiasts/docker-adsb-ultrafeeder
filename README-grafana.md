@@ -1,8 +1,3 @@
----
-description: >-
-  If you wish to deploy Grafana for alternative graphs, follow the steps below.
----
-
 # Using Ultrafeeder with Grafana and Prometheus
 
 [`Grafana`](https://grafana.com/) is an analytics platform that can provide alternative graphs for `readsb`.
