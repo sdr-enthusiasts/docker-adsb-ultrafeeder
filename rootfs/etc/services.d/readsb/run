@@ -39,12 +39,6 @@ if [ -n "${UUID}" ]; then
     READSB_CMD+=("--uuid-file=/run/uuid")
 fi
 
-# ingest MLAT results data from the MLATHUB if one is defined:
-if [[ -n "${MLAT_CONFIG}" ]] || [[ -n "$MLATHUB_NET_CONNECTOR" ]]
-then
-            READSB_CMD+=("--net-connector=localhost,${MLATHUB_BEAST_REDUCE_OUT_PORT:-31006},beast_in")
-fi
-
 READSB_CMD+=("--write-json=/run/readsb")
 READSB_CMD+=("--heatmap-dir=/var/globe_history")
 READSB_CMD+=("--heatmap=15")

@@ -23,10 +23,7 @@ MLATHUB_CMD+=("--net-only")
 MLATHUB_CMD+=("--mlat")
 MLATHUB_CMD+=("--forward-mlat")
 
-# send MLAT data to the main readsb/tar1090 of this container:
-# 26-mar-2023 this was removed; we'll have the main readsb connect directly to the mlat clients. This
-# is to avoid a data loop in case MLATHUB_ENABLE_ADSB_INGEST is enabled
-# MLATHUB_CMD+=("--net-connector=localhost,30004,beast_reduce_out")
+MLATHUB_CMD+=("--net-connector=localhost,30004,beast_reduce_out")
 
 # define some more ports:
 MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUT_PORT:-31003}")
