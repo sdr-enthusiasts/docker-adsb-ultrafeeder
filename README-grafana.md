@@ -42,7 +42,7 @@ cat > docker-compose.yml
 Now paste in the following text:
 
 <details>
-<summary>Click the arrow to see the `docker-compose.yml` text</summary>
+  <summary>&lt;&dash;&dash; Click the arrow to see the <code>docker-compose.yml</code> text</summary>
 
 ```yaml
 version: '3.9'
@@ -95,6 +95,10 @@ Now, you should be able to see the following directories:
 
 Prometheus needs to be told where to look for the data from the ultrafeeder. We will create a target prometheus configuration file that does this, please copy and paste the following:
 
+<details>
+  <summary>&lt;&dash;&dash; Click the arrow to see the shell script</summary>
+
+
 ```bash
 sudo touch /opt/grafana/prometheus/config/prometheus.yml
 sudo chmod a+rwx /opt/grafana/prometheus/config/prometheus.yml
@@ -120,6 +124,8 @@ scrape_configs:
       - targets: ['ip_of_ultrafeeder_machine:9273', 'ip_of_ultrafeeder_machine:9274']
 EOF
 ```
+
+</details>
 
 Make sure to change `ip_of_ultrafeeder_machine` to the IP address or hostname of your ultrafeeder machine.
 
@@ -159,3 +165,6 @@ Clicking `Save & Test` should return a green message indicating success. The das
 4. Click `Import` on the subsequent dialogue box
 
 At this point you should see a very nice dashboard, you can find it under `General` in the `Dashboards` section.
+<img src="https://user-images.githubusercontent.com/15090643/228942953-ed8b64aa-3a38-4c6f-bd42-e929b72399b2.png">
+<img src="https://user-images.githubusercontent.com/15090643/228943041-7e135856-543a-416a-9331-50853d2e0929.png">
+<img src="https://user-images.githubusercontent.com/15090643/228943083-c017c5a0-f5aa-4d03-b241-8e58f2c8a5f6.png">
