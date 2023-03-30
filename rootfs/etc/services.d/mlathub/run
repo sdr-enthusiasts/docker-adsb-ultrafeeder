@@ -32,6 +32,7 @@ MLATHUB_CMD+=("--forward-mlat")
 MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUT_PORT:-31003}")
 MLATHUB_CMD+=("--net-bi-port=${MLATHUB_BEAST_IN_PORT:-31004}")
 MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-31005}")
+MLATHUB_CMD+=("--net-beast-reduce-out-port=${MLATHUB_BEAST_REDUCE_OUT_PORT:-31006}"))
 
 # We need to get the mlat results ports from the parameters:
 # parse MLAT_CONFIG string into mlat_configs array
@@ -100,15 +101,15 @@ fi
 # Handle "--net-heartbeat=<rate>"
 MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
 
-
-if (( $(ps -o etimes= -p 1) < 30 ))
+if ! pgrep readsb >/dev/null 2>&1
 then
     echo "[$(date)][mlathub] Delaying MLAT hub start until container is established..."
-    while (( $(ps -o etimes= -p 1) < 30 ))
+    while ! pgrep readsb >/dev/null 2>&1
     do
-        sleep 5
+        sleep 2
     done
 fi
+sleep 5     # sleep a bit so readsb is well established
 
 echo "[$(date)][mlathub] Starting MLATHUB..."
 

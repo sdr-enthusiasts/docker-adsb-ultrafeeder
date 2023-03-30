@@ -86,6 +86,18 @@ The sections below describe how to configure each part of the container function
 
 ### General Configuration
 
+You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file::
+
+```yaml
+    device_cgroup_rules:
+      - 'c 189:* rwm'
+...
+    volumes:
+      - /dev:/dev:ro
+```
+
+The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. 
+
 #### Basic Ultrafeeder Parameters
 
 ##### Mandatory Parameters
@@ -241,11 +253,13 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_NET_RAW_OUTPUT_PORT` | TCP raw output listen ports. | `--net-ro-port=<ports>` | `30002` |
 | `READSB_NET_SBS_INPUT_PORT` | TCP BaseStation input listen ports. | `--net-sbs-in-port=<ports>` | Unset |
 | `READSB_NET_SBS_OUTPUT_PORT` | TCP BaseStation output listen ports. | `--net-sbs-port=<ports>` | `30003` |
+| `READSB_NET_SBS_DISABLE_REDUCE` | Disable application of "reduce" logic to SBS/BaseStation output. (By default, this is enabled) | `--net-sbs-reduce` | Unset |
 | `REASSB_NET_VERBATIM` | Set this to any value to forward messages unchanged. | `--net-verbatim` | Unset |
 | `READSB_NET_VRS_PORT` | TCP VRS JSON output listen ports. | `--net-vrs-port=<ports>` | Unset |
 | `READSB_WRITE_STATE_ONLY_ON_EXIT` | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb` | `--write-state-only-on-exit` | Unset |
 | `READSB_JSON_INTERVAL` | Update interval for the webinterface in seconds / interval between aircraft.json writes | `--write-json-every=<sec>` | `1.0` |
 | `READSB_JSON_TRACE_INTERVAL` | Per plane interval for json position output and trace interval for globe history | `--json-trace-interval=<sec>` | `15` |
+| `READSB_FORWARD_MLAT_SBS` | If set to anthing, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | Unset |
 
 ### Web Gui (`tar1090`) Configuration
 
@@ -485,8 +499,8 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31003` |
 | `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
 | `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
-| `MLATHUB_NET_CONNECTOR` | List of semi-colon separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
-| `MLATHUB_ENABLE_ADSB_INGEST` | If set to any non-empty value, the MLATHUB will ingest the ADSB data from the readsb component and make it available on its output port. This is useful if you want to connect to external applications that want both ADSB and MLAT result data (for example, Planefence). Note -- do not use this option to feed external aggregators as they generally do not want to receive processed MLAT data. | Unset |
+| `MLATHUB_BEAST_REDUCE_OUT_PORT` |  TCP port where consolidated MLAT results will be available in Beast format with reduced data rates | `31006` |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
 
 ## Metrics
 

@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   ultrafeeder:
-    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder
     tty: true
     container_name: ultrafeeder
     hostname: ultrafeeder
@@ -10,10 +8,13 @@ services:
     device_cgroup_rules:
       - 'c 189:* rwm'
     ports:
-      - 80:80
-      - 30003:30003
-      - 30005:30005
+      - 8080:80               # to expose the web interface
+      - 9273-9274:9273-9274   # to expose the statistics interface to Prometheus
     environment:
+      # --------------------------------------------------
+      # general parameters:
+      - LOGLEVEL=error
+      - TZ=${FEEDER_TZ}
       # --------------------------------------------------
       # SDR related parameters:
       - READSB_DEVICE_TYPE=rtlsdr
@@ -25,22 +26,21 @@ services:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
       - READSB_ALT=${FEEDER_ALT_M}m
-      - READSB_GAIN=autogain
+      - READSB_GAIN=${ADSB_SDR_GAIN}
       - READSB_MODEAC=true
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
-      - TZ=${FEEDER_TZ}
       #
       # --------------------------------------------------
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
       - READSB_NET_CONNECTOR=
-          dump978,37981,raw_in;
           feed.adsb.fi,30004,beast_reduce_plus_out;
           in.adsb.lol,30004,beast_reduce_plus_out;
           feed.adsb.one,64004,beast_reduce_plus_out;
           feed.planespotters.net,30004,beast_reduce_plus_out;
           feed.theairtraffic.com,30004,beast_reduce_plus_out
+      # If you really want to feed ADSBExchange, you can do so by adding this above: feed1.adsbexchange.com,30004,beast_reduce_plus_out
       - UUID=${MULTIFEEDER_UUID}
       #
       # --------------------------------------------------
@@ -52,13 +52,14 @@ services:
           feed.adsb.one,64006,39002;
           mlat.planespotters.net,31090,39003;
           feed.theairtraffic.com,31090,39004
+      # If you really want to feed ADSBExchange, you can do so by adding this above: feed.adsbexchange.com,31090,39005
       - MLAT_USER=${FEEDER_NAME}
       # MLATHUB automatically gets MLAT results data from the feeders defined in MLAT_CONFIG,
       # and additionally from the Net Connectors defined with MLATHUB_NET_CONNECTOR
       - MLATHUB_NET_CONNECTOR=
           piaware,30105,beast_in;
           rbfeeder,30105,beast_in;
-          Radarvirtuel,30105,beast_in
+          radarvirtuel,30105,beast_in
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
@@ -72,17 +73,27 @@ services:
       - TAR1090_FLIGHTAWARELINKS=true
       - HEYWHATSTHAT_PANORAMA_ID=${FEEDER_HEYWHATSTHAT_ID}
       - HEYWHATSTHAT_ALTS=${FEEDER_HEYWHATSTHAT_ALTS}
+      - TAR1090_SITESHOW=true
+      - TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE=true
+      - TAR1090_RANGE_OUTLINE_WIDTH=2.0
+      - TAR1090_RANGERINGSDISTANCES=50,100,150,200
+      - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
       #
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
       # The two 978 related parameters should only be included if you are running dump978 for UAT reception (USA only)
       - GRAPHS1090_DARKMODE=true
-      - ENABLE_978=yes
-      - URL_978=http://dump978/skyaware978
+      # - ENABLE_978=yes
+      # - URL_978=http://dump978/skyaware978
       # 
+      # --------------------------------------------------
+      # Prometheus and InfluxDB connection parameters:
+      - INFLUXDBV2_URL=${INFLUX_URL}
+      - INFLUXDBV2_TOKEN=${INFLUX_TOKEN}
+      - INFLUXDBV2_BUCKET=${INFLUX_BUCKET}
+      - PROMETHEUS_ENABLE=true
     volumes:
       - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
-      - /opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090
       - /opt/adsb/ultrafeeder/graphs1090:/var/lib/collectd
       - /proc/diskstats:/proc/diskstats:ro
       - /dev:/dev:ro

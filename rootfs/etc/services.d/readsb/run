@@ -39,7 +39,13 @@ if [ -n "${UUID}" ]; then
     READSB_CMD+=("--uuid-file=/run/uuid")
 fi
 
-# ingest MLAT results data if MLAT clients have been defined:
+# ingest MLAT results data from the MLATHUB if one is defined:
+if [[ -n "${MLAT_CONFIG}" ]] || [[ -n "$MLATHUB_NET_CONNECTOR" ]]
+then
+            READSB_CMD+=("--net-connector=localhost,${MLATHUB_BEAST_REDUCE_OUT_PORT:-31006},beast_in")
+fi
+
+if MLAT clients have been defined:
 # parse MLAT_CONFIG string into mlat_configs array
 # note - it's OK for MLAT_CONFIG to be empty or unset
 readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
@@ -74,9 +80,18 @@ READSB_CMD+=("--net-json-port=30047")
 READSB_CMD+=(--net-api-port=30152)
 READSB_CMD+=(--net-sbs-in-port=32006)
 
+if [[ -z "$READSB_NET_SBS_DISABLE_REDUCE" ]]; then
+    READSB_CMD+=("--net-sbs-reduce")
+fi
+
 if [[ -n "${READSB_FORWARD_MLAT}" ]]; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregretors!"
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat")
+fi
+
+if [[ -n "${READSB_FORWARD_MLAT_SBS}" ]]; then
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
+    READSB_CMD+=("--forward-mlat-sbs")
 fi
 
 if [[ -n "$READSB_RX_LOCATION_ACCURACY" ]]; then
