@@ -533,7 +533,7 @@ In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxda
 | `INFLUXDBV2_TOKEN` | The token for authentication |
 | `INFLUXDBV2_BUCKET` | Destination bucket to write into |
 
-### Output to Prometheus
+### Output to Prometheus and configuring Grafana
 
 In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, the following environment variables can be used:
 
@@ -541,6 +541,7 @@ In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, t
 | ---- | ---- |
 | `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
 
+Please see the [separate instruction document](README-grafana.md) for step by step instructions on how to set up and configure a Grafana Dashboard.
 
 ## Message decoding introspection
 
