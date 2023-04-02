@@ -72,8 +72,11 @@ services:
     hostname: grafana
     tty: true
     # uncomment the following section and set the variables if you are exposing Grafana to the internet behind a rev web proxy:
-    # environment:
-    #   - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana
+    environment:
+    # windrose panel plugin is needed for polar plots:
+      - GF_INSTALL_PLUGINS=fatcloud-windrose-panel
+    # uncomment and set the following variables if you are exposing Grafana to the internet behind a rev web proxy:
+    #   - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana/
     #   - GF_SERVER_SERVE_FROM_SUB_PATH=true
     ports:
       - 3000:3000
