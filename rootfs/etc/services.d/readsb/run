@@ -307,11 +307,9 @@ fi
 
 #####################
 # Handle --write-prom=<filepath> 
-
 if [[ -n "$PROMETHEUS_ENABLE" ]]; then 
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
-
 
 # shellcheck disable=SC2086
 if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
