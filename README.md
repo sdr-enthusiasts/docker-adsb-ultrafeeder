@@ -532,6 +532,7 @@ In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxda
 | `INFLUXDBV2_URL` | The URL of the InfluxDB instance |
 | `INFLUXDBV2_TOKEN` | The token for authentication |
 | `INFLUXDBV2_BUCKET` | Destination bucket to write into |
+| `INFLUXDBV2_ORG` | InfluxDB Organization to write into |
 
 ### Output to Prometheus and configuring Grafana
 
