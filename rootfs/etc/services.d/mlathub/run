@@ -1,14 +1,14 @@
 #!/usr/bin/with-contenv bash
-# shellcheck shell=bash disable=SC2016
+# shellcheck shell=bash disable=SC1091,SC2016
 
-if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]
-then
+source /scripts/common
+
+if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]; then
     echo "[$(date)][mlathub] No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
     sleep infinity
 fi
 
-if [[ -n "${MLATHUB_DISABLED}" ]]
-then
+if chk_enabled "${MLATHUB_DISABLED}"; then
     echo "[$(date)][mlathub] MLATHUB is disabled."
     sleep infinity
 fi
@@ -70,7 +70,7 @@ if [[ -n "$MLATHUB_NET_CONNECTOR" ]]; then
     done
 fi
 
-if [ -n "${READSB_DEBUG}" ]; then
+if chk_enabled "${READSB_DEBUG}"; then
     MLATHUB_CMD+=("--debug=$READSB_DEBUG")
 fi
 

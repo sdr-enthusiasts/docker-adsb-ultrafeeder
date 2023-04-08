@@ -101,6 +101,11 @@ Aircraft.json:
 
 The sections below describe how to configure each part of the container functionality. Each section describes what's needed to come up with a minimally viable configuration, followed by additional / optional parameters that can also be set.
 
+Note:
+
+- to enable a parameter, you can set it to any of `1`, `true`, `on`, `enabled`, `enable`, `yes`, or `y`. In the table below, we'll simply use `true` for convenience.
+- to disable a parameter, you can set it to anything else or simply leave it undefined.
+
 ### General Configuration
 
 You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file:
@@ -132,17 +137,17 @@ The following parameters must be set (mandatory) for the container to function:
 
 | Variable | Description | Controls which `readsb` option | Default |
 |----------|-------------|--------------------------------|---------|
-| `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to any value to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset |
+| `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset |
 | `READSB_EXTRA_ARGS` | Optional, allows to specify extra parameters for readsb | Unset |
 | `READSB_DEBUG` | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check | Unset |
 | `S6_SERVICES_GRACETIME` | Optional, set to 30000 when saving traces / globe_history | `3000` |
 | `READSB_MAX_RANGE` | Optional. Maximum range (in nautical miles). | `300` |
-| `READSB_ENABLE_BIASTEE` | Set to any value to enable bias tee on supporting interfaces | | Unset |
+| `READSB_ENABLE_BIASTEE` | Set to `true` to enable bias tee on supporting interfaces | | Unset |
 | `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location in metadata: 0=no location, 1=approximate, 2=exact | `--rx-location-accuracy=<n>` | `2` |
 | `READSB_HEATMAP_INTERVAL` | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value) | `--heatmap=<sec>` | `15` |
 | `READSB_MAX_RANGE` | Absolute maximum range for position decoding (in nm) | `--max-range=<dist>` | `300` |
 | `READSB_STATS_EVERY` | Number of seconds between showing and resetting stats. | `--stats-every=<sec>` | Unset |
-| `READSB_STATS_RANGE` | Set this to any value to collect range statistics for polar plot. | `--stats-range` |  Unset |
+| `READSB_STATS_RANGE` | Set this to `true` to collect range statistics for polar plot. | `--stats-range` |  Unset |
 | `READSB_RANGE_OUTLINE_HOURS` | Change which past timeframe the range outline is based on | `--range-outline-hours` |  `24` |
 | `READSB_EXTRA_ARGS` | Optional, allows to specify extra parameters for readsb | | Unset |
 | `S6_SERVICES_GRACETIME` | Optional, set to 30000 when saving traces / globe_history | | `3000` |
@@ -271,7 +276,7 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_NET_SBS_INPUT_PORT` | TCP BaseStation input listen ports. | `--net-sbs-in-port=<ports>` | Unset |
 | `READSB_NET_SBS_OUTPUT_PORT` | TCP BaseStation output listen ports. | `--net-sbs-port=<ports>` | `30003` |
 | `READSB_NET_SBS_DISABLE_REDUCE` | Disable application of "reduce" logic to SBS/BaseStation output. (By default, this is enabled) | `--net-sbs-reduce` | Unset |
-| `REASSB_NET_VERBATIM` | Set this to any value to forward messages unchanged. | `--net-verbatim` | Unset |
+| `REASSB_NET_VERBATIM` | Set this to `true` to forward messages unchanged. | `--net-verbatim` | Unset |
 | `READSB_NET_VRS_PORT` | TCP VRS JSON output listen ports. | `--net-vrs-port=<ports>` | Unset |
 | `READSB_WRITE_STATE_ONLY_ON_EXIT` | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb` | `--write-state-only-on-exit` | Unset |
 | `READSB_JSON_INTERVAL` | Update interval for the webinterface in seconds / interval between aircraft.json writes | `--write-json-every=<sec>` | `1.0` |
@@ -300,7 +305,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `URL_978` | The URL needs to point at where you would normally find the skyview978 webinterface, for example `http://192.168.0.29/skyaware978`. Note -- do not use `localhost` or `127.0.0.1 | |
 | `GZIP_LVL` | `1`-`9` are valid, lower lvl: less CPU usage, higher level: less network bandwidth used when loading the page | `3` |
 | `PTRACKS` | Shows the last `$PTRACKS` hours of traces you have seen at the `?pTracks` URL | `8` |
-| `TAR1090_FLIGHTAWARELINKS` | Set to any value to enable FlightAware links in the web interface | `null` |
+| `TAR1090_FLIGHTAWARELINKS` | Set to `true` to enable FlightAware links in the web interface | `null` |
 | `TAR1090_ENABLE_AC_DB` | Set to `true` to enable extra information, such as aircraft type and registration, to be included in in `aircraft.json` output. Will use more memory; use caution on older Pis or similar devices. | `false` |
 | `HEYWHATSTHAT_PANORAMA_ID` | Your `heywhatsthat.com` panorama ID. See <https://github.com/wiedehopf/tar1090#heywhatsthatcom-range-outline> | |
 | `HEYWHATSTHAT_ALTS` | Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please | `12192m` (=40000 ft) |
@@ -365,12 +370,12 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `GRAPHS1090_DARKMODE` | If set to any value, `graphs1090` will be rendered in "dark mode". | Unset |
+| `GRAPHS1090_DARKMODE` | If set to `true`, `graphs1090` will be rendered in "dark mode". | Unset |
 | `GRAPHS1090_RRD_STEP` | Interval in seconds to feed data into RRD files. | `60` |
 | `GRAPHS1090_SIZE` | Set graph size, possible values: `small`, `default`, `large`, `huge`, `custom`. | `default` |
 | `GRAPHS1090_ALL_LARGE` | Make the small graphs as large as the big ones by setting to `yes`. | `no` |
 | `GRAPHS1090_FONT_SIZE` | Font size (relative to graph size). | `10.0` |
-| `GRAPHS1090_MAX_MESSAGES_LINE` | Set to any value to draw a reference line at the maximum message rate. | Unset |
+| `GRAPHS1090_MAX_MESSAGES_LINE` | Set to `true` to draw a reference line at the maximum message rate. | Unset |
 | `GRAPHS1090_LARGE_WIDTH` | Defines the width of the larger graphs. | `1096` |
 | `GRAPHS1090_LARGE_HEIGHT` | Defines the height of the larger graphs. | `235` |
 | `GRAPHS1090_SMALL_WIDTH` | Defines the width of the smaller graphs. | `619` |
@@ -378,7 +383,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `GRAPHS1090_DISK_DEVICE` | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_ETHERNET_DEVICE` | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_WIFI_DEVICE` | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device | Unset |
-| `GRAPHS1090_DISABLE` | Set to any value to disable the GRAPHS1090 web page and data collection | Unset |
+| `GRAPHS1090_DISABLE` | Set to `true` to disable the GRAPHS1090 web page and data collection | Unset |
 | `ENABLE_AIRSPY` | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset |
 
 #### Enabling UAT data
@@ -469,7 +474,7 @@ Legacy: **We recommend AGAINST enabling this feature** as it has been replaced w
 
 | Environment Variable | Purpose | Default |
 |----------------------|---------|---------|
-| `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to any value to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/> | Unset |
+| `ENABLE_TIMELAPSE1090` | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/> | Unset |
 | `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds | `10` |
 | `TIMELAPSE1090_HISTORY` | Time saved in hours | `24` |
 

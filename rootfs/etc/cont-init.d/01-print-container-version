@@ -1,5 +1,7 @@
 #!/usr/bin/with-contenv bash
-#shellcheck shell=bash disable=SC2015
+# shellcheck shell=bash disable=SC1091,SC2015
+
+source /scripts/common
 
 # Print container version
 #---------------------------------------------------------------------------------------------

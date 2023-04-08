@@ -1,4 +1,6 @@
 #!/usr/bin/with-contenv bash
-#shellcheck shell=bash
+# shellcheck shell=bash disable=SC1091
+
+source /scripts/common
 
 rm -f /run/readsb-prometheus.prom || true
