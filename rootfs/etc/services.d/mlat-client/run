@@ -95,6 +95,7 @@ do
 then
     echo "[$(date)][mlathub] Delaying start of MLAT client(s) until container is established..."
     while ! pgrep readsb >/dev/null
+    do
         sleep 2
     done
 fi
