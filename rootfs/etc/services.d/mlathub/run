@@ -99,15 +99,15 @@ fi
 # Handle "--net-heartbeat=<rate>"
 MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
 
-if ! pgrep readsb >/dev/null 2>&1
+if ! pgrep readsb >/dev/null || ! pgrep 'mlat-client' >/dev/null
 then
     echo "[$(date)][mlathub] Delaying MLAT hub start until container is established..."
-    while ! pgrep readsb >/dev/null 2>&1
+    while ! pgrep readsb >/dev/null || ! pgrep 'mlat-client' >/dev/null
     do
         sleep 2
     done
 fi
-sleep 5     # sleep a bit so readsb is well established
+sleep 5     # sleep a bit so everything is well established
 
 echo "[$(date)][mlathub] Starting MLATHUB..."
 
@@ -122,3 +122,5 @@ elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS >/dev/null 2>/dev/null 
 fi
 
+echo "[$(date +%Y-%m-%d %H:%M:%S)][mlathub] The mlathub instance has exited. Restarting in 10 seconds."
+sleep 10

@@ -90,6 +90,16 @@ do
     # shellcheck disable=SC2048,SC2086
     execstring="$(echo ${MLAT_CMD} ${MLAT_PARAM[*]} | xargs)"
 
+    # Wait a bit until readsb is established...
+    if ! pgrep readsb >/dev/null 
+then
+    echo "[$(date)][mlathub] Delaying start of MLAT client(s) until container is established..."
+    while ! pgrep readsb >/dev/null
+        sleep 2
+    done
+fi
+sleep 10     # sleep a bit so everything is well established - starting readsb may take a bit
+
     # run this Mlat_client instance in the background:
     echo  "[$(date)][${APPNAME}] starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
 

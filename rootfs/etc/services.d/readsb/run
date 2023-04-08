@@ -1,8 +1,6 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash disable=SC2016
 
-#all-in-one
-
 mkdir -p /run/readsb
 
 # Build the readsb command line based on options
@@ -322,6 +320,7 @@ elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null 
 fi
 
-
+echo "[$(date +%Y-%m-%d %H:%M:%S)][readsb] The main readsb instance has exited. Restarting in 10 seconds."
+sleep 10
 
 
