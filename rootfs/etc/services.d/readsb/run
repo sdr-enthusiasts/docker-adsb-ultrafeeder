@@ -123,9 +123,8 @@ fi
 READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152}")
 
 # Handle "--net-beast-reduce-interval=<seconds>"
-if [[ -n "$READSB_NET_BEAST_REDUCE_INTERVAL" ]]; then
-    READSB_CMD+=("--net-beast-reduce-interval=$READSB_NET_BEAST_REDUCE_INTERVAL")
-fi
+# Default it to 1.0 second if no value is provided
+READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-1.0}")
 
 # Handle "--net-beast-reduce-out-port=<ports>"
 if [[ -n "$READSB_NET_BEAST_REDUCE_OUT_PORT" ]]; then
@@ -243,7 +242,7 @@ if [[ -n "$READSB_GAIN" ]]; then
     else
         [[ "${READSB_GAIN,,}" == "autogain" ]] && gain="49.6" || gain="${READSB_GAIN}"
     fi
-    READSB_CMD+=("--gain=$gain") 
+    READSB_CMD+=("--gain=$gain")
 fi
 
 ##### RTL-SDR OPTIONS #####
@@ -305,8 +304,8 @@ if [[ -n "$READSB_BEAST_BAUDRATE" ]]; then
 fi
 
 #####################
-# Handle --write-prom=<filepath> 
-if chk_enabled "$PROMETHEUS_ENABLE"; then 
+# Handle --write-prom=<filepath>
+if chk_enabled "$PROMETHEUS_ENABLE"; then
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
 
@@ -318,7 +317,7 @@ elif [[ "${LOGLEVEL,,}" == "error" ]]; then
     "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 1>/dev/null | \
 	    mawk -W Interactive '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][readsb] " $0}'
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null 
+    "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null
 fi
 
 echo "[$(date +%Y-%m-%d %H:%M:%S)][readsb] The main readsb instance has exited. Restarting in 10 seconds."
