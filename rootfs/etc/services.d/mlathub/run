@@ -46,10 +46,10 @@ do
     if [[ -n "${params[2]}" ]]
     then
         MLATHUB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
-        (( mlat_result_sources++ ))
+        (( mlat_result_sources++ )) || true
     fi
 done
-if ((mlat_result_sources == 0 ))
+if (( mlat_result_sources == 0 ))
 then
     echo "[$(date)][mlathub] No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
     sleep infinity
