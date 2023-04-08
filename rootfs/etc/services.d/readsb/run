@@ -35,7 +35,7 @@ if [ -n "${BEASTHOST}" ]; then
     READSB_CMD+=("--net-connector=${BEASTHOST},${BEASTPORT},beast_in")
 fi
 
-if chk_enabled "${UUID}"; then
+if [ -n "${UUID}" ]; then
     READSB_CMD+=("--uuid-file=/run/uuid")
 fi
 
