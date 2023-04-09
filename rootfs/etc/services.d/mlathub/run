@@ -99,10 +99,10 @@ fi
 # Handle "--net-heartbeat=<rate>"
 MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
 
-if ! pgrep readsb >/dev/null || ! pgrep 'mlat-client' >/dev/null
+if [[ ! -f /run/mlathub_up ]]
 then
     echo "[$(date)][mlathub] Delaying MLAT hub start until container is established..."
-    while ! pgrep readsb >/dev/null || ! pgrep 'mlat-client' >/dev/null
+    while [[ ! -f /run/mlathub_up ]]
     do
         sleep 2
     done

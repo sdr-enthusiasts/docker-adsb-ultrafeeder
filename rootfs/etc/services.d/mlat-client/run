@@ -131,6 +131,9 @@ sleep 10     # sleep a bit so everything is well established - starting readsb m
     sleep 5
 done
 
+# All MLAT Clients are up, so set the flag:
+touch /run/mlathub_up
+
 # Now iterate over all MLAT-client instances and check if they are still running:
 while true
 do
