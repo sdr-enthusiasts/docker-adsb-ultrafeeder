@@ -122,5 +122,5 @@ elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS >/dev/null 2>/dev/null 
 fi
 
-echo "[$(date +%Y-%m-%d %H:%M:%S)][mlathub] The mlathub instance has exited. Restarting in 10 seconds."
+echo "[$(date "+%Y-%m-%d %H:%M:%S")][mlathub] The mlathub instance has exited. Restarting in 10 seconds."
 sleep 10
