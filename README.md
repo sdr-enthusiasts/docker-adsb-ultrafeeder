@@ -103,8 +103,8 @@ The sections below describe how to configure each part of the container function
 
 Note:
 
-- to enable a parameter, you can set it to any of `1`, `true`, `on`, `enabled`, `enable`, `yes`, or `y`. In the table below, we'll simply use `true` for convenience.
-- to disable a parameter, you can set it to anything else or simply leave it undefined.
+* to enable a parameter, you can set it to any of `1`, `true`, `on`, `enabled`, `enable`, `yes`, or `y`. In the table below, we'll simply use `true` for convenience.
+* to disable a parameter, you can set it to anything else or simply leave it undefined.
 
 ### General Configuration
 
@@ -218,7 +218,7 @@ docker exec -it ultrafeeder /usr/local/bin/autogain1090 reset
 
 In addition to (or instead of) connecting to a SDR or hardware device to get ADSB data, the container also supports ingesting data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
 
-##### Mandatory parameters
+##### Networking parameters
 
 | Environment Variable | Purpose | Default |
 |----------------------|---------|---------|
@@ -227,7 +227,7 @@ In addition to (or instead of) connecting to a SDR or hardware device to get ADS
 | `MLATHOST` | Legacy parameter. IP/Hostname of an MLAT provider (`mlat-client`). Note - using this parameter will not make the MLAT data part of the consolidated mlathub. The preferred way of ingesting MLAT results is using the `mlathub` functionality of the container, see below for details | |
 | `MLATPORT` | Legacy parameter used with `MLATHOST`. TCP port number of an MLAT provider (`mlat-client`) | 30105 |
 
-###### Alternate Configuration Method with `READSB_NET_CONNECTOR`
+##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
 Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure incoming and outgoing connections. The variable takes a semicolon (`;`) separated list of `host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]`, where:
 
@@ -282,6 +282,33 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_JSON_INTERVAL` | Update interval for the webinterface in seconds / interval between aircraft.json writes | `--write-json-every=<sec>` | `1.0` |
 | `READSB_JSON_TRACE_INTERVAL` | Per plane interval for json position output and trace interval for globe history | `--json-trace-interval=<sec>` | `15` |
 | `READSB_FORWARD_MLAT_SBS` | If set to anthing, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | Unset |
+| `UUID` | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. | | unset |
+
+##### MLAT configuration
+
+The Ultrafeeder contains a capability to send MLAT data to MLAT servers to be processed, and to receive the MLAT results and integrate those with an MLAT Hub and the `tar1090` map.
+It will create a separate instance of `mlat-client` for each defined MLAT server. The parameters for these `mlat-client` instances is as follows:
+
+```yaml
+    environment:
+    ...
+      - MLAT_CONFIG=
+           mlat-server1.com,port1,return_port1,uuid=1234-5678-90123,--extra-argument hello;
+           mlat-server2.com,port2,return_port2,uuid=5678-9012-34567,--extra-argument hello
+    ...
+```
+
+where:
+
+* `mlat-server.com` is the domain name or ip address of the target MLAT server (mandatory)
+* `port` is the port (TCP or UDP) of the target MLAT server (mandatory)
+* `return_port` is the port at which the MLAT results are made available in BEAST format. We recommend to sequentially number them starting at 39000 (optional)
+* `uuid=xxxx` defines a unique user ID for this MLAT server instance. If included, the string must start with `uuid=` (optional)
+* `extra-arguments` are any additional command line arguments that you would like to use for this MLAT Client instance (optional)
+
+Note - the three optional parameters (`return_port`, `uuid=`, and `extra-arguments`) can be given in any order.
+
+If no UUID is specified with the `MLAT_CONFIG` parameter, it will use the value of the `UUID` parameter if it exists. If that fails, no UUID parameter is included with `mlat-client`. 
 
 ### Web Gui (`tar1090`) Configuration
 
@@ -291,7 +318,7 @@ The web interface is rendered to port `80` in the container. This can me mapped 
 
 All of the variables below are optional.
 
-Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them.
+Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` entry for them.
 
 #### `tar1090` Core Configuration
 

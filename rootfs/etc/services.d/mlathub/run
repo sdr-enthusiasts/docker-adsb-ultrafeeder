@@ -43,12 +43,17 @@ do
     # put individual params into the $params array:
     readarray -td "," params < <(printf '%s' "${instance}")
 
-    if [[ -n "${params[2]}" ]]
-    then
-        MLATHUB_CMD+=("--net-connector=localhost,${params[2]},beast_in")
-        (( mlat_result_sources++ )) || true
-    fi
+    for ((i=2; i<${#params[*]}; i++))
+    do
+        if [[ -n "${params[i]}" ]] && [[ "${params[i]}" =~ ^[0-9]+$ ]]; then
+            # the parameter is a number and it is assumed that this is the beast_results port
+            MLATHUB_CMD+=("--net-connector=localhost,${params[i]},beast_in")
+            (( mlat_result_sources++ )) || true
+            break
+        fi
+    done
 done
+
 if (( mlat_result_sources == 0 ))
 then
     echo "[$(date)][mlathub] No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
