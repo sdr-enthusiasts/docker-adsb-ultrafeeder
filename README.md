@@ -292,7 +292,7 @@ It will create a separate instance of `mlat-client` for each defined MLAT server
 ```yaml
     environment:
     ...
-      - MLAT_CONFIG=
+      - MLAT_NET_CONNECTOR=
            mlat-server1.com,port1,return_port1,uuid=1234-5678-90123,--extra-argument hello;
            mlat-server2.com,port2,return_port2,uuid=5678-9012-34567,--extra-argument hello
     ...
@@ -308,7 +308,7 @@ where:
 
 Note - the three optional parameters (`return_port`, `uuid=`, and `extra-arguments`) can be given in any order.
 
-If no UUID is specified with the `MLAT_CONFIG` parameter, it will use the value of the `UUID` parameter if it exists. If that fails, no UUID parameter is included with `mlat-client`. 
+If no UUID is specified with the `MLAT_CONFIG` parameter, it will use the value of the `UUID` parameter if it exists. If that fails, no UUID parameter is included with `mlat-client`.
 
 ### Web Gui (`tar1090`) Configuration
 
