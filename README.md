@@ -226,7 +226,7 @@ Note that `ULTRAFEEDER_CONFIG` and `ULTRAFEEDER_NET_CONNECTOR` can be used inter
 
 `ULTRAFEEDER_CONFIG` syntax:
 
-The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`. Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
+The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`. Please note that the config strings cannot contain `;` or `,` -- undefined things may happen if these characters are present.
 
 ```yaml
 - ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
@@ -239,7 +239,7 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 In the above configuration strings:
 
 * `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
-* `port` is a TCP port number
+* `port` and `return_port` are TCP port numbers
 * `protocol` can be one of the following:
   * `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
   * `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
