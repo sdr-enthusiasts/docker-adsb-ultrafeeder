@@ -1,5 +1,5 @@
 #!/usr/bin/with-contenv bash
-# shellcheck shell=bash disable=SC2016,SC1091
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091
 
 APPNAME="readsb"
 
@@ -182,7 +182,7 @@ if [[ -n "$READSB_NET_CONNECTOR" ]]; then
 fi
 
 # Handle ULTRAFEEDER_CONFIG / ULTRAFEEDER_NET_CONNECTOR elements relevant to readsb:
-[[ "${#READSB_CONF_ARR[@]}" > 0 ]] && READSB_CMD+=("${READSB_CONF_ARR[@]}") || true
+[[ "${#READSB_CONF_ARR[@]}" -gt 0 ]] && READSB_CMD+=("${READSB_CONF_ARR[@]}") || true
 
 # Handle "--net-connector-delay=<seconds>"
 if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
