@@ -34,7 +34,7 @@ services:
       # --------------------------------------------------
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
-      - READSB_NET_CONNECTOR=
+      - ULTRAFEEDER_CONFIG=
           adsb,feed.adsb.fi,30004,beast_reduce_plus_out;
           adsb,in.adsb.lol,30004,beast_reduce_plus_out;
           adsb,feed.adsb.one,64004,beast_reduce_plus_out;
