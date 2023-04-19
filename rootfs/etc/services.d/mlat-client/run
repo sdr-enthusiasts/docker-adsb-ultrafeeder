@@ -168,9 +168,9 @@ do
     echo  "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
 
     if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+        { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
     elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-        { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y/%m/%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+        { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
     elif [[ "${LOGLEVEL,,}" == "none" ]]; then
        { exec ${execstring} >/dev/null 2>/dev/null; } &
     fi
