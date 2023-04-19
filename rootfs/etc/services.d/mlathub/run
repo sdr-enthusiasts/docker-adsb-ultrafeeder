@@ -104,7 +104,7 @@ if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
 fi
 
 # Handle "--net-heartbeat=<rate>"
-MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
+MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 
 if [[ ! -f /run/mlathub_up ]]
 then
