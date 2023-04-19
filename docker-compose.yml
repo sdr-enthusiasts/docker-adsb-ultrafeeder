@@ -34,32 +34,27 @@ services:
       # --------------------------------------------------
       # Sources and Aggregator connections:
       # (Note - remove the ones you are not using / feeding)
-      - READSB_NET_CONNECTOR=
-          feed.adsb.fi,30004,beast_reduce_plus_out;
-          in.adsb.lol,30004,beast_reduce_plus_out;
-          feed.adsb.one,64004,beast_reduce_plus_out;
-          feed.planespotters.net,30004,beast_reduce_plus_out;
-          feed.theairtraffic.com,30004,beast_reduce_plus_out
-      # If you really want to feed ADSBExchange, you can do so by adding this above: feed1.adsbexchange.com,30004,beast_reduce_plus_out
-      - UUID=${MULTIFEEDER_UUID}
+      - ULTRAFEEDER_CONFIG=
+          adsb,feed.adsb.fi,30004,beast_reduce_plus_out;
+          adsb,in.adsb.lol,30004,beast_reduce_plus_out;
+          adsb,feed.adsb.one,64004,beast_reduce_plus_out;
+          adsb,feed.planespotters.net,30004,beast_reduce_plus_out;
+          adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out;
+          mlat,feed.adsb.fi,31090,39000;
+          mlat,in.adsb.lol,31090,39001;
+          mlat,feed.adsb.one,64006,39002;
+          mlat,mlat.planespotters.net,31090,39003;
+          mlat,feed.theairtraffic.com,31090,39004;
+          mlathub,piaware,30105,beast_in;
+          mlathub,rbfeeder,30105,beast_in;
+          mlathub,radarvirtuel,30105,beast_in
+      # If you really want to feed ADSBExchange, you can do so by adding this above: 
+      #        adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out,uuid=${ADSBX_UUID};
+      #        mlat,feed.adsbexchange.com,31090,39005,uuid=${ADSBX_UUID}
       #
       # --------------------------------------------------
-      # MLAT and MLATHUB related parameters:
-      # MLAT_CONFIG defines who you are feeding MLAT data to, and on what port(s) the results will become available
-      - MLAT_CONFIG=
-          feed.adsb.fi,31090,39000;
-          in.adsb.lol,31090,39001;
-          feed.adsb.one,64006,39002;
-          mlat.planespotters.net,31090,39003;
-          feed.theairtraffic.com,31090,39004
-      # If you really want to feed ADSBExchange, you can do so by adding this above: feed.adsbexchange.com,31090,39005
+      - UUID=${MULTIFEEDER_UUID}
       - MLAT_USER=${FEEDER_NAME}
-      # MLATHUB automatically gets MLAT results data from the feeders defined in MLAT_CONFIG,
-      # and additionally from the Net Connectors defined with MLATHUB_NET_CONNECTOR
-      - MLATHUB_NET_CONNECTOR=
-          piaware,30105,beast_in;
-          rbfeeder,30105,beast_in;
-          radarvirtuel,30105,beast_in
       #
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:

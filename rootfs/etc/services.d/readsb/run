@@ -1,7 +1,10 @@
 #!/usr/bin/with-contenv bash
-# shellcheck shell=bash disable=SC2016,SC1091
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091
+
+APPNAME="readsb"
 
 source /scripts/common
+source /scripts/interpret_ultrafeeder_config
 
 mkdir -p /run/readsb
 
@@ -61,12 +64,12 @@ if ! chk_enabled "$READSB_NET_SBS_DISABLE_REDUCE"; then
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT}"; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat")
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT_SBS}"; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][readsb] WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
+    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat-sbs")
 fi
 
@@ -93,6 +96,7 @@ if [[ -n "$READSB_MAX_RANGE" ]]; then
 fi
 
 # Handle "--mlat"
+# shellcheck disable=SC2153
 if chk_enabled "$READSB_MLAT"; then
     READSB_CMD+=("--mlat")
 fi
@@ -168,6 +172,9 @@ fi
 
 # Handle "--net-connector=<ip,port,protocol>"
 if [[ -n "$READSB_NET_CONNECTOR" ]]; then
+    # Strip any extraneous spaces:
+    READSB_NET_CONNECTOR="${READSB_NET_CONNECTOR#"${READSB_NET_CONNECTOR%%[![:space:]]*}"}"   # strip leading space
+    READSB_NET_CONNECTOR="${READSB_NET_CONNECTOR//; /;}"
     IFS=';' read -r -a READSB_NET_CONNECTOR_ARRAY <<< "$READSB_NET_CONNECTOR"
     for NET_CONNECTOR_ELEMENT in "${READSB_NET_CONNECTOR_ARRAY[@]}"
     do
@@ -175,13 +182,16 @@ if [[ -n "$READSB_NET_CONNECTOR" ]]; then
     done
 fi
 
+# Handle ULTRAFEEDER_CONFIG / ULTRAFEEDER_NET_CONNECTOR elements relevant to readsb:
+[[ "${#READSB_CONF_ARR[@]}" -gt 0 ]] && READSB_CMD+=("${READSB_CONF_ARR[@]}") || true
+
 # Handle "--net-connector-delay=<seconds>"
 if [[ -n "$READSB_NET_CONNECTOR_DELAY" ]]; then
     READSB_CMD+=("--net-connector-delay=$READSB_NET_CONNECTOR_DELAY")
 fi
 
 # Handle "--net-heartbeat=<rate>"
-READSB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-30}")
+READSB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 
 # Handle "--net-ri-port=<ports>"
 if [[ -n "$READSB_NET_RAW_INPUT_PORT" ]]; then
@@ -320,7 +330,7 @@ elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null
 fi
 
-echo "[$(date "+%Y-%m-%d %H:%M:%S")][readsb] The main readsb instance has exited. Restarting in 10 seconds."
+echo "[$(date "+%Y-%m-%d %H:%M:%S")][${APPNAME}] The main readsb instance has exited. Restarting in 10 seconds."
 sleep 10
 
 

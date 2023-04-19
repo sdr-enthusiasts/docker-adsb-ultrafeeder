@@ -129,8 +129,8 @@ docker compose up -d
 
 You should be able to point your web browser at:
 
-* `http://docker.host.ip.addr:9090/` to access the `prometheus` console.
-* `http://docker.host.ip.addr:3000/` to access the `grafana` console, use admin/admin as initial credentials, you should be prompted to change the password on first login.
+- `http://docker.host.ip.addr:9090/` to access the `prometheus` console.
+- `http://docker.host.ip.addr:3000/` to access the `grafana` console, use admin/admin as initial credentials, you should be prompted to change the password on first login.
 
 Remember to change `docker.host.ip.addr` to the IP address of your docker host.
 
@@ -145,7 +145,7 @@ After you have logged into the `grafana` console the following manual steps are 
 Option | Input
 ------------- | -------------
 Name | readsb
-URL | http://prometheus:9090/
+URL | `http://prometheus:9090/`
 
 Clicking `Save & Test` should return a green message indicating success. The dashboard can now be imported with the following steps
 

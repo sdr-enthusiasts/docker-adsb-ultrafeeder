@@ -1,0 +1,123 @@
+# shellcheck shell=bash disable=SC2015
+#
+# This scripts should be sourced by the /etc/services.d/xxx/run modules for
+# readsb, mlat-client, and mlathub. It interprets the ULTRAFEEDER_CONFIG / ULTRAFEEDER_NET_CONNECTOR parameter
+# and makes individual net-connector strings available for these three modules.
+#
+#---------------------------------------------------------------------------------------------
+# Copyright (C) 2023, Ramon F. Kolb (kx1t)
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------------------------
+#
+# Note:
+# ULTRAFEEDER_CONFIG and ULTRAFEEDER_NET_CONNECTOR can be used interchangeably
+# If both are defined, they will be considered jointly.
+#
+# Format:
+# ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+# ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+# ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+#
+# The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`
+# Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
+#
+# In the above configuration strings:
+# `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
+# `port` is a TCP port number
+# `protocol` can be one of the following:
+#    `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
+#    `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
+#    `beast_out`: Beast-format output
+#    `beast_in`: Beast-format input
+#    `raw_out`: Raw output
+#    `raw_in`: Raw input
+#    `sbs_out`: SBS-format output
+#    `vrs_out`: SBS-format output
+# `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance.
+#     It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
+# `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client
+#     Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
+
+# Do some prep work:
+# combine ULTRAFEEDER_CONFIG and ULTRAFEEDER_NET_CONNECTOR
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG}${ULTRAFEEDER_CONFIG:+;}${ULTRAFEEDER_NET_CONNECTOR}"
+# Strip any extraneous spaces:
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG#"${ULTRAFEEDER_CONFIG%%[![:space:]]*}"}"   # strip leading space
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG//; /;}"
+
+# Now read each entry and parse it:
+
+READSB_CONF_ARR=()
+MLATHUB_CONF_ARR=()
+
+readarray -td ";" configs < <(printf '%s' "${ULTRAFEEDER_CONFIG}")
+
+# Now loop through the MLAT_CONFIG items and start up an Mlat_client for each of them:
+for instance in "${configs[@]}"
+do
+    [[ -z "${instance}" ]] && continue || true
+    # put individual params into the $params array:
+    readarray -td "," param < <(printf '%s' "${instance}")
+
+    # Process based on parameter string type in param[0]:
+    param[0]="${param[0],,}"
+    case "${param[0]}" in
+
+        adsb)
+            # parse arguments for main readsb
+            # build net-connector string into $readsb_str
+            # and add any extra arguments in as individual entries into READSB_CONF_ARR()
+            readsb_str="${param[1]},${param[2]},${param[3]}"
+            for ((i=4; i<${#param[*]}; i++))
+            do
+                if [[ "${param[i]:0:5}" == "uuid=" ]]; then
+                    readsb_str="${readsb_str},${param[i]}"
+                elif [[ -n "${param[i]}" ]]; then
+                    READSB_CONF_ARR+=("${param[i]}")
+                fi
+            done
+            # Now add $readsb_str to the READSB_CONF_ARR() as --net-connector argument:
+            READSB_CONF_ARR+=("--net-connector=${readsb_str}")
+        ;;
+
+        mlat)
+            # parse arguments for the individual MLAT clients.
+            # In this case, the mlat-client run module will interpret everything
+            # as long as it is in the MLAT_CONFIG parameter. So we'll just add that here.
+            MLAT_CONFIG="${MLAT_CONFIG}${MLAT_CONFIG:+;}${instance#*,}"
+        ;;
+
+        mlathub)
+            # parse arguments for mlat_hub
+            # build net-connector string into $readsb_str
+            # and add any extra arguments in as individual entries into MLATHUB_CONF_STR()
+            mlathub_str="${param[1]},${param[2]},${param[3]}"
+            for ((i=4; i<${#param[*]}; i++))
+            do
+                if [[ "${param[i]:0:5}" == "uuid=" ]]; then
+                    mlathub_str="${readsb_str},${param[i]}"
+                elif [[ -n "${param[i]}" ]]; then
+                    MLATHUB_CONF_ARR+=("${param[i]}")
+                fi
+            done
+            # Now add $readsb_str to the READSB_CONF_STR as --net-connector argument:
+            MLATHUB_CONF_ARR+=("--net-connector=${mlathub_str}")
+        ;;
+
+        *)
+            # unknown string; warn and skip
+            echo "[$(date)][${APPNAME}] Warning: skipping unknown ULTRAFEEDER_CONFIG config element \"${instance}\""
+    esac
+
+done
