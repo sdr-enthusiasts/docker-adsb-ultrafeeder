@@ -229,10 +229,10 @@ Note that `ULTRAFEEDER_CONFIG` and `ULTRAFEEDER_NET_CONNECTOR` can be used inter
 The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`. Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
 
 ```yaml
-- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]```
-```yaml
-- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]```
-```yaml
+- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+...or...
+- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+...or...
 - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
 ```
 
