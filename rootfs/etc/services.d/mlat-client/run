@@ -1,8 +1,6 @@
 #!/usr/bin/with-contenv bash
 # shellcheck shell=bash disable=SC1091,SC2015,SC2016
 
-source /scripts/common
-
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2023, Ramon F. Kolb (kx1t)
 #
@@ -21,6 +19,9 @@ source /scripts/common
 
 APPNAME="mlat-client"
 echo "[$(date)][${APPNAME}] Started as an s6 service"
+
+source /scripts/common
+source /scripts/interpret_ultrafeeder_config
 
 MLAT_CMD="/usr/bin/mlat-client"
 
@@ -61,7 +62,10 @@ fi
 # anything else will be appended as extra parameter(s) to the mlat-client command line
 
 # parse MLAT_CONFIG string into mlat_configs array
-readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
+# Strip any extraneous spaces:
+MLAT_CONFIG="${MLAT_CONFIG#"${MLAT_CONFIG%%[![:space:]]*}"}"   # strip leading space
+MLAT_CONFIG="${MLAT_CONFIG//; /;}"
+readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG}")
 
 # Now loop through the MLAT_CONFIG items and start up an Mlat_client for each of them:
 for instance in "${mlat_configs[@]}"
