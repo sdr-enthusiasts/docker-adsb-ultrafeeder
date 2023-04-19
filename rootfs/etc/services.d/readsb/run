@@ -96,6 +96,7 @@ if [[ -n "$READSB_MAX_RANGE" ]]; then
 fi
 
 # Handle "--mlat"
+# shellcheck disable=SC2153
 if chk_enabled "$READSB_MLAT"; then
     READSB_CMD+=("--mlat")
 fi

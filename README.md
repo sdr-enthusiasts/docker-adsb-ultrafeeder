@@ -224,31 +224,33 @@ In addition to (or instead of) connecting to a SDR or hardware device to get ADS
 
 Note that `ULTRAFEEDER_CONFIG` and `ULTRAFEEDER_NET_CONNECTOR` can be used interchangeably; in this documentation, we'll use `ULTRAFEEDER_CONFIG` as an example.
 
-# Format:
-# ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-# ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-# ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-#
-# The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`
-# Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
-#
-# In the above configuration strings:
-# `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
-# `port` is a TCP port number
-# `protocol` can be one of the following:
-#    `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
-#    `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
-#    `beast_out`: Beast-format output
-#    `beast_in`: Beast-format input
-#    `raw_out`: Raw output
-#    `raw_in`: Raw input
-#    `sbs_out`: SBS-format output
-#    `vrs_out`: SBS-format output
-# `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance.
-#     It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
-# `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client
-#     Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
+`ULTRAFEEDER_CONFIG` syntax:
 
+The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`. Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
+
+```yaml
+- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]```
+```yaml
+- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]```
+```yaml
+- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+```
+
+In the above configuration strings:
+
+* `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
+* `port` is a TCP port number
+* `protocol` can be one of the following:
+  * `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
+  * `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
+  * `beast_out`: Beast-format output
+  * `beast_in`: Beast-format input
+  * `raw_out`: Raw output
+  * `raw_in`: Raw input
+  * `sbs_out`: SBS-format output
+  * `vrs_out`: SBS-format output
+* `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
+* `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client. Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
 
 ##### Networking parameters
 
