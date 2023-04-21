@@ -73,6 +73,7 @@ services:
       - TAR1090_RANGE_OUTLINE_WIDTH=2.0
       - TAR1090_RANGERINGSDISTANCES=50,100,150,200
       - TAR1090_RANGERINGSCOLORS='#1A237E','#0D47A1','#42A5F5','#64B5F6'
+      - TAR1090_USEROUTEAPI=true
       #
       # --------------------------------------------------
       # GRAPHS1090 (Decoder and System Status Web Page) parameters:
