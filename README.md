@@ -118,7 +118,7 @@ You need to make sure that the USB device can be accessed by the container. The 
       - /dev:/dev:ro
 ```
 
-The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle.
+The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. ⚠️This feature requires a recent version of docker-compose (version >=2.3). Make sure your system is up to date if dongles are not found. ⚠️
 
 #### Basic Ultrafeeder Parameters
 
