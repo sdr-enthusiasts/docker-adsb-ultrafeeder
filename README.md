@@ -108,7 +108,7 @@ Note:
 
 ### General Configuration
 
-You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file:
+You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to your `docker-compose.yml` file:
 
 ```yaml
     device_cgroup_rules:
