@@ -108,7 +108,7 @@ Note:
 
 ### General Configuration
 
-You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to you `docker-compose.yml` file:
+You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to your `docker-compose.yml` file:
 
 ```yaml
     device_cgroup_rules:
@@ -130,7 +130,7 @@ The following parameters must be set (mandatory) for the container to function:
 |----------------------|---------|---------|
 | `LAT` or `READSB_LAT` | The latitude of your antenna | |
 | `LONG` or `READSB_LON` | The longitude of your antenna | |
-| `ALT` or `READSB_ALT` | The altitude of your antenna over ground level. For example, `15m` or `45ft` | |
+| `ALT` or `READSB_ALT` | The altitude of your antenna above sea level. For example, `15m` or `45ft` | |
 | `TZ` | Your local timezone in [TZ-database-name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) format | |
 
 ##### Optional Parameters
