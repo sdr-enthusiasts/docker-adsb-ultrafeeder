@@ -180,7 +180,7 @@ If you have multiple feeder stations with multiple instances of `ultrafeeder`, y
 
 First execute all steps above, and then continue here.
 
-### Step 1: Edit your Prometheus config file so it looks like this
+### Step 1: Edit your Prometheus config file so the `job_name`s look like this
 
 ```yaml
   - job_name: 'heerlen'
@@ -201,14 +201,13 @@ Once you are done editing, restart Prometheus (`docker restart prometheus`).
 
 In the previous step, you replaced the `ultrafeeder` job name by two or more new names. Now, we need to create a copy of the dashboard for each of the job names and make sure they each use the data source from the correct `ultrafeeder` instance.
 
-Step 2a: Log into Grafana and open the Ultrafeeder dashboard that you already created
-Step 2b: Click on the cogwheel (`Dashboard Settings`) in the top of the screen
-Step 2c: Choose `JSON Model` from the Setting menu on the left of the screen and click anywhere in the JSON text
-Step 2d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and press the `>` button to show Find and Replace:
-image
-Step 2e: Find all instances of `job=\"ultrafeeder\"` and replace them with `job=\"heerlen\"` (or whatever name your first feeder has)
-Step 2f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
-Step 2g: Press ESC to go back to your dashboard
+- Step 2a: Log into Grafana and open the Ultrafeeder dashboard that you already created
+- Step 2b: Click on the cogwheel (`Dashboard Settings`) in the top of the screen
+- Step 2c: Choose `JSON Model` from the Setting menu on the left of the screen and click anywhere in the JSON text
+- Step 2d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and press the `>` button to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
+- Step 2e: Find all instances of `job=\"ultrafeeder\"` and replace them with `job=\"heerlen\"` (or whatever name your first feeder has)
+- Step 2f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
+- Step 2g: Press ESC to go back to your dashboard
 
 Now your first Grafana dashboard gets its data from the your first `ultrafeeder` instance.
 
@@ -216,12 +215,12 @@ Now your first Grafana dashboard gets its data from the your first `ultrafeeder`
 
 If you followed the steps above, you should be at your updated (first) dashboard. We'll now clone and adapt it for your second `ultrafeeder` instance:
 
-Step 3a: Press the `Share` icon (to the right of the star, next to the page title)
-Step 3b: Click the `Export` tab. Switch on `Export for sharing externally`
-Step 3c: Press `View JSON` and `Copy to Clipboard`
-Step 3d: `X` out of the popup box, leave the Dashboard, and go back to the `Browse Dashboards` page.
-Step 3e: Click `New` -> `Import`. Right-click in the `Import via panel json` box, and paste your clipboard. Press `Load`
-Step 3f: Change the `Name` and `uid` (pick anything you want), and select `Prometheus` as data source. IMPORTANT: if you do not change the `Name` and `uid`, it will overwrite your existing dashboard. CHANGE BOTH OF THEM! Then press `Import`
-Step 3g: You will see your new dashboard, but it's still getting data from your first one. Follow steps 2b - 2g above to change the data source from `heerlen` (or whatever you named it) to `trenton` (or whatever name you want to give to it)
+- Step 3a: Press the `Share` icon (to the right of the star, next to the page title)
+- Step 3b: Click the `Export` tab. Switch on `Export for sharing externally`
+- Step 3c: Press `View JSON` and `Copy to Clipboard`
+- Step 3d: `X` out of the popup box, leave the Dashboard, and go back to the `Browse Dashboards` page.
+- Step 3e: Click `New` -> `Import`. Right-click in the `Import via panel json` box, and paste your clipboard. Press `Load`
+- Step 3f: Change the `Name` and `uid` (pick anything you want), and select `Prometheus` as data source. IMPORTANT: if you do not change the `Name` and `uid`, it will overwrite your existing dashboard. CHANGE BOTH OF THEM! Then press `Import`
+- Step 3g: You will see your new dashboard, but it's still getting data from your first one. Follow steps 2b - 2g above to change the data source from `heerlen` (or whatever you named it) to `trenton` (or whatever name you want to give to it)
 
 Now you have 2 dashboards for 2 instances of Ultrafeeder!
