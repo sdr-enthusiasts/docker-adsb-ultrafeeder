@@ -221,3 +221,7 @@ If you followed the steps above, you should be at your updated (first) dashboard
 - Step 3g: You will see your new dashboard, but it's still getting data from your first one. Follow steps 2b - 2g above to change the data source from `heerlen` (or whatever you named it) to `trenton` (or whatever name you want to give to it)
 
 Now you have 2 dashboards for 2 instances of Ultrafeeder!
+
+![image](https://user-images.githubusercontent.com/15090643/234161588-69cd1888-6d9c-42f2-90d9-8eb108b0dce5.png)
+![image](https://user-images.githubusercontent.com/15090643/234161718-845d3836-005e-4d38-ba45-9c59873c8db9.png)
+![image](https://user-images.githubusercontent.com/15090643/234161841-fde61d66-2f64-43f6-8e71-4152eef76f72.png)
