@@ -170,9 +170,6 @@ Clicking `Save & Test` should return a green message indicating success. The das
 4. Click `Import` on the subsequent dialogue box
 
 At this point you should see a very nice dashboard, you can find it under `General` in the `Dashboards` section.
-<img src="https://user-images.githubusercontent.com/15090643/228942953-ed8b64aa-3a38-4c6f-bd42-e929b72399b2.png">
-<img src="https://user-images.githubusercontent.com/15090643/228943041-7e135856-543a-416a-9331-50853d2e0929.png">
-<img src="https://user-images.githubusercontent.com/15090643/228943083-c017c5a0-f5aa-4d03-b241-8e58f2c8a5f6.png">
 
 ## Advanced Configuration: support for dashboards for multiple ultrafeeder instances
 
