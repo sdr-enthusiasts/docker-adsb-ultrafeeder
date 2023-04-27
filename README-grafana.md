@@ -10,7 +10,7 @@ Using Grafana and Prometheus in this configuration does not require a plan, acco
 
 When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influxdata.com/telegraf/), which can be used to capture metrics from `readsb` if an output is enabled.
 
-**NOTE - READ CAREFULLY**: As of 27 April 2023, the `latest` image no longer container Telegraf. If you want to send metrics to InfluxDB or Prometheus, please use the `:telegraf` tag like this in your `docker-compose.yml` file:
+**NOTE - READ CAREFULLY**: As of 27 April 2023, the `latest` image no longer contains Telegraf. If you want to send metrics to InfluxDB or Prometheus, please use the `:telegraf` tag like this in your `docker-compose.yml` file:
 
 ```yaml
 services:
