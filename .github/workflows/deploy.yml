@@ -57,7 +57,7 @@ jobs:
       - name: Run hadolint against Dockerfiles
         run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
 
-  deploy_ghcr_multiarch:
+  deploy_ghcr_multiarch_no_telegraf:
     name: Deploy ghcr.io (Multi-Arch)
     needs: [hadolint]
     runs-on: ubuntu-latest
@@ -108,4 +108,21 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
           tags: ghcr.io/${{ env.GHCR_IMAGE }}:${{ env.GHCR_TAG }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      # Change Dockerfile to use telegraf tag of build image:
+      - name: change build image to use telegraf tag of docker-docker-tar1090
+        run: |
+          sed -i "s|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf/g" ./Dockerfile
+      
+      # Build "telegraf"
+      - name: Build & Push - telegraf
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          no-cache: true
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: true
+          tags: ghcr.io/${{ env.GHCR_IMAGE }}:telegraf
           labels: ${{ steps.meta.outputs.labels }}
