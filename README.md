@@ -598,7 +598,7 @@ When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influ
 
 See [README-grafana.md](README-grafana.md) for detailed instruction on how to configure this.
 
-**NOTE - READ CAREFULLY**: As of 27 April 2023, the `latest` image no longer container Telegraf. If you want to send metrics to InfluxDB or Prometheus, please use this image:
+**NOTE - READ CAREFULLY**: As of 27 April 2023, the `latest` image no longer contains Telegraf. If you want to send metrics to InfluxDB or Prometheus, please use this image:
 
 ```yaml
 services:
