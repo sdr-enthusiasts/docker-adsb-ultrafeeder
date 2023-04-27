@@ -1,6 +1,9 @@
 services:
   ultrafeeder:
     image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder
+    # Note - if you want to enable telegraf for use with InfluxDB/Prometheus and Grafana,
+    # use the following image instead:
+    # image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf
     tty: true
     container_name: ultrafeeder
     hostname: ultrafeeder
@@ -84,6 +87,7 @@ services:
       # 
       # --------------------------------------------------
       # Prometheus and InfluxDB connection parameters:
+      # (See above for the correct image tag you must use to enable this)
       - INFLUXDBV2_URL=${INFLUX_URL}
       - INFLUXDBV2_TOKEN=${INFLUX_TOKEN}
       - INFLUXDBV2_BUCKET=${INFLUX_BUCKET}

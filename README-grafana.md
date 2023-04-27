@@ -6,6 +6,19 @@ In this guide we will be using [`Prometheus`](https://prometheus.io/) as the dat
 
 Using Grafana and Prometheus in this configuration does not require a plan, account, or credentials for their respective cloud offerings.
 
+## Ultrafeeder Image Tag
+
+When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influxdata.com/telegraf/), which can be used to capture metrics from `readsb` if an output is enabled.
+
+**NOTE - READ CAREFULLY**: As of 27 April 2023, the `latest` image no longer container Telegraf. If you want to send metrics to InfluxDB or Prometheus, please use the `:telegraf` tag like this in your `docker-compose.yml` file:
+
+```yaml
+services:
+  tar1090:
+    image: ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf
+  ...
+```
+
 ## Hardware requirements
 
 Prometheus will store a lot of data, and Grafana will do a lot of data queries. As a result, it would be better if you run these containers on a different system than your feeder Raspberry Pi. This will leave your Pi focused on data collection and processing, and unbothered by the CPU and Disk IO load that Prometheus/Grafana will cause.
