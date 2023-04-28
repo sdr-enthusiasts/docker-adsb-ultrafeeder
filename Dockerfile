@@ -43,8 +43,10 @@ RUN set -x && \
     popd && \
     rm -rf /git && \
 #
-# Clean up
+# Clean up and install POST_PACKAGES:
     apt-get remove -q -y ${TEMP_PACKAGES[@]} && \
+    apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
+        ${POST_PACKAGES[@]} \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
     apt-get clean -q -y && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
