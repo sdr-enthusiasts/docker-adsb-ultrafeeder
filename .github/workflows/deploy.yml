@@ -57,8 +57,8 @@ jobs:
       - name: Run hadolint against Dockerfiles
         run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
 
-  deploy_ghcr_multiarch:
-    name: Deploy ghcr.io (Multi-Arch)
+  deploy_ghcr_multiarch_latest:
+    name: Deploy latest to ghcr.io (Multi-Arch)
     needs: [hadolint]
     runs-on: ubuntu-latest
     permissions:
@@ -110,12 +110,114 @@ jobs:
           tags: ghcr.io/${{ env.GHCR_IMAGE }}:${{ env.GHCR_TAG }}
           labels: ${{ steps.meta.outputs.labels }}
 
+  # ------------------------------------------------------------------------------------------------------------------------
+  deploy_ghcr_multiarch_latest_nohealthcheck:
+    name: Deploy latest_nohealthcheck to ghcr.io (Multi-Arch)
+    needs: [hadolint]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+
+      # Check out our code
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GH_LABEL }}
+
+      # Log into ghcr (so we can push images)
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Get metadata from repo
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Set up QEMU for multi-arch builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      # Set up buildx for multi platform builds
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: image=moby/buildkit:v0.10.6
+
+
+      # Change Dockerfile to use latest_nohealthcheck tag of build image:
+      - name: change build image to use latest_nohealthcheck tag of docker-docker-tar1090
+        run: |
+          sed -i "s|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest_nohealthcheck|g" ./Dockerfile
+ 
+      # Build "latest_nohealthcheck" 
+      - name: Build & Push - latest_nohealthcheck
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile
+          no-cache: true
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          push: true
+          tags: ghcr.io/${{ env.GHCR_IMAGE }}:latest_nohealthcheck
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # ------------------------------------------------------------------------------------------------------------------------
+  deploy_ghcr_multiarch_telegraf:
+    name: Deploy telegraf to ghcr.io (Multi-Arch)
+    needs: [hadolint]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+
+      # Check out our code
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GH_LABEL }}
+
+      # Log into ghcr (so we can push images)
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Get metadata from repo
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Set up QEMU for multi-arch builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      # Set up buildx for multi platform builds
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: image=moby/buildkit:v0.10.6
+
       # Change Dockerfile to use telegraf tag of build image:
       - name: change build image to use telegraf tag of docker-docker-tar1090
         run: |
           sed -i "s|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf|g" ./Dockerfile
-      
-      # Build "telegraf"
+ 
+      # Build "telegraf" 
       - name: Build & Push - telegraf
         uses: docker/build-push-action@v3
         with:
@@ -127,13 +229,49 @@ jobs:
           tags: ghcr.io/${{ env.GHCR_IMAGE }}:telegraf
           labels: ${{ steps.meta.outputs.labels }}
 
-      # Change Dockerfile to use telegraf_nohealthcheck tag of build image and disable healthcheck:
-      - name: change build image to use telegraf tag of docker-docker-tar1090
+  # ------------------------------------------------------------------------------------------------------------------------
+  deploy_ghcr_multiarch_telegraf_nohealthcheck:
+    name: Deploy telegraf_nohealthcheck to ghcr.io (Multi-Arch)
+    needs: [hadolint]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      # Check out our code
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.GH_LABEL }}
+      # Log into ghcr (so we can push images)
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.GHCR_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # Get metadata from repo
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.GHCR_REGISTRY }}/${{ env.IMAGE_NAME }}
+      # Set up QEMU for multi-arch builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      # Set up buildx for multi platform builds
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          driver-opts: image=moby/buildkit:v0.10.6
+      # Change Dockerfile to use telegraf_nohealthcheck tag of build image:
+      - name: change build image to use telegraf_nohealthcheck tag of docker-docker-tar1090
         run: |
-          sed -i "s|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf_nohealthcheck|g" ./Dockerfile
-      
-      # Build "telegraf"
-      - name: Build & Push - telegraf
+          sed -i "s|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest|FROM ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf_nohealthcheck|g" ./Dockerfile
+      # Build "telegraf_nohealthcheck" 
+      - name: Build & Push - telegraf_nohealthcheck
         uses: docker/build-push-action@v3
         with:
           context: .
