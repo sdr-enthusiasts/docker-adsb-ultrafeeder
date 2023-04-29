@@ -461,7 +461,6 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 1. Set the following environment parameters:
 
 ```yaml
-  - ENABLE_978=yes
   - URL_978=http://dump978/skyaware978
 ```
 
@@ -535,6 +534,32 @@ Note that you will have to add `- privileged: true` capabilities to the containe
 ```
 
 Note - on some systems (DietPi comes to mind), `/sys/class/thermal/` may not be available.
+
+#### Reducing Disk IO for Graphs1090
+
+If you are using a Raspberry Pi or another type of computer with an SD card, you may already be aware that these SD cards have a limited number of write-cycles that will determine their lifespan. In other words - a common reason for SD card failure is excessive writes to it.
+
+By the nature of having to log lots of data the `graphs1090` functionality writes a lot to the SD card. To reduce the number of write cycles, there are a few parameters you can set.
+
+Enabling this functionality will cause `graphs1090` to temporarily write all data to volatile memory (`/run`) instead of persistent disk space (`/var/lib/collectd`). This data is backed up to persistent disk space in regular intervals and upon (graceful) shutdown of the container. 
+
+Note -- there is a chance that the data isn't written back in time (due to power failures, non-graceful container shutdowns, etc), in which case you may lose statistics data that has been generated since the last write-back.
+
+The feature assumes that you have mapped `/var/lib/collectd` to a volume (to ensure data is persistent across container recreations), and `/run` as a `tmpfs` RAM disk, as shown below and also as per the [`docker-compose.yml` example](docker-compose.yml):
+
+```yaml
+    volumes:
+      - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
+...
+    tmpfs:
+      - /run:exec,size=256M
+...
+```
+
+| Environment Variable | Purpose | Default |
+|----------------------|---------|---------|
+| `GRAPHS1090_REDUCE_IO=` | Optional Set to `true` to reduce the write cycles for `graphs1090`| Unset |
+| `GRAPHS1090_REDUCE_IO_FLUSH_IVAL` | Interval (in secs) over which the `graphs1090` data is written back to non-volatile storage | `3600` |
 
 ### `timelapse1090` Configuration
 
