@@ -27,7 +27,7 @@
       - [`tar1090` `config.js` Configuration - Map Settings](#tar1090-configjs-configuration---map-settings)
       - [`tar1090` `config.js` Configuration - Range Rings](#tar1090-configjs-configuration---range-rings)
       - [`tar1090` `config.js` Configuration - Route Display](#tar1090-configjs-configuration---route-display)
-    - [Configuring `graphs1090`](#configuring-graphs1090)
+    - [`graphs1090` Configuration](#graphs1090-configuration)
       - [`graphs1090` Environment Parameters](#graphs1090-environment-parameters)
       - [Enabling UAT data](#enabling-uat-data)
       - [Enabling AirSpy graphs](#enabling-airspy-graphs)
@@ -482,7 +482,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `TAR1090_USEROUTEAPI` | Set to `true` to enable route lookup for callsigns | Unset |
 | `TAR1090_ROUTEAPIURL` | API URL used | `https://api.adsb.lol/api/0/routeset` |
 
-### Configuring `graphs1090`
+### `graphs1090` Configuration
 
 #### `graphs1090` Environment Parameters
 
