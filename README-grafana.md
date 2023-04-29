@@ -25,7 +25,9 @@ Prometheus will store a lot of data, and Grafana will do a lot of data queries. 
 
 You *can* do it on a single system. We're assuming below that you are not. If you do it on a single system, then you can combine the `docker-compose.yml` components in a single file
 
-## Step 1: Make Prometheus data available for the Ultrafeeder
+## Steps to install Prometheus, Grafana, and the Grafana Dashboard
+
+### Step 1: Make Prometheus data available for the Ultrafeeder
 
 - Edit your Ultrafeeder's `docker-compose.yml` file and ensure that the following is set for the `ultrafeeder` service:
 
@@ -39,7 +41,7 @@ You *can* do it on a single system. We're assuming below that you are not. If yo
 
 Now recreate the ultrafeeder container (`docker-compose up -d ultrafeeder`) and it will generate Prometheus data.
 
-## Step 2: create a container stack for `prometheus` and `grafana`
+### Step 2: create a container stack for `prometheus` and `grafana`
 
 On the machine where you will run Prometheus and Grafana, create a docker-compose file in the `/opt/grafana` directory:
 
@@ -141,7 +143,7 @@ Download and create Grafana and Prometheus for the first time with this command:
 docker compose up -d
 ```
 
-## Step 3: Configuring Prometheus
+### Step 3: Configuring Prometheus
 
 Prometheus needs to be told where to look for the data from the ultrafeeder. We will create a target prometheus configuration file that does this, please copy and paste the following. Make sure to replace `ip_xxxxxxx` with the IP address or hostname of the machine where `ultrafeeder` is running:
 
@@ -153,7 +155,7 @@ docker compose up -d
 
 (If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana//prometheus/config/prometheus.yml` and fix it that way.)
 
-## Accessing Prometheus and Grafana via your browser
+### Accessing Prometheus and Grafana via your browser
 
 You should be able to point your web browser at:
 
@@ -162,7 +164,7 @@ You should be able to point your web browser at:
 
 Remember to change `docker.host.ip.addr` to the IP address of your docker host.
 
-## Configuring data source and dashboard in Grafana
+### Configuring data source and dashboard in Grafana
 
 After you have logged into the `grafana` console the following manual steps are required to connect to `prometheus` as the data source
 
@@ -175,7 +177,7 @@ Option | Input
 Name | ultrafeeder
 URL | `http://prometheus:9090/`
 
-Clicking `Save & Test` should return a green message indicating success. The dashboard can now be imported with the following steps
+Clicking `Save & Test` should return a green message indicating success. The dashboard can now be imported with the following steps:
 
 1. Hover over the `four squares` icon in the sidebar, click `+ Import`
 2. Enter `18398` into the `Import via grafana.com` section and click `Load`
@@ -184,13 +186,29 @@ Clicking `Save & Test` should return a green message indicating success. The das
 
 At this point you should see a very nice dashboard, you can find it under `General` in the `Dashboards` section.
 
-## Advanced Configuration: support for dashboards for multiple ultrafeeder instances
+### Making the feeder's heatmap and graphs pages available in Grafana
+
+The dashboard comes preconfigured with panels that show the tar1090 heatmap and graphs1090 stats pages. These panels need to be configured to look for this data at the correct URL.
+
+Note that these URLs need to be accessible from the browser that you use to see the Grafana dashboard - they should work if you enter them in your browser's URL box.
+
+If you don't have access to these URLs, it'd be safe to simply delete these panels from your dashboard.
+
+- Step a: Log into Grafana and open the Ultrafeeder dashboard that you already created
+- Step b: Click on the cogwheel (`Dashboard Settings`) in the top of the screen
+- Step c: Choose `JSON Model` from the Setting menu on the left of the screen and click anywhere in the JSON text
+- Step d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and press the `>` button to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
+- Step e: Find all (2) instances of `my_feeder` and replace them with the IP of your tar1090 map page
+- Step f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
+- Step g: Press ESC to go back to your dashboard
+
+### Advanced Configuration: support for dashboards for multiple ultrafeeder instances
 
 If you have multiple feeder stations with multiple instances of `ultrafeeder`, you can configure a dashboard for each of them. Here's how. In our example, we have two `ultrafeeder` instance called `heerlen` and `trenton`. You can adjust these names in accordance with your needs.
 
 First execute all steps above, and then continue here.
 
-### Step 1: Edit your Prometheus config file so the `job_name`s look like this
+#### Step 1: Edit your Prometheus config file so the `job_name`s look like this
 
 ```yaml
   - job_name: 'heerlen'
@@ -207,7 +225,7 @@ You can remove the `ultrafeeder` section as it will probably be a duplicate of w
 
 Once you are done editing, restart Prometheus (`docker restart prometheus`).
 
-### Step 2: Change your initial Grafana dashboard to use the new job name
+#### Step 2: Change your initial Grafana dashboard to use the new job name
 
 In the previous step, you replaced the `ultrafeeder` job name by two or more new names. Now, we need to create a copy of the dashboard for each of the job names and make sure they each use the data source from the correct `ultrafeeder` instance.
 
@@ -221,7 +239,7 @@ In the previous step, you replaced the `ultrafeeder` job name by two or more new
 
 Now your first Grafana dashboard gets its data from the your first `ultrafeeder` instance.
 
-### Step 3: Clone the dashboard and repoint it at your second `ultrafeeder` instance
+#### Step 3: Clone the dashboard and repoint it at your second `ultrafeeder` instance
 
 If you followed the steps above, you should be at your updated (first) dashboard. We'll now clone and adapt it for your second `ultrafeeder` instance:
 
