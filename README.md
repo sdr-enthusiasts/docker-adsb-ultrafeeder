@@ -47,25 +47,24 @@
   - [Getting help](#getting-help)
   - [Acknowledgements](#acknowledgements)
 
-
 ## Introduction
 
 `adsb-ultrafeeder` is a ADS-B data collector container that can be used to:
 
-* retrieve ADS-B data from your SDR or other device
-* display it on a local map, including options to show tracks, heatmaps, and system performance graphs
-* forward the data to one or more aggregators using BEAST/BEAST-REDUCE/BEAST-REDUCE-PLUS format
-* send MLAT data to these aggregators
-* receive and consolidate MLAT results data (built-in `mlathub`)
-* Interface with external visualization tools such as Grafana using statistics data available in InfluxDB and Prometheus format
+- retrieve ADS-B data from your SDR or other device
+- display it on a local map, including options to show tracks, heatmaps, and system performance graphs
+- forward the data to one or more aggregators using BEAST/BEAST-REDUCE/BEAST-REDUCE-PLUS format
+- send MLAT data to these aggregators
+- receive and consolidate MLAT results data (built-in `mlathub`)
+- Interface with external visualization tools such as Grafana using statistics data available in InfluxDB and Prometheus format
 
 In order to accomplish this, the container makes use of the following underlying technologies:
 
-* SDR-Enthusiasts [Docker Base-Image](https://github.com/sdr-enthusiasts/docker-baseimage)
-* [Wiedehopf's branch of `readsb`](https://github.com/wiedehopf/readsb)
-* Wiedehopf's [tar1090](https://github.com/wiedehopf/tar1090) graphical interface
-* Wiedehopf's [graphs1090](https://github.com/wiedehopf/graphs1090)
-* [MLAT Client](https://github.com/adsbxchange/mlat-client.git)
+- SDR-Enthusiasts [Docker Base-Image](https://github.com/sdr-enthusiasts/docker-baseimage)
+- [Wiedehopf's branch of `readsb`](https://github.com/wiedehopf/readsb)
+- Wiedehopf's [tar1090](https://github.com/wiedehopf/tar1090) graphical interface
+- Wiedehopf's [graphs1090](https://github.com/wiedehopf/graphs1090)
+- [MLAT Client](https://github.com/adsbxchange/mlat-client.git)
 
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
 
@@ -73,8 +72,8 @@ It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm
 
 ## Up-and-Running Quickly with `docker-compose`
 
-* An example [`docker-compose.yml`](docker-compose.yml) file can be found in this repository.
-* The accompanying environment variable values are defined in the [`.env`](.env) file in this repository
+- An example [`docker-compose.yml`](docker-compose.yml) file can be found in this repository.
+- The accompanying environment variable values are defined in the [`.env`](.env) file in this repository
 
 Once you have [installed Docker](https://github.com/sdr-enthusiasts/docker-install), you can follow these lines of code to get up and running in very little time:
 
@@ -104,10 +103,10 @@ Some common ports are as follows (which may or may not be in use depending on yo
 
 The general principle behind the port numbering, is:
 
-* `30xxx` ports are connected to the main instance `readsb` that decodes and processes the SDR data
-* `31xxx` ports are connected to the MLAT Hub
-* `92xx` ports are for Prometheus statistics output
-* `80` contains the Tar1090 web interface
+- `30xxx` ports are connected to the main instance `readsb` that decodes and processes the SDR data
+- `31xxx` ports are connected to the MLAT Hub
+- `92xx` ports are for Prometheus statistics output
+- `80` contains the Tar1090 web interface
 
 | Port | Details |
 |------|---------|
@@ -137,15 +136,15 @@ Any of these ports can be made available to the host system by using the `ports:
 
 Json position output:
 
-* outputs an aircraft object for every new position received for an aircraft if the --json-trace-interval has elapsed for that aircraft
-* to make it output every received position, set READSB_JSON_TRACE_INTERVAL to 0.1
-* each json object will be on a new line
-* <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
+- outputs an aircraft object for every new position received for an aircraft if the --json-trace-interval has elapsed for that aircraft
+- to make it output every received position, set READSB_JSON_TRACE_INTERVAL to 0.1
+- each json object will be on a new line
+- <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 
 Aircraft.json:
 
-* <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
-* available on the same port as the web interface, example: `http://192.168.x.yy:8087/data/aircraft.json`
+- <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
+- available on the same port as the web interface, example: `http://192.168.x.yy:8087/data/aircraft.json`
 
 ## Runtime Environment Variables
 
@@ -153,8 +152,8 @@ The sections below describe how to configure each part of the container function
 
 Note:
 
-* to enable a parameter, you can set it to any of `1`, `true`, `on`, `enabled`, `enable`, `yes`, or `y`. In the table below, we'll simply use `true` for convenience.
-* to disable a parameter, you can set it to anything else or simply leave it undefined.
+- to enable a parameter, you can set it to any of `1`, `true`, `on`, `enabled`, `enable`, `yes`, or `y`. In the table below, we'll simply use `true` for convenience.
+- to disable a parameter, you can set it to anything else or simply leave it undefined.
 
 ### General Configuration
 
@@ -209,8 +208,8 @@ The following parameters must be set (mandatory) for the container to function:
 
 There are two ways to provide ADSB data to the Ultrafeeder:
 
-* provide the container with access to a SDR or other hardware device that collects ADSB data
-* allow the container to connect to a ADSB data source in Beast, Raw, or SBS format
+- provide the container with access to a SDR or other hardware device that collects ADSB data
+- allow the container to connect to a ADSB data source in Beast, Raw, or SBS format
 
 These methods are not mutually exclusive - you can use both at the same time if you want.
 
@@ -239,8 +238,8 @@ If you have set `READSB_GAIN=autogain`, then the system will take signal strengt
 
 There are 2 distinct periods in which the container will attempt to figure out the gain:
 
-* The initial period of 2 hours, in which an adjustment is done every 5 minutes
-* The subsequent period, in which an adjustment is done once every day
+- The initial period of 2 hours, in which an adjustment is done every 5 minutes
+- The subsequent period, in which an adjustment is done once every day
 
 Please note that in order for the initial period to complete, the container must run for 90 minutes without restarting.
 
@@ -288,19 +287,19 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 
 In the above configuration strings:
 
-* `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
-* `port` and `return_port` are TCP port numbers
-* `protocol` can be one of the following:
-  * `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
-  * `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
-  * `beast_out`: Beast-format output
-  * `beast_in`: Beast-format input
-  * `raw_out`: Raw output
-  * `raw_in`: Raw input
-  * `sbs_out`: SBS-format output
-  * `vrs_out`: SBS-format output
-* `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
-* `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client. Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
+- `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
+- `port` and `return_port` are TCP port numbers
+- `protocol` can be one of the following:
+  - `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
+  - `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
+  - `beast_out`: Beast-format output
+  - `beast_in`: Beast-format input
+  - `raw_out`: Raw output
+  - `raw_in`: Raw input
+  - `sbs_out`: SBS-format output
+  - `vrs_out`: SBS-format output
+- `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
+- `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client. Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
 
 ##### Networking parameters
 
@@ -315,18 +314,18 @@ In the above configuration strings:
 
 Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure incoming and outgoing connections. The variable takes a semicolon (`;`) separated list of `host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]`, where:
 
-* `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
-* `port` is a TCP port number
-* `protocol` can be one of the following:
-  * `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
-  * `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
-  * `beast_out`: Beast-format output
-  * `beast_in`: Beast-format input
-  * `raw_out`: Raw output
-  * `raw_in`: Raw input
-  * `sbs_out`: SBS-format output
-  * `vrs_out`: SBS-format output
-* `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
+- `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
+- `port` is a TCP port number
+- `protocol` can be one of the following:
+  - `beast_reduce_out`: Beast-format output with lower data throughput (saves bandwidth and CPU)
+  - `beast_reduce_plus_out`: Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services
+  - `beast_out`: Beast-format output
+  - `beast_in`: Beast-format input
+  - `raw_out`: Raw output
+  - `raw_in`: Raw input
+  - `sbs_out`: SBS-format output
+  - `vrs_out`: SBS-format output
+- `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
 
 NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use `READSB_NET_CONNECTOR` to ingest UAT data from `dump978`. See example below
 
@@ -384,11 +383,11 @@ It will create a separate instance of `mlat-client` for each defined MLAT server
 
 where:
 
-* `mlat-server.com` is the domain name or ip address of the target MLAT server (mandatory)
-* `port` is the port (TCP or UDP) of the target MLAT server (mandatory)
-* `return_port` is the port at which the MLAT results are made available in BEAST format. We recommend to sequentially number them starting at 39000 (optional)
-* `uuid=xxxx` defines a unique user ID for this MLAT server instance. If included, the string must start with `uuid=` (optional)
-* `extra-arguments` are any additional command line arguments that you would like to use for this MLAT Client instance (optional)
+- `mlat-server.com` is the domain name or ip address of the target MLAT server (mandatory)
+- `port` is the port (TCP or UDP) of the target MLAT server (mandatory)
+- `return_port` is the port at which the MLAT results are made available in BEAST format. We recommend to sequentially number them starting at 39000 (optional)
+- `uuid=xxxx` defines a unique user ID for this MLAT server instance. If included, the string must start with `uuid=` (optional)
+- `extra-arguments` are any additional command line arguments that you would like to use for this MLAT Client instance (optional)
 
 Note - the three optional parameters (`return_port`, `uuid=`, and `extra-arguments`) can be given in any order.
 
@@ -423,8 +422,8 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `HTTP_ACCESS_LOG` | Optional. Set to `true` to display HTTP server access logs. | `false` |
 | `HTTP_ERROR_LOG` | Optional. Set to `false` to hide HTTP server error logs. | `true` |
 
-* For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
-* TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>
+- For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
+- TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>
 
 #### `tar1090` `config.js` Configuration - Title
 
@@ -522,13 +521,13 @@ Note that you **must** configure `URL_978` to point at a working skyaware978 web
 
 Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the following:
 
-* Set the following environment parameter:
+- Set the following environment parameter:
 
 ```yaml
       - ENABLE_AIRSPY=yes
 ```
 
-* To provide the container access to the AirSpy statistics, map a volume in your `docker-compose.yml` file as follows:
+- To provide the container access to the AirSpy statistics, map a volume in your `docker-compose.yml` file as follows:
 
 ```yaml
     volumes:
@@ -628,12 +627,12 @@ Legacy: **We recommend AGAINST enabling this feature** as it has been replaced w
 If you have configured the container as described above, you should be able to browse to the following web pages:
 You should now be able to browse to:
 
-* <http://dockerhost/> to access the tar1090 web interface.
-* <http://dockerhost/?replay> to see a replay of past data
-* <http://dockerhost/?heatmap> to see the heatmap for the past 24 hours
-* <http://dockerhost/?heatmap&realHeat> to see a different heatmap for the past 24 hours
-* <http://dockerhost/?pTracks> to see the tracks of all planes for the past 24 hours
-* <http://dockerhost/graphs1090/> to see performance graphs
+- <http://dockerhost/> to access the tar1090 web interface.
+- <http://dockerhost/?replay> to see a replay of past data
+- <http://dockerhost/?heatmap> to see the heatmap for the past 24 hours
+- <http://dockerhost/?heatmap&realHeat> to see a different heatmap for the past 24 hours
+- <http://dockerhost/?pTracks> to see the tracks of all planes for the past 24 hours
+- <http://dockerhost/graphs1090/> to see performance graphs
 
 ## Paths
 
@@ -652,10 +651,10 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 
 An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
 
-* collect the MLAT results from all of these services
-* ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
-* make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
-* create outbound connections using any supported format to send your Beast data wherever you want
+- collect the MLAT results from all of these services
+- ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
+- make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
+- create outbound connections using any supported format to send your Beast data wherever you want
 
 Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them. Adding these sources only to `MLATHUB_NET_CONNECTOR` will make the data available on the MLATHUB, but won't display them on your `tar1090` map.
 
@@ -734,8 +733,8 @@ We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join
 
 ## Acknowledgements
 
-* The [SDR-Enthusiasts team](https://github.com/sdr-enthusiasts) ([Mike Nye](https://github.com/mikenye), [Fred Clausen](https://github.com/fredclausen)) for all the foot and leg work done to create the base images on which the container is built
-* [Wiedehopf](https://github.com/wiedehopf) for modifying, creating, maintaining, and adding features to many of the components of this container including [readsb](https://github.com/wiedehopf/readsb), [tar1090](https://github.com/wiedehopf/tar1090), [graphs1090](https://github.com/wiedehopf/graphs1090), [autogain](https://github.com/wiedehopf/adsb-scripts/wiki/Automatic-gain-optimization-for-readsb-and-dump1090-fa), and many more components
-* [John Norrbin](https://github.com/Johnex) for his ideas, testing, feature requests, more testing, nagging, pushing, prodding, and overall efforts to make this a high quality container and for the USB "hotplug" configuration
-* The community at the [SDR-Enthusiasts Discord Server](https://discord.gg/sTf9uYF) for helping out, testing, asking questions, and generally driving to make this a better product
-* Of course the Open Source community at large, including Salvatore Sanfilippo and Oliver Jowett (mutability) who wrote the excellent base code for `dump1090` from which much of this is derived
+- The [SDR-Enthusiasts team](https://github.com/sdr-enthusiasts) ([Mike Nye](https://github.com/mikenye), [Fred Clausen](https://github.com/fredclausen)) for all the foot and leg work done to create the base images on which the container is built
+- [Wiedehopf](https://github.com/wiedehopf) for modifying, creating, maintaining, and adding features to many of the components of this container including [readsb](https://github.com/wiedehopf/readsb), [tar1090](https://github.com/wiedehopf/tar1090), [graphs1090](https://github.com/wiedehopf/graphs1090), [autogain](https://github.com/wiedehopf/adsb-scripts/wiki/Automatic-gain-optimization-for-readsb-and-dump1090-fa), and many more components
+- [John Norrbin](https://github.com/Johnex) for his ideas, testing, feature requests, more testing, nagging, pushing, prodding, and overall efforts to make this a high quality container and for the USB "hotplug" configuration
+- The community at the [SDR-Enthusiasts Discord Server](https://discord.gg/sTf9uYF) for helping out, testing, asking questions, and generally driving to make this a better product
+- Of course the Open Source community at large, including Salvatore Sanfilippo and Oliver Jowett (mutability) who wrote the excellent base code for `dump1090` from which much of this is derived
