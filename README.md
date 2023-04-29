@@ -1,5 +1,55 @@
 # sdr-enthusiasts/docker-adsb-ultrafeeder
 
+- [sdr-enthusiasts/docker-adsb-ultrafeeder](#sdr-enthusiastsdocker-adsb-ultrafeeder)
+  - [Introduction](#introduction)
+  - [Up-and-Running Quickly with `docker-compose`](#up-and-running-quickly-with-docker-compose)
+  - [Ports](#ports)
+  - [Runtime Environment Variables](#runtime-environment-variables)
+    - [General Configuration](#general-configuration)
+      - [Basic Ultrafeeder Parameters](#basic-ultrafeeder-parameters)
+        - [Mandatory Parameters](#mandatory-parameters)
+        - [Optional Parameters](#optional-parameters)
+    - [Getting ADSB data to the Ultrafeeder](#getting-adsb-data-to-the-ultrafeeder)
+      - [Connecting to a SDR or other hardware device](#connecting-to-a-sdr-or-other-hardware-device)
+        - [Mandatory parameters](#mandatory-parameters-1)
+        - [Optional/Additional Parameters](#optionaladditional-parameters)
+        - [AutoGain for RTLSDR Devices](#autogain-for-rtlsdr-devices)
+      - [Connecting to external ADSB data sources](#connecting-to-external-adsb-data-sources)
+        - [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config)
+        - [Networking parameters](#networking-parameters)
+        - [Alternate Configuration Method with `READSB_NET_CONNECTOR`](#alternate-configuration-method-with-readsb_net_connector)
+      - [Optional Networking Parameters](#optional-networking-parameters)
+      - [MLAT configuration](#mlat-configuration)
+    - [Web Gui (`tar1090`) Configuration](#web-gui-tar1090-configuration)
+      - [`tar1090` Core Configuration](#tar1090-core-configuration)
+      - [`tar1090` `config.js` Configuration - Title](#tar1090-configjs-configuration---title)
+      - [`tar1090` `config.js` Configuration - Output](#tar1090-configjs-configuration---output)
+      - [`tar1090` `config.js` Configuration - Map Settings](#tar1090-configjs-configuration---map-settings)
+      - [`tar1090` `config.js` Configuration - Range Rings](#tar1090-configjs-configuration---range-rings)
+      - [`tar1090` `config.js` Configuration - Route Display](#tar1090-configjs-configuration---route-display)
+    - [Configuring `graphs1090`](#configuring-graphs1090)
+      - [`graphs1090` Environment Parameters](#graphs1090-environment-parameters)
+      - [Enabling UAT data](#enabling-uat-data)
+      - [Enabling AirSpy graphs](#enabling-airspy-graphs)
+      - [Enabling Disk IO and IOPS data](#enabling-disk-io-and-iops-data)
+      - [Configuring the Core Temperature graphs](#configuring-the-core-temperature-graphs)
+      - [Reducing Disk IO for Graphs1090](#reducing-disk-io-for-graphs1090)
+    - [`timelapse1090` Configuration](#timelapse1090-configuration)
+  - [Web Pages](#web-pages)
+  - [Paths](#paths)
+    - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
+  - [Display of Metrix with Grafana and Prometheus/InfluxDB](#display-of-metrix-with-grafana-and-prometheusinfluxdb)
+    - [Configuring Grafana](#configuring-grafana)
+    - [Output from Ultrafeeder to Prometheus](#output-from-ultrafeeder-to-prometheus)
+    - [Output from Ultrafeeder to InfluxDBv2](#output-from-ultrafeeder-to-influxdbv2)
+  - [Message decoding introspection](#message-decoding-introspection)
+  - [Logging](#logging)
+  - [Getting help](#getting-help)
+  - [Acknowledgements](#acknowledgements)
+
+
+## Introduction
+
 `adsb-ultrafeeder` is a ADS-B data collector container that can be used to:
 
 * retrieve ADS-B data from your SDR or other device
@@ -183,7 +233,7 @@ If you want to connect your SDR to the container, here's how to do that:
 | `READSB_GAIN` | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. | `--gain=<db>` | Max gain |
 | `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/README.MD#estimating-ppm)  | `--ppm=<correction>` | Unset |
 
-###### AutoGain for RTLSDR Devices
+##### AutoGain for RTLSDR Devices
 
 If you have set `READSB_GAIN=autogain`, then the system will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
 
@@ -287,7 +337,7 @@ NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use 
     ...
 ```
 
-##### Optional Networking Parameters
+#### Optional Networking Parameters
 
 There are many optional parameters relating to the ingestion of data and the general networking functioning of the `readsb` program that implements this functionality.
 
@@ -318,7 +368,7 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_FORWARD_MLAT_SBS` | If set to anthing, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | Unset |
 | `UUID` | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. | | unset |
 
-##### MLAT configuration
+#### MLAT configuration
 
 The Ultrafeeder contains a capability to send MLAT data to MLAT servers to be processed, and to receive the MLAT results and integrate those with an MLAT Hub and the `tar1090` map.
 It will create a separate instance of `mlat-client` for each defined MLAT server. The parameters for these `mlat-client` instances is as follows:
@@ -619,7 +669,7 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_BEAST_REDUCE_OUT_PORT` |  TCP port where consolidated MLAT results will be available in Beast format with reduced data rates | `31006` |
 | `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
 
-## Metrics
+## Display of Metrix with Grafana and Prometheus/InfluxDB
 
 When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influxdata.com/telegraf/), which can be used to capture metrics from `ultrafeeder` if an output is enabled.
 
@@ -634,7 +684,19 @@ services:
   ...
 ```
 
-### Output to InfluxDBv2
+### Configuring Grafana
+
+Please see the [separate instruction document](README-grafana.md) for step by step instructions on how to set up and configure a Grafana Dashboard with Prometheus. The sections below are provided as a reference.
+
+### Output from Ultrafeeder to Prometheus
+
+In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, the following environment variables can be used:
+
+| Variable | Description |
+| ---- | ---- |
+| `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
+
+### Output from Ultrafeeder to InfluxDBv2
 
 In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxdata.com/influxdb/) time-series database, the following environment variables can be used:
 
@@ -644,16 +706,6 @@ In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxda
 | `INFLUXDBV2_TOKEN` | The token for authentication |
 | `INFLUXDBV2_BUCKET` | Destination bucket to write into |
 | `INFLUXDBV2_ORG` | InfluxDB Organization to write into |
-
-### Output to Prometheus and configuring Grafana
-
-In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, the following environment variables can be used:
-
-| Variable | Description |
-| ---- | ---- |
-| `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
-
-Please see the [separate instruction document](README-grafana.md) for step by step instructions on how to set up and configure a Grafana Dashboard.
 
 ## Message decoding introspection
 

@@ -1,5 +1,23 @@
 # Using Ultrafeeder with Grafana and Prometheus
 
+- [Using Ultrafeeder with Grafana and Prometheus](#using-ultrafeeder-with-grafana-and-prometheus)
+  - [Introduction](#introduction)
+  - [Ultrafeeder Image Tag](#ultrafeeder-image-tag)
+  - [Hardware requirements](#hardware-requirements)
+  - [Steps to install Prometheus, Grafana, and the Grafana Dashboard](#steps-to-install-prometheus-grafana-and-the-grafana-dashboard)
+    - [Step 1: Make Prometheus data available for the Ultrafeeder](#step-1-make-prometheus-data-available-for-the-ultrafeeder)
+    - [Step 2: create a container stack for `prometheus` and `grafana`](#step-2-create-a-container-stack-for-prometheus-and-grafana)
+    - [Step 3: Configuring Prometheus](#step-3-configuring-prometheus)
+    - [Accessing Prometheus and Grafana via your browser](#accessing-prometheus-and-grafana-via-your-browser)
+    - [Configuring data source and dashboard in Grafana](#configuring-data-source-and-dashboard-in-grafana)
+    - [Making the feeder's heatmap and graphs pages available in Grafana](#making-the-feeders-heatmap-and-graphs-pages-available-in-grafana)
+  - [Advanced Configuration: support for dashboards for multiple ultrafeeder instances](#advanced-configuration-support-for-dashboards-for-multiple-ultrafeeder-instances)
+    - [Step 1: Edit your Prometheus config file so the `job_name`s look like this](#step-1-edit-your-prometheus-config-file-so-the-job_names-look-like-this)
+    - [Step 2: Change your initial Grafana dashboard to use the new job name](#step-2-change-your-initial-grafana-dashboard-to-use-the-new-job-name)
+    - [Step 3: Clone the dashboard and repoint it at your second `ultrafeeder` instance](#step-3-clone-the-dashboard-and-repoint-it-at-your-second-ultrafeeder-instance)
+
+## Introduction
+
 [`Grafana`](https://grafana.com/) is an analytics platform that can provide alternative graphs for `readsb`.
 
 In this guide we will be using [`Prometheus`](https://prometheus.io/) as the data repository.
@@ -202,13 +220,13 @@ If you don't have access to these URLs, it'd be safe to simply delete these pane
 - Step f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
 - Step g: Press ESC to go back to your dashboard
 
-### Advanced Configuration: support for dashboards for multiple ultrafeeder instances
+## Advanced Configuration: support for dashboards for multiple ultrafeeder instances
 
 If you have multiple feeder stations with multiple instances of `ultrafeeder`, you can configure a dashboard for each of them. Here's how. In our example, we have two `ultrafeeder` instance called `heerlen` and `trenton`. You can adjust these names in accordance with your needs.
 
 First execute all steps above, and then continue here.
 
-#### Step 1: Edit your Prometheus config file so the `job_name`s look like this
+### Step 1: Edit your Prometheus config file so the `job_name`s look like this
 
 ```yaml
   - job_name: 'heerlen'
@@ -225,7 +243,7 @@ You can remove the `ultrafeeder` section as it will probably be a duplicate of w
 
 Once you are done editing, restart Prometheus (`docker restart prometheus`).
 
-#### Step 2: Change your initial Grafana dashboard to use the new job name
+### Step 2: Change your initial Grafana dashboard to use the new job name
 
 In the previous step, you replaced the `ultrafeeder` job name by two or more new names. Now, we need to create a copy of the dashboard for each of the job names and make sure they each use the data source from the correct `ultrafeeder` instance.
 
@@ -239,7 +257,7 @@ In the previous step, you replaced the `ultrafeeder` job name by two or more new
 
 Now your first Grafana dashboard gets its data from the your first `ultrafeeder` instance.
 
-#### Step 3: Clone the dashboard and repoint it at your second `ultrafeeder` instance
+### Step 3: Clone the dashboard and repoint it at your second `ultrafeeder` instance
 
 If you followed the steps above, you should be at your updated (first) dashboard. We'll now clone and adapt it for your second `ultrafeeder` instance:
 
