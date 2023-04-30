@@ -24,6 +24,7 @@ MLATHUB_CMD+=("--quiet")
 MLATHUB_CMD+=("--net-only")
 MLATHUB_CMD+=("--mlat")
 MLATHUB_CMD+=("--forward-mlat")
+MLATHUB_CMD+=("--forward-mlat-sbs")
 
 MLATHUB_CMD+=("--net-connector=localhost,30004,beast_reduce_out")
 
