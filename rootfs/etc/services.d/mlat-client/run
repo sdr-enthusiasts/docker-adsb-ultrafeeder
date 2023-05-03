@@ -18,7 +18,7 @@
 #---------------------------------------------------------------------------------------------
 
 APPNAME="mlat-client"
-echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] Started as an s6 service"
+s6wrap --prepend="${APPNAME}" --timestamps --args echo "Started as an s6 service"
 
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
@@ -30,27 +30,27 @@ declare -A pid_array
 
 if [[ -z "${MLAT_CONFIG}" ]]
 then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] Warning: MLAT_CONFIG not defined - MLAT will be disabled."
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "Warning: MLAT_CONFIG not defined - MLAT will be disabled."
     sleep infinity
 fi
 
 if [[ -z "${MLAT_USER}" ]] && [[ -z "${UUID}" ]]
 then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] ERROR: either UUID or MLAT_USER must be defined - MLAT will be disabled."
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "ERROR: either UUID or MLAT_USER must be defined - MLAT will be disabled."
     sleep infinity
 fi
 
 if [[ -z "$LAT$READSB_LAT" ]]; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] ERROR: READSB_LAT or LAT must be defined - MLAT will be disabled."
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "ERROR: READSB_LAT or LAT must be defined - MLAT will be disabled."
     sleep infinity
 fi
 
 if [[ -z "$LONG$READSB_LON" ]]; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] ERROR: READSB_LON or LONG must be defined - MLAT will be disabled."
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "ERROR: READSB_LON or LONG must be defined - MLAT will be disabled."
     sleep infinity
 fi
 if [[ -z "$ALT$READSB_ALT" ]]; then
-    echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] ERROR: READSB_ALT or ALT must be defined - MLAT will be disabled."
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "ERROR: READSB_ALT or ALT must be defined - MLAT will be disabled."
     sleep infinity
 fi
 
@@ -80,7 +80,7 @@ do
     # Check if the params array has values for the mandatory elements:
     if [[ -z "${params[0]}" ]] || [[ -z "${params[1]}" ]]
     then
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] ERROR -- MLAT_CONFIG is malformed: \"${instance}\". Stopping MLAT execution."
+        s6wrap --prepend="${APPNAME}" --timestamps --args echo "ERROR -- MLAT_CONFIG is malformed: \"${instance}\". Stopping MLAT execution."
          # shellcheck disable=SC2046
         kill $(ps -s $$ -o pid=)   
         sleep infinity
@@ -114,7 +114,7 @@ do
         MLAT_PARAM+=(--user "${MLAT_USER}")
     else 
         rnd="${RANDOM}"
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
+        s6wrap --prepend="${APPNAME}" --timestamps --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
         MLAT_PARAM+=(--user "${rnd}")
     fi
 
@@ -156,7 +156,7 @@ do
     # ------------------------------------------------
     # Ready to launch, but wait until readsb is established...
     if ! pgrep readsb >/dev/null; then
-        echo "[$(date +"%Y-%m-%d %H:%M:%S")][$APPNAME] Delaying start of MLAT client(s) until container is established..."
+        s6wrap --prepend="${APPNAME}" --timestamps --args echo "Delaying start of MLAT client(s) until container is established..."
         while ! pgrep readsb >/dev/null
         do
             sleep 2
@@ -165,12 +165,13 @@ do
     sleep 10     # sleep a bit so everything is well established - starting readsb may take a bit
 
     # run this Mlat_client instance in the background:
-    echo  "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
+    s6wrap --prepend="${APPNAME}" --timestamps --args echo "starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
 
+    #shellcheck disable=SC2069,SC2086
     if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring}; } &
     elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-        { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
     elif [[ "${LOGLEVEL,,}" == "none" ]]; then
        { exec ${execstring} >/dev/null 2>/dev/null; } &
     fi
@@ -194,14 +195,15 @@ do
         then
             # it exited - let's restart:
             sleep "${RESTARTTIMER}"
-            [[ "${LOGLEVEL,,}" != "none" ]] && echo "[$(date +"%Y-%m-%d %H:%M:%S")][${APPNAME}] MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart." || true
+            [[ "${LOGLEVEL,,}" != "none" ]] && s6wrap --prepend="${APPNAME}" --timestamps --args echo "MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart." || true
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
+            #shellcheck disable=SC2069,SC2086
             if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-                { exec ${execstring} 2>&1 | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1; } &
             elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-                { exec ${execstring} 2>&1 >/dev/null | stdbuf -o0 awk -v app="${APPNAME}" -v inst="${params[0]}" '{print "[" strftime("%Y-%m-%d %H:%M:%S", systime()) "][" app "][" inst "] " $0}'; } &
+                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
             elif [[ "${LOGLEVEL,,}" == "none" ]]; then
                 { exec ${execstring} >/dev/null 2>/dev/null; } &
             fi
