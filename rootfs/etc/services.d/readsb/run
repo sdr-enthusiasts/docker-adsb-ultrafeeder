@@ -5,7 +5,7 @@ APPNAME="readsb"
 
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
-alias s6wrap='s6wrap --quiet'
+
 
 mkdir -p /run/readsb
 
@@ -65,12 +65,12 @@ if ! chk_enabled "$READSB_NET_SBS_DISABLE_REDUCE"; then
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT}"; then
-    s6wrap --prepend="${APPNAME}" --timestamps --args echo "WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
+    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat")
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT_SBS}"; then
-    s6wrap --prepend="${APPNAME}" --timestamps --args echo "WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
+    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat-sbs")
 fi
 
@@ -322,14 +322,14 @@ fi
 
 # shellcheck disable=SC2086,SC2069
 if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-    s6wrap --prepend="${APPNAME}" --timestamps --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1
+    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    s6wrap --prepend="${APPNAME}" --timestamps --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 1>/dev/null
+    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS 2>&1 1>/dev/null
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS >/dev/null 2>/dev/null
 fi
 
-s6wrap --prepend="${APPNAME}" --timestamps --args echo "WARNING: The main readsb instance has exited. Restarting in 10 seconds."
+s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "WARNING: The main readsb instance has exited. Restarting in 10 seconds."
 sleep 10
 
 
