@@ -227,9 +227,9 @@ do
 
             #shellcheck disable=SC2069,SC2086
             if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1; } &
+                { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring} 2>&1; } &
             elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
+                { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
             elif [[ "${LOGLEVEL,,}" == "none" ]]; then
                 { exec ${execstring} >/dev/null 2>/dev/null; } &
             fi
