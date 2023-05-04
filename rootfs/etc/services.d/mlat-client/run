@@ -198,9 +198,9 @@ do
 
     #shellcheck disable=SC2069,SC2086
     if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring}; } &
+        { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring}; } &
     elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
+        { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
     elif [[ "${LOGLEVEL,,}" == "none" ]]; then
        { exec ${execstring} >/dev/null 2>/dev/null; } &
     fi
@@ -224,7 +224,7 @@ do
         then
             # it exited - let's restart:
             sleep "${RESTARTTIMER}"
-            [[ "${LOGLEVEL,,}" != "none" ]] && s6wrap --prepend="${APPNAME}" --timestamps --args echo "MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart." || true
+            [[ "${LOGLEVEL,,}" != "none" ]] && s6wrap --prepend="${APPNAME}" --timestamps --args echo "MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart. ${pid_array[$mlat_pid]}" || true
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
