@@ -281,6 +281,8 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 - ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
 ...or...
 - ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+...or to retrieve MLAT data from a remote receiver...
+- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]
 ...or...
 - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
 ```
@@ -300,6 +302,11 @@ In the above configuration strings:
   - `vrs_out`: SBS-format output
 - `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance. It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
 - `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client. Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
+- To connect to a remote receiver and send MLAT data to a MLAT Server, create a `mlat` instance with these additional parameters - `input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz`, where:
+  - `input_connect=remote-host:port` defines the remote receiver's hostname or IP address and the port number where BEAST output data is available
+  - `lat=xx.xxxx` defines the remote receiver's latitude
+  - `lon=yy.yyyy` defines the remote receiver's longitude
+  - `alt=zzz` defines the remote receiver's altitude in meters above the eliptoid (~above sea level)
 
 ##### Networking parameters
 
@@ -387,11 +394,12 @@ where:
 - `port` is the port (TCP or UDP) of the target MLAT server (mandatory)
 - `return_port` is the port at which the MLAT results are made available in BEAST format. We recommend to sequentially number them starting at 39000 (optional)
 - `uuid=xxxx` defines a unique user ID for this MLAT server instance. If included, the string must start with `uuid=` (optional)
+- `input_connect=hostname:port` / `lat=xxxx` /  `lon=xxxx` / `alt=xxxx` defines a unique input connection/latitude/longitude/altitude. This can be used to connect to a remote Beast source and forward MLAT data to an MLAT server
 - `extra-arguments` are any additional command line arguments that you would like to use for this MLAT Client instance (optional)
 
 Note - the three optional parameters (`return_port`, `uuid=`, and `extra-arguments`) can be given in any order.
 
-If no UUID is specified with the `MLAT_CONFIG` parameter, it will use the value of the `UUID` parameter if it exists. If that fails, no UUID parameter is included with `mlat-client`.
+If no UUID is specified with the `MLAT_CONFIG` parameter, it will use the value of the `UUID` parameter if it exists. If that fails, a random UUID will be generated for each instance of `mlat-client` with format `00000000-ffff-aaaa-rrrr-tttttttttttt` where `rrrr` is a random hexadecimal number and `tttttttttttt` contains the UUID creation time (secs since epoch) in hexadecimal format.
 
 ### Web Gui (`tar1090`) Configuration
 
