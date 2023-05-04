@@ -4,6 +4,7 @@
 APPNAME="mlathub"
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
+alias s6wrap='s6wrap --quiet'
 
 if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]; then
     s6wrap --prepend="${APPNAME}" --timestamps --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"

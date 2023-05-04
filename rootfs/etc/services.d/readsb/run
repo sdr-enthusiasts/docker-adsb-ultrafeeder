@@ -5,6 +5,7 @@ APPNAME="readsb"
 
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
+alias s6wrap='s6wrap --quiet'
 
 mkdir -p /run/readsb
 

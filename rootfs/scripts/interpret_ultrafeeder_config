@@ -46,6 +46,10 @@
 #    `vrs_out`: SBS-format output
 # `uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX` is an optional parameter that sets the UUID for this specific instance.
 #     It will override the global `UUID` parameter. This is only needed when you want to send different UUIDs to different aggregators.
+# `input_connect=host:port is an optional parameter that sets the input_connect values for this instance`
+# `lat=xxxx` is an optional parameter that sets the latitude for this specific instance
+# `lon=xxxx` is an optional parameter that sets the longitude for this specific instance
+# `alt=xxxx` is an optional parameter that sets the altitude for this specific instance
 # `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client
 #     Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
 

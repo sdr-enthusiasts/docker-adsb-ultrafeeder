@@ -18,6 +18,8 @@
 #---------------------------------------------------------------------------------------------
 
 APPNAME="mlat-client"
+alias s6wrap='s6wrap --quiet'
+
 s6wrap --prepend="${APPNAME}" --timestamps --args echo "Started as an s6 service"
 
 source /scripts/common
@@ -74,9 +76,6 @@ do
     # put individual params into the $params array:
     readarray -td "," params < <(printf '%s' "${instance}")
 
-    uuid_arg=false
-    extra_args=""
-
     # Check if the params array has values for the mandatory elements:
     if [[ -z "${params[0]}" ]] || [[ -z "${params[1]}" ]]
     then
@@ -86,31 +85,52 @@ do
         sleep infinity
     fi
 
+    # Now process the the arguments
+    # The order doesn't matter, we'll do pattern matching:
+    # If the argument is a number, then it must be the beast_results port
+    # If the argument starts with "uuid=", then it must be a UUID, etc.
+    # If the argument isn't any of the above, then it's an "extra argument"
+
+    unset uuid_arg lat_arg lon_arg alt_arg input_connect_arg return_port_arg extra_args
+    
+    for ((i=2; i<${#params[*]}; i++))
+    do
+        if [[ -n "${params[i]}" ]] && [[ "${params[i]}" =~ ^[0-9]+$ ]]; then
+            # It's a number so it must be the return port
+            return_port_arg="${params[i]}"
+        elif header="${params[i]:0:5}" && [[ "${header,,}" == "uuid=" ]]; then
+            # It's a UUID
+            uuid_arg="${params[i]#*=}"
+        elif header="${params[i]:0:4}" && [[ "${header,,}" == "lat=" ]]; then
+            # It's a latitude
+            lat_arg="${params[i]#*=}"
+        elif header="${params[i]:0:4}" && [[ "${header,,}" == "lon=" ]]; then
+            # It's a longitude
+            lon_arg="${params[i]#*=}"
+        elif header="${params[i]:0:4}" && [[ "${header,,}" == "alt=" ]]; then
+            # It's a latitude
+            alt_arg="${params[i]#*=}"
+        elif header="${params[i]:0:14}" && [[ "${header,,}" == "input_connect=" ]]; then
+            #It's the input_connect parameter value
+            input_connect_arg="${params[i]#*=}"
+        else
+            # It's an Extra Args string
+            extra_args="$extra_args ${params[i]}"
+        fi
+    done
+
     # ------------------------------------------------
     # Build the MLAT parameter string:
-    MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE}")
-    MLAT_PARAM+=(--input-connect localhost:30005)
+    MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE:-auto}")
     MLAT_PARAM+=(--server "${params[0]}:${params[1]}")
 
-    if [ -n "${LAT}" ]; then
-        MLAT_PARAM+=(--lat "${LAT}")
-    elif [ -n "${READSB_LAT}" ]; then
-        MLAT_PARAM+=(--lat "${READSB_LAT}")
-    fi
+    # add return port:
+    [ -n "${return_port_arg}" ] && MLAT_PARAM+=("--results beast,listen,${return_port_arg}") || true
 
-    if [ -n "${LONG}" ]; then
-        MLAT_PARAM+=(--lon "${LONG}")
-    elif [ -n "${READSB_LON}" ]; then
-        MLAT_PARAM+=(--lon "${READSB_LON}")
-    fi
+    # add input-connect to the param array:
+    MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
 
-    if [ -n "${ALT}" ]; then
-        MLAT_PARAM+=(--alt "${ALT}")
-    elif [ -n "${READSB_ALT}" ]; then
-        MLAT_PARAM+=(--alt "${READSB_ALT}")
-    fi
-
-    if [[ -n "${MLAT_USER}" ]]; then 
+    if [ -n "${MLAT_USER}" ]; then 
         MLAT_PARAM+=(--user "${MLAT_USER}")
     else 
         rnd="${RANDOM}"
@@ -118,33 +138,44 @@ do
         MLAT_PARAM+=(--user "${rnd}")
     fi
 
-    # Now process the rest of the arguments
-    # The order doesn't matter, we'll do pattern matching:
-    # If the argument is a number, then it must be the beast_results port
-    # If the argument starts with "uuid=", then it must be a UUID
-    # If the argument isn't any of the above, then it's an "extra argument"
+    # add LAT/LON/ALT to instance:
+    if [ -n "${lat_arg}" ]; then
+        MLAT_PARAM+=(--lat "${lat_arg}")
+    elif [ -n "${LAT}" ]; then
+        MLAT_PARAM+=(--lat "${LAT}")
+    elif [ -n "${READSB_LAT}" ]; then
+        MLAT_PARAM+=(--lat "${READSB_LAT}")
+    fi
 
-    for ((i=2; i<${#params[*]}; i++))
-    do
-        if [[ -n "${params[i]}" ]] && [[ "${params[i]}" =~ ^[0-9]+$ ]]; then
-            # It's a number so it must be the return port
-            MLAT_PARAM+=("--results beast,listen,${params[i]}")
+    if [ -n "${lon_arg}" ]; then
+        MLAT_PARAM+=(--lon "${lon_arg}")
+    elif [ -n "${LONG}" ]; then
+        MLAT_PARAM+=(--lon "${LONG}")
+    elif [ -n "${READSB_LON}" ]; then
+        MLAT_PARAM+=(--lon "${READSB_LON}")
+    fi
 
-        elif header="${params[i]:0:5}" && [[ "${header,,}" == "uuid=" ]]; then
-            # It's a UUID
-            MLAT_PARAM+=("--uuid ${params[i]:5}")
-            uuid_arg=true
+    if [ -n "${alt_arg}" ]; then
+        MLAT_PARAM+=(--alt "${alt_arg}")
+    elif [ -n "${ALT}" ]; then
+        MLAT_PARAM+=(--alt "${ALT}")
+    elif [ -n "${READSB_ALT}" ]; then
+        MLAT_PARAM+=(--alt "${READSB_ALT}")
+    fi
 
-        else
-            # It's an Extra Args string
-            extra_args="$extra_args ${params[i]}"
-
-        fi
-    done
-    # If no UUID was set in the argument strings, check if we can use the generic UUID parameter
-    if [[ $uuid_arg == false ]] && [[ -n "${UUID}" ]]; then
+    # Add UUID to instance
+    if [ -n "$uuid_arg" ]; then
+        MLAT_PARAM+=("--uuid ${uuid_arg}")
+    elif [ -n "${UUID}" ]; then
+        MLAT_PARAM+=("--uuid ${UUID}")
+    else
+        # generate a random UUID
+        UUID="$(cat /proc/sys/kernel/random/uuid)"
+        [[ -z "${UUID}" ]] && UUID="$(printf '00000000-ffff-aaaa-%04x-%012x\n' "$RANDOM" "$(date +%s)")"
+        s6wrap --prepend="${APPNAME}" --timestamps --args echo "WARNING: UUID is not defined - using randomized uuid \"${UUID}\""
         MLAT_PARAM+=("--uuid ${UUID}")
     fi
+
     # Now add the extra_args, if any:
     [[ -n "${extra_args}" ]] && MLAT_PARAM+=("${extra_args}") || true
 
@@ -169,9 +200,9 @@ do
 
     #shellcheck disable=SC2069,SC2086
     if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring}; } &
+        { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring}; } &
     elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-        { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
+        { exec s6wrap --prepend="${APPNAME}][${params[0]}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
     elif [[ "${LOGLEVEL,,}" == "none" ]]; then
        { exec ${execstring} >/dev/null 2>/dev/null; } &
     fi
@@ -179,8 +210,9 @@ do
     # pid_array is indexed by the PID of each mlat_client and contains the MLAT_PARAMs for that instance
     # This is done so we can monitor them and restart them if needed
     pid_array[$!]="${MLAT_PARAM[*]}"
-    sleep 5
 done
+
+sleep 5
 
 # All MLAT Clients are up, so set the flag. This flag is read by MLATHUB as a sign that it's
 # safe to start up
@@ -195,15 +227,18 @@ do
         then
             # it exited - let's restart:
             sleep "${RESTARTTIMER}"
-            [[ "${LOGLEVEL,,}" != "none" ]] && s6wrap --prepend="${APPNAME}" --timestamps --args echo "MLAT_Client $(awk '{print $6}' <<< "${pid_array[$mlat_pid]}") exited. Attempting to restart." || true
+            servername="$(awk '{print $4}' <<< "${pid_array[$mlat_pid]}")"
+            servername="${servername%%:*}"
+
+            [[ "${LOGLEVEL,,}" != "none" ]] && s6wrap --prepend="${APPNAME}[${servername}" --timestamps --args echo "MLAT_Client ${servername} exited. Attempting to restart." || true
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
             #shellcheck disable=SC2069,SC2086
             if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1; } &
+                { exec s6wrap --prepend="${APPNAME}][${servername}" --timestamps --args ${execstring} 2>&1; } &
             elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-                { exec s6wrap --prepend="${APPNAME}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
+                { exec s6wrap --prepend="${APPNAME}][${servername}" --timestamps --args ${execstring} 2>&1 >/dev/null; } &
             elif [[ "${LOGLEVEL,,}" == "none" ]]; then
                 { exec ${execstring} >/dev/null 2>/dev/null; } &
             fi
