@@ -18,6 +18,8 @@
 #---------------------------------------------------------------------------------------------
 
 APPNAME="mlat-client"
+alias s6wrap='s6wrap --quiet'
+
 s6wrap --prepend="${APPNAME}" --timestamps --args echo "Started as an s6 service"
 
 source /scripts/common
