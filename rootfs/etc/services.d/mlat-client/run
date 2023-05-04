@@ -89,13 +89,13 @@ do
     # If the argument starts with "uuid=", then it must be a UUID, etc.
     # If the argument isn't any of the above, then it's an "extra argument"
 
-    unset uuid_arg lat_arg lon_arg alt_arg input_connect_arg extra_args
+    unset uuid_arg lat_arg lon_arg alt_arg input_connect_arg return_port_arg extra_args
     
     for ((i=2; i<${#params[*]}; i++))
     do
         if [[ -n "${params[i]}" ]] && [[ "${params[i]}" =~ ^[0-9]+$ ]]; then
             # It's a number so it must be the return port
-            MLAT_PARAM+=("--results beast,listen,${params[i]}")
+            return_port_arg="${params[i]}"
         elif header="${params[i]:0:5}" && [[ "${header,,}" == "uuid=" ]]; then
             # It's a UUID
             uuid_arg="${params[i]#*=}"
@@ -121,6 +121,9 @@ do
     # Build the MLAT parameter string:
     MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE:-auto}")
     MLAT_PARAM+=(--server "${params[0]}:${params[1]}")
+
+    # add return port:
+    [ -n "${return_port_arg}" ] && MLAT_PARAM+=("--results beast,listen,${return_port_arg}") || true
 
     # add input-connect to the param array:
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
