@@ -79,10 +79,10 @@ if ! pgrep readsb >/dev/null; then
     fi
     while ! pgrep readsb >/dev/null
         do
-        sleep 2 &; wait $!
+        sleep 2 & wait $!
     done
     # wait 2 seconds after readsb process exists
-    sleep 2 &; wait $!
+    sleep 2 & wait $!
 fi
 
 
@@ -201,7 +201,7 @@ do
 
 
     # stagger by 1 second so they don't all start at the same time
-    sleep 1 &; wait $!
+    sleep 1 & wait $!
 
     # ------------------------------------------------
     # run this Mlat_client instance in the background:
@@ -220,7 +220,7 @@ do
     pid_array[$!]="${MLAT_PARAM[*]}"
 done
 
-sleep 5 &; wait $!
+sleep 5 & wait $!
 
 # All MLAT Clients are up, so set the flag. This flag is read by MLATHUB as a sign that it's
 # safe to start up
@@ -234,7 +234,7 @@ do
         if ! kill -0 "${mlat_pid}" >/dev/null 2>&1
         then
             # it exited - let's restart:
-            sleep "${RESTARTTIMER}" &; wait $!
+            sleep "${RESTARTTIMER}" & wait $!
             servername="$(awk '{print $4}' <<< "${pid_array[$mlat_pid]}")"
             servername="${servername%%:*}"
 
@@ -255,5 +255,5 @@ do
             unset "pid_array[${mlat_pid}]"
         fi
     done
-    sleep 10 &; wait $!
+    sleep 10 & wait $!
 done
