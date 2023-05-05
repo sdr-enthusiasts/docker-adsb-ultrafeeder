@@ -20,6 +20,4 @@ source /scripts/common
 # If not, see <https://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------------------------
 
-alias s6wrap='s6wrap --quiet'
-
-[[ -f /.CONTAINER_VERSION ]] && s6wrap --prepend=01-print-container-version --timestamps --args  echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true
+[[ -f /.CONTAINER_VERSION ]] && s6wrap --quiet --prepend=01-print-container-version --timestamps --args  echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true
