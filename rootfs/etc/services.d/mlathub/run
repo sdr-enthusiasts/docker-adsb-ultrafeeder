@@ -4,15 +4,15 @@
 APPNAME="mlathub"
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
-
+s6wrap=(s6wrap --quiet --timestamps --prepend="${APPNAME}")
 
 if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]; then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
+    "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
     sleep infinity
 fi
 
 if chk_enabled "${MLATHUB_DISABLED}"; then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "MLATHUB is disabled."
+    "${s6wrap[@]}" --args echo "MLATHUB is disabled."
     sleep infinity
 fi
 
@@ -60,7 +60,7 @@ done
 
 if (( mlat_result_sources == 0 ))
 then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
+    "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
     sleep infinity
 fi
 
@@ -110,7 +110,9 @@ MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 
 if [[ ! -f /run/mlathub_up ]]
 then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "Delaying MLAT hub start until container is established..."
+    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+        "${s6wrap[@]}" --args echo "Delaying MLAT hub start until container is established..."
+    fi
     while [[ ! -f /run/mlathub_up ]]
     do
         sleep 2
@@ -118,16 +120,13 @@ then
 fi
 sleep 5     # sleep a bit so everything is well established
 
-s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "Starting MLATHUB..."
+"${s6wrap[@]}" --args echo "Starting MLATHUB..."
 
 # shellcheck disable=SC2086,SC2069
 if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1
+    exec "${s6wrap[@]}" --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS 2>&1 >/dev/null
+    exec "${s6wrap[@]}" --ignore-stdout --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    s6wrap --quiet --prepend="${APPNAME}" --timestamps --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS >/dev/null 2>/dev/null 
+    exec "${s6wrap[@]}" --ignore-stdtout --ignore-stderr --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 fi
-
-s6wrap --quiet --prepend="${APPNAME}" --timestamps --args echo "WARNING: The mlathub instance has exited. Restarting in 10 seconds."
-sleep 10

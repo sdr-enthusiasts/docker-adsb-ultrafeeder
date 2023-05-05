@@ -8,7 +8,9 @@ if chk_enabled "$PROMETHEUS_ENABLE"; then
     do
         sleep 1
     done
-    echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n$(cat /run/readsb-prometheus.prom)" | ncat -l 9274 > /dev/null 2>&1
+    trap "pkill -P $$ || true; s6wrap --timestamps --prepend=prometheus-readsb --quiet --args echo 'service stopping'; exit 0" SIGTERM SIGINT SIGHUP SIGQUIT
+    echo -e "HTTP/1.1 200 OK\nContent-Type: text/plain\n\n$(cat /run/readsb-prometheus.prom)" | ncat -l 9274 > /dev/null 2>&1 &
+    wait
 else
-    sleep infinity
+    exec sleep infinity
 fi
