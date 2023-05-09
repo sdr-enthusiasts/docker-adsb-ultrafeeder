@@ -20,6 +20,7 @@
         - [Alternate Configuration Method with `READSB_NET_CONNECTOR`](#alternate-configuration-method-with-readsb_net_connector)
       - [Optional Networking Parameters](#optional-networking-parameters)
       - [MLAT configuration](#mlat-configuration)
+      - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
     - [Web Gui (`tar1090`) Configuration](#web-gui-tar1090-configuration)
       - [`tar1090` Core Configuration](#tar1090-core-configuration)
       - [`tar1090` `config.js` Configuration - Title](#tar1090-configjs-configuration---title)
@@ -37,7 +38,6 @@
     - [`timelapse1090` Configuration](#timelapse1090-configuration)
   - [Web Pages](#web-pages)
   - [Paths](#paths)
-    - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
   - [Display of Metrix with Grafana and Prometheus/InfluxDB](#display-of-metrix-with-grafana-and-prometheusinfluxdb)
     - [Configuring Grafana](#configuring-grafana)
     - [Output from Ultrafeeder to Prometheus](#output-from-ultrafeeder-to-prometheus)
@@ -392,6 +392,28 @@ where:
 
 Note - the  optional parameters can be given in any order.
 
+#### Configuring the built-in MLAT Hub
+
+An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
+
+- collect the MLAT results from all of these services
+- ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
+- make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
+- create outbound connections using any supported format to send your Beast data wherever you want
+
+Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them. Adding these sources only to `MLATHUB_NET_CONNECTOR` will make the data available on the MLATHUB, but won't display them on your `tar1090` map.
+
+Generally, there is little to configure, but there are a few parameters that you can set or change:
+
+| Variable | Description | Default if omitted|
+|----------|-------------|--------------------------------|
+| `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31003` |
+| `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
+| `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
+| `MLATHUB_BEAST_REDUCE_OUT_PORT` |  TCP port where consolidated MLAT results will be available in Beast format with reduced data rates | `31006` |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset |
+| `MLATHUB_DISABLE` | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container | Unset |
+
 ### Web Gui (`tar1090`) Configuration
 
 The Container creates an interactive web interface displaying the aircraft, based on Wiedehopf's widely used [tar1090](https://github.com/wiedehopf/tar1090) software.
@@ -645,28 +667,6 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 | `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`  | Holds graphs1090 & performance data |
 | `/proc/diskstats:/proc/diskstats:ro` | Makes disk statistics available to `graphs1090` |
 | `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro` | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](#configuring-the-core-temperature-graphs) |
-
-### Configuring the built-in MLAT Hub
-
-An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
-
-- collect the MLAT results from all of these services
-- ingest MLAT results from other containers (FlightAware, Radarbox, etc.)
-- make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
-- create outbound connections using any supported format to send your Beast data wherever you want
-
-Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them. Adding these sources only to `MLATHUB_NET_CONNECTOR` will make the data available on the MLATHUB, but won't display them on your `tar1090` map.
-
-Generally, there is little to configure, but there are a few parameters that you can set or change:
-
-| Variable | Description | Default if omitted|
-|----------|-------------|--------------------------------|
-| `MLATHUB_SBS_OUT_PORT` | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format | `31003` |
-| `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
-| `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
-| `MLATHUB_BEAST_REDUCE_OUT_PORT` |  TCP port where consolidated MLAT results will be available in Beast format with reduced data rates | `31006` |
-| `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset |
-| `MLATHUB_DISABLE` | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container | Unset |
 
 ## Display of Metrix with Grafana and Prometheus/InfluxDB
 
