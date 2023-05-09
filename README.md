@@ -43,6 +43,7 @@
     - [Output from Ultrafeeder to Prometheus](#output-from-ultrafeeder-to-prometheus)
     - [Output from Ultrafeeder to InfluxDBv2](#output-from-ultrafeeder-to-influxdbv2)
   - [Message decoding introspection](#message-decoding-introspection)
+  - [Minimalist setup](#minimalist-setup)
   - [Logging](#logging)
   - [Getting help](#getting-help)
   - [Acknowledgements](#acknowledgements)
@@ -664,7 +665,8 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_BEAST_IN_PORT` | TCP port you where you can send additional MLAT results to, in Beast format | `31004` |
 | `MLATHUB_BEAST_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format | `31005` |
 | `MLATHUB_BEAST_REDUCE_OUT_PORT` |  TCP port where consolidated MLAT results will be available in Beast format with reduced data rates | `31006` |
-| `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above. | Unset |
+| `MLATHUB_NET_CONNECTOR` | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset |
+| `MLATHUB_DISABLE` | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container | Unset |
 
 ## Display of Metrix with Grafana and Prometheus/InfluxDB
 
@@ -718,6 +720,14 @@ docker exec -it ultrafeeder /usr/local/bin/viewadsb --no-interactive
 # show position / CPR debugging for hex 3D3ED0
 docker exec -it ultrafeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 ```
+
+## Minimalist setup
+
+If you want to use `ultrafeeder` *only* as a SDR decoder but without any mapping or stats/graph websites, without MLAT connections or MLAT-hub, etc., for example to minimize CPU and RAM needs on a low CPU/memory single board computer, then do the following:
+
+- in the `ULTRAFEEDER_CONFIG` parameter, remove any entry that starts with `mlat` or `mlathub`. This will prevent any `mlat-client`s or `mlathub` instances to be launched. If you still want to connect the `mlat-client`(s) to external MLAT servers but you don't want to run the overhead of a MLATHUB, you can leave any entries starting with `mlat` in the `ULTRAFEEDER_CONFIG` parameter, and set `MLATHUB_DISABLE=true`
+- Set the parameter `TAR1090_DISABLE=true`. This will prevent the `nginx` webserver and any websites to be launched and no `collectd` (graphs1090) or `rrd` (ADSB message history) data to be collected or retained.
+- Make sure to use `ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest` and specifically NOT the `ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf` label as Telegraf adds a LOT of resource use to the container
 
 ## Logging
 

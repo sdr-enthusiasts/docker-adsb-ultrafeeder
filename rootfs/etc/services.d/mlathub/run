@@ -8,12 +8,12 @@ s6wrap=(s6wrap --quiet --timestamps --prepend="${APPNAME}")
 
 if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]; then
     "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
-    sleep infinity
+    exec sleep infinity
 fi
 
-if chk_enabled "${MLATHUB_DISABLED}"; then
+if chk_enabled "${MLATHUB_DISABLE}"; then
     "${s6wrap[@]}" --args echo "MLATHUB is disabled."
-    sleep infinity
+    exec sleep infinity
 fi
 
 # Build the readsb command line based on options
@@ -61,7 +61,7 @@ done
 if (( mlat_result_sources == 0 ))
 then
     "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
-    sleep infinity
+    exec sleep infinity
 fi
 
 # Add any additional net_connectors:
