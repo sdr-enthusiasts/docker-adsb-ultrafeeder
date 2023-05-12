@@ -38,6 +38,7 @@ services:
       # Sources and Aggregator connections:
       # Notes - remove the ones you are not using / feeding
       #       - remove "adsb,dump978,30978,uat_in;" if you don't have dump978 and a UAT dongle connected to your station
+      #       - !!! make sure that each line ends with a semicolon ";",  with the exception of the last line which shouldn't have a ";" !!!
       - ULTRAFEEDER_CONFIG=
           adsb,dump978,30978,uat_in;
           adsb,feed.adsb.fi,30004,beast_reduce_plus_out;
