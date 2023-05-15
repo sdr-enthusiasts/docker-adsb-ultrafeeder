@@ -521,7 +521,14 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `GRAPHS1090_DISK_DEVICE` | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_ETHERNET_DEVICE` | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device | Unset |
 | `GRAPHS1090_WIFI_DEVICE` | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device | Unset |
-| `GRAPHS1090_DISABLE` | Set to `true` to disable the GRAPHS1090 web page and data collection | Unset |
+| `GRAPHS1090_DISABLE` | Set to `true` to disable the entire GRAPHS1090 web page and associated data collection | Unset |
+| `GRAPHS1090_DISABLE_CHART_CPU` | Set to `true` to disable the GRAPHS1090 CPU chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_TEMP` | Set to `true` to disable the GRAPHS1090 Temperature chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_MEMORY` | Set to `true` to disable the GRAPHS1090 Memory Utilization chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_NETWORK_BANDWIDTH` | Set to `true` to disable the GRAPHS1090 Network Bandwidth chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_DISK_USAGE` | Set to `true` to disable the GRAPHS1090 Disk Usage chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_DISK_IOPS` | Set to `true` to disable the GRAPHS1090 Disk IOPS chart | Unset |
+| `GRAPHS1090_DISABLE_CHART_DISK_BANDWIDTH` | Set to `true` to disable the GRAPHS1090 Disk Bandwidth chart | Unset |
 | `ENABLE_AIRSPY` | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset |
 
 #### Enabling UAT data
