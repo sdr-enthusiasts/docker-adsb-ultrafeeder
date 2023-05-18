@@ -321,7 +321,7 @@ In the above configuration strings:
 
 There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators:
 
-| Name | (C)ommercial/</br/>(N)on-profit | Description | Feed details |
+| Name | (C)ommercial/<br/>(N)on-profit | Description | Feed details |
 |------|---------------------------|-------------|--------------|
 | ADSB.fi | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.fi` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.fi` port `tcp/31090`, format `mlat-client`|
 | ADSB.one | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.one` port `tcp/60004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.one` port `tcp/64006`, format `mlat-client`|
