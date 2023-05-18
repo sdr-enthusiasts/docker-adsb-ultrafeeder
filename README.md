@@ -69,7 +69,8 @@ In order to accomplish this, the container makes use of the following underlying
 
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
 
-![ultrafeeder container architecture](https://user-images.githubusercontent.com/15090643/228925713-f2583af7-7cdf-4a8a-9ddb-d9e751991a46.png)
+![ultrafeeder container architecture](https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder/assets/15090643/8d689e93-f93b-4194-8a80-5bbc67eba33a)
+
 
 ## Up-and-Running Quickly with `docker-compose`
 
