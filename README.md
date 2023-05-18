@@ -319,17 +319,17 @@ In the above configuration strings:
 
 ##### Feeding directly from Ultrafeeder
 
-There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators:
+There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators. All of them use the `beast_reduce_plus` format for feeding ADSB data, and `mlat-client` for feeding MLAT:
 
 | Name | (C)ommercial/<br/>(N)on-profit | Description | Feed details |
 |------|---------------------------|-------------|--------------|
-| ADSB.fi | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.fi` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.fi` port `tcp/31090`, format `mlat-client`|
-| ADSB.one | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.one` port `tcp/60004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.one` port `tcp/64006`, format `mlat-client`|
-| ADSB.lol | N | Run by a private individual located in the Netherlands | adsb:`in.adsb.lol` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `in.adsb.one` port `tcp/31090`, format `mlat-client`|
-| Planespotters | N | planespotters.net | adsb:`feed.planespotters.net` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `mlat.planespotters.net` port `tcp/31090`, format `mlat-client`|
-| The Air Traffic | N | Run by a private individual | adsb:`feed.theairtraffic.com` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `mlat.theairtraffic.com` port `tcp/31090`, format `mlat-client`|
-| AV Delphi | C | Swiss aircraft data company | adsb:`data.avdelphi.com` port `tcp/24999`, format `beast_reduce_plus_out`<br/>mlat: no MLAT|
-| ADSB Exchange | C | Large aggregator owned by JetNet | adsb:`feed1.adsbexchange.com` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsbexchange.com` port `tcp/31090`, format `mlat-client`|
+| ADSB.fi | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.fi` port `tcp/30004`<br/>mlat: `feed.adsb.fi` port `tcp/31090`|
+| ADSB.one | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.one` port `tcp/60004`<br/>mlat: `feed.adsb.one` port `tcp/64006`|
+| ADSB.lol | N | Run by a private individual located in the Netherlands | adsb:`in.adsb.lol` port `tcp/30004`<br/>mlat: `in.adsb.one` port `tcp/31090`|
+| Planespotters | N | planespotters.net | adsb:`feed.planespotters.net` port `tcp/30004``<br/>mlat: `mlat.planespotters.net` port `tcp/31090`|
+| The Air Traffic | N | Run by a private individual | adsb:`feed.theairtraffic.com` port `tcp/30004`<br/>mlat: `mlat.theairtraffic.com` port `tcp/31090`|
+| AV Delphi | C | Swiss aircraft data company | adsb:`data.avdelphi.com` port `tcp/24999``<br/>mlat: no MLAT|
+| ADSB Exchange | C | Large aggregator owned by JetNet | adsb:`feed1.adsbexchange.com` port `tcp/30004`<br/>mlat: `feed.adsbexchange.com` port `tcp/31090`|
 
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
