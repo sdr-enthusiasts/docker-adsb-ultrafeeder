@@ -17,6 +17,7 @@
       - [Connecting to external ADSB data sources](#connecting-to-external-adsb-data-sources)
         - [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config)
         - [Networking parameters](#networking-parameters)
+        - [Feeding directly from Ultrafeeder](#feeding-directly-from-ultrafeeder)
         - [Alternate Configuration Method with `READSB_NET_CONNECTOR`](#alternate-configuration-method-with-readsb_net_connector)
       - [Optional Networking Parameters](#optional-networking-parameters)
       - [MLAT configuration](#mlat-configuration)
@@ -265,7 +266,7 @@ docker exec -it ultrafeeder /usr/local/bin/autogain1090 reset
 
 #### Connecting to external ADSB data sources
 
-In addition to (or instead of) connecting to a SDR or hardware device to get ADSB data, the container also supports ingesting data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
+In addition to (or instead of) connecting to a SDR or hardware device to get ADSB data, the container also supports ingesting or sending data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
 
 ##### All-in-One Configuration using `ULTRAFEEDER_CONFIG`
 
@@ -315,6 +316,26 @@ In the above configuration strings:
 | `BEASTPORT` | TCP port number of Mode-S/Beast provider (`dump1090`/`readsb`) | `30005` |
 | `MLATHOST` | Legacy parameter. IP/Hostname of an MLAT provider (`mlat-client`). Note - using this parameter will not make the MLAT data part of the consolidated mlathub. The preferred way of ingesting MLAT results is using the `mlathub` functionality of the container, see below for details | |
 | `MLATPORT` | Legacy parameter used with `MLATHOST`. TCP port number of an MLAT provider (`mlat-client`) | 30105 |
+
+##### Feeding directly from Ultrafeeder
+
+There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators:
+
+| Name | (C)ommercial/(N)on-profit | Description | Feed details |
+|------|---------------------------|-------------|--------------|
+| ADSB.fi | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.fi` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.fi` port `tcp/31090`, format `mlat-client`|
+|------|---------------------------|-------------|--------------|
+| ADSB.one | N | Run by volunteers that used to be related to adsbexchange | adsb:`feed.adsb.one` port `tcp/60004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsb.one` port `tcp/64006`, format `mlat-client`|
+|------|---------------------------|-------------|--------------|
+| ADSB.lol | N | Run by a private individual located in the Netherlands | adsb:`in.adsb.lol` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `in.adsb.one` port `tcp/31090`, format `mlat-client`|
+|------|---------------------------|-------------|--------------|
+| Planespotters | N | planespotters.net | adsb:`feed.planespotters.net` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `mlat.planespotters.net` port `tcp/31090`, format `mlat-client`|
+|------|---------------------------|-------------|--------------|
+| The Air Traffic | N | Run by a private individual | adsb:`feed.theairtraffic.com` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `mlat.theairtraffic.com` port `tcp/31090`, format `mlat-client`|
+|------|---------------------------|-------------|--------------|
+| AV Delphi | C | Swiss aircraft data company | adsb:`data.avdelphi.com` port `tcp/24999`, format `beast_reduce_plus_out`<br/>mlat: no MLAT|
+|------|---------------------------|-------------|--------------|
+| ADSB Exchange | C | Large aggregator owned by JetNet | adsb:`feed1.adsbexchange.com` port `tcp/30004`, format `beast_reduce_plus_out`<br/>mlat: `feed.adsbexchange.com` port `tcp/31090`, format `mlat-client`|
 
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
