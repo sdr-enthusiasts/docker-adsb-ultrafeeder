@@ -128,7 +128,7 @@ services:
       - grafana:/var/lib/grafana
 
 # The `renderer` container is needed if you want to share images of your dashboard as a graphic:
-renderer:
+  renderer:
     image: grafana/grafana-image-renderer:latest
 
   prometheus:
