@@ -32,8 +32,8 @@ When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influ
 
 ```yaml
 services:
-  tar1090:
-    image: ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf
+  ultrafeeder:
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf
   ...
 ```
 
