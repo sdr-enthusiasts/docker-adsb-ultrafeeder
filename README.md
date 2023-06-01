@@ -231,7 +231,7 @@ If you want to connect your SDR to the container, here's how to do that:
 | Variable | Description | Controls which `readsb` option | Default |
 |----------|-------------|--------------------------------|---------|
 | `READSB_GAIN` | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. | `--gain=<db>` | Max gain |
-| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/README.MD#estimating-ppm)  | `--ppm=<correction>` | Unset |
+| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/#estimating-ppm)  | `--ppm=<correction>` | Unset |
 
 ##### AutoGain for RTLSDR Devices
 
