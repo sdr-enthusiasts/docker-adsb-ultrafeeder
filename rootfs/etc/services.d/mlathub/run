@@ -37,6 +37,11 @@ MLATHUB_CMD+=("--net-beast-reduce-out-port=${MLATHUB_BEAST_REDUCE_OUT_PORT:-3100
 
 # We need to get the mlat results ports from the parameters:
 # parse MLAT_CONFIG string into mlat_configs array
+# Strip any extraneous spaces:
+MLAT_CONFIG="${MLAT_CONFIG#"${MLAT_CONFIG%%[![:space:]]*}"}"   # strip leading space
+MLAT_CONFIG="${MLAT_CONFIG//; /;}"
+# remove any newlines:
+MLAT_CONFIG="${MLAT_CONFIG//$'\n'/}"
 readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
 # Now loop through the MLAT_CONFIG items and add a net-connector for each of them:
 mlat_result_sources=0

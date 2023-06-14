@@ -56,6 +56,8 @@
 # Do some prep work:
 # combine ULTRAFEEDER_CONFIG and ULTRAFEEDER_NET_CONNECTOR
 ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG}${ULTRAFEEDER_CONFIG:+;}${ULTRAFEEDER_NET_CONNECTOR}"
+# remove any newlines:
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG//$'\n'/}"
 # Strip any extraneous spaces:
 ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG#"${ULTRAFEEDER_CONFIG%%[![:space:]]*}"}"   # strip leading space
 ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG//; /;}"
@@ -120,8 +122,25 @@ do
         ;;
 
         *)
-            # unknown string; warn and skip
-            echo "[$(date)][${APPNAME}] Warning: skipping unknown ULTRAFEEDER_CONFIG config element \"${instance}\""
+            # Check if there's anything in ${ULTRAFEEDER_NET_CONNECTOR} -- if not, it's a bad config element. If yes, add it as if it were ADSB
+            if [[ -z "${ULTRAFEEDER_NET_CONNECTOR}" ]]; then
+                echo "[$(date)][${APPNAME}] Warning: skipping unknown ULTRAFEEDER_CONFIG config element \"${instance}\""
+            else
+                # parse arguments for main readsb
+                # build net-connector string into $readsb_str
+                # and add any extra arguments in as individual entries into READSB_CONF_ARR()
+                readsb_str="${param[0]},${param[1]},${param[2]}"
+                for ((i=3; i<${#param[*]}; i++))
+                do
+                    if [[ "${param[i]:0:5}" == "uuid=" ]]; then
+                        readsb_str="${readsb_str},${param[i]}"
+                    elif [[ -n "${param[i]}" ]]; then
+                        READSB_CONF_ARR+=("${param[i]}")
+                    fi
+                done
+                # Now add $readsb_str to the READSB_CONF_ARR() as --net-connector argument:
+                READSB_CONF_ARR+=("--net-connector=${readsb_str}")
+            fi
     esac
 
 done

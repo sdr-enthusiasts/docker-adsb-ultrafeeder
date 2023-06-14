@@ -69,6 +69,8 @@ fi
 # Strip any extraneous spaces:
 MLAT_CONFIG="${MLAT_CONFIG#"${MLAT_CONFIG%%[![:space:]]*}"}"   # strip leading space
 MLAT_CONFIG="${MLAT_CONFIG//; /;}"
+# remove any newlines:
+MLAT_CONFIG="${MLAT_CONFIG//$'\n'/}"
 readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG}")
 
 
