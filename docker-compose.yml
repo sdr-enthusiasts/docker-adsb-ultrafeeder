@@ -52,7 +52,7 @@ services:
           mlat,feed.adsb.one,64006,39002;
           mlat,mlat.planespotters.net,31090,39003;
           mlat,feed.theairtraffic.com,31090,39004;
-          mlathub,piaware,30105,beast_in;
+          mlathub,piaware,30104,beast_in;
           mlathub,rbfeeder,30105,beast_in;
           mlathub,radarvirtuel,30105,beast_in
       # If you really want to feed ADSBExchange, you can do so by adding this above: 
