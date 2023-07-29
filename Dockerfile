@@ -9,13 +9,13 @@ ENV URL_MLAT_CLIENT_REPO="https://github.com/wiedehopf/mlat-client.git" \
 RUN set -x && \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
-# Git and net-tools are needed to install and run @Mikenye's HealthCheck framework
+    # Git and net-tools are needed to install and run @Mikenye's HealthCheck framework
     KEPT_PACKAGES+=(git) && \
-#
-# Needed to run the mlat_client:
+    #
+    # Needed to run the mlat_client:
     POST_PACKAGES+=(python3-minimal) && \
-#
-# These are needed to compile and install the mlat_client:
+    #
+    # These are needed to compile and install the mlat_client:
     TEMP_PACKAGES+=(python3) && \
     TEMP_PACKAGES+=(build-essential) && \
     TEMP_PACKAGES+=(debhelper) && \
@@ -24,34 +24,34 @@ RUN set -x && \
     TEMP_PACKAGES+=(python3-pip) && \
     TEMP_PACKAGES+=(python3-setuptools) && \
     TEMP_PACKAGES+=(python3-wheel) && \
-#
-# packages needed for debugging - these can stay out in production builds:
+    #
+    # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
-# Install all these packages:
+    # Install all these packages:
     apt-get update -q -y && \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
-        ${KEPT_PACKAGES[@]} \
-        ${TEMP_PACKAGES[@]} && \
-#
-# Compile and Install the mlat_client
+    ${KEPT_PACKAGES[@]} \
+    ${TEMP_PACKAGES[@]} && \
+    #
+    # Compile and Install the mlat_client
     mkdir -p /git && \
     pushd /git && \
-      git clone --depth 1 $URL_MLAT_CLIENT_REPO && \
-      cd mlat-client && \
-      ./setup.py install && \
-      ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
+    git clone --depth 1 $URL_MLAT_CLIENT_REPO && \
+    cd mlat-client && \
+    ./setup.py install && \
+    ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
     popd && \
     rm -rf /git && \
-#
-# Clean up and install POST_PACKAGES:
+    #
+    # Clean up and install POST_PACKAGES:
     apt-get remove -q -y ${TEMP_PACKAGES[@]} && \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
-        ${POST_PACKAGES[@]} && \
+    ${POST_PACKAGES[@]} && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
     apt-get clean -q -y && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
-#
-# Do some stuff for kx1t's convenience:
+    #
+    # Do some stuff for kx1t's convenience:
     echo "alias dir=\"ls -alsv\"" >> /root/.bashrc && \
     echo "alias nano=\"nano -l\"" >> /root/.bashrc
 
