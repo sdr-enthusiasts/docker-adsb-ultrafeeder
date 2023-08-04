@@ -111,19 +111,19 @@ services:
     # windrose panel plugin is needed for polar plots:
       - GF_INSTALL_PLUGINS=snuids-radar-panel,fatcloud-windrose-panel
     # uncomment and set the following variables if you are exposing Grafana to the internet behind a rev web proxy:
-    #   - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana/
-    #   - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    #  - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana/
+    #  - GF_SERVER_SERVE_FROM_SUB_PATH=true
     # The following variables are needed if you want to expose and embed any dashboards publicly:
-    #  - GF_AUTH_ANONYMOUS_ENABLED=true
-    #  - GF_AUTH_ANONYMOUS_ORG_NAME=public
-    #  - GF_SECURITY_ALLOW_EMBEDDING=true
-    #  - GF_PANELS_DISABLE_SANITIZE_HTML=true
-    #  - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_NAME=public
+      - GF_SECURITY_ALLOW_EMBEDDING=true
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+      - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
     # The following variables will allow you to "share/render" dashboards as PNG graphics.
     # You should also enabled the renderer container below.
-    #  - GF_RENDERING_SERVER_URL=http://renderer:8081/render
-    #  - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
-    #  - GF_LOG_FILTERS=rendering:debug
+     - GF_RENDERING_SERVER_URL=http://renderer:8081/render
+     - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+     - GF_LOG_FILTERS=rendering:debug
     ports:
       - 3000:3000
     volumes:
