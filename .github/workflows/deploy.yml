@@ -100,12 +100,14 @@ jobs:
       # set build_latest to true if github.event.inputs.use_test_image is false
       build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
-      build_baseimage_url: docker-tar1090:latest/docker-tar1090:telegraf-baseimage-test
+      build_baseimage_url: docker-tar1090:telegraf/docker-tar1090:telegraf-baseimage-test
       # only build the entire stack if we are not using the test image
       build_version_specific: false
       build_platform_specific: false
       build_nohealthcheck: false
       docker_latest_tag: telegraf
+      dockerfile_changes: |
+        docker-tar1090:latest/docker-tar1090:telegraf
 
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}

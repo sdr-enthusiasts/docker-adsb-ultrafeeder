@@ -13,18 +13,18 @@ RUN set -x && \
     KEPT_PACKAGES+=(git) && \
     #
     # Needed to run the mlat_client:
-    POST_PACKAGES+=(python3-minimal) && \
+    # POST_PACKAGES+=(python3-minimal) && \
     #
     # These are needed to compile and install the mlat_client:
-    TEMP_PACKAGES+=(python3) && \
+    KEPT_PACKAGES+=(python3) && \
     TEMP_PACKAGES+=(build-essential) && \
     TEMP_PACKAGES+=(debhelper) && \
-    TEMP_PACKAGES+=(python3-dev) && \
-    TEMP_PACKAGES+=(python3-distutils-extra) && \
-    TEMP_PACKAGES+=(python3-pip) && \
+    KEPT_PACKAGES+=(python3-dev) && \
+    KEPT_PACKAGES+=(python3-distutils-extra) && \
+    KEPT_PACKAGES+=(python3-pip) && \
     KEPT_PACKAGES+=(python3-setuptools) && \
     KEPT_PACKAGES+=(python3-pkg-resources) && \
-    TEMP_PACKAGES+=(python3-wheel) && \
+    KEPT_PACKAGES+=(python3-wheel) && \
     #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
@@ -46,8 +46,8 @@ RUN set -x && \
     #
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y ${TEMP_PACKAGES[@]} && \
-    apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
-    ${POST_PACKAGES[@]} && \
+    # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
+    # ${POST_PACKAGES[@]} && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
     apt-get clean -q -y && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
