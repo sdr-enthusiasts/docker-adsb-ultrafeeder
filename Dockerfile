@@ -23,6 +23,7 @@ RUN set -x && \
     TEMP_PACKAGES+=(python3-distutils-extra) && \
     TEMP_PACKAGES+=(python3-pip) && \
     KEPT_PACKAGES+=(python3-setuptools) && \
+    KEPT_PACKAGES+=(python3-pkg-resources) && \
     TEMP_PACKAGES+=(python3-wheel) && \
     #
     # packages needed for debugging - these can stay out in production builds:
