@@ -75,7 +75,7 @@ jobs:
       ghcr_repo: ${{ github.repository }}
       get_version_method: file_in_container:file=/CONTAINER_VERSION
       # set build_latest to true if github.event.inputs.use_test_image is false
-      build_latest: ${{ github.event.inputs.use_test_image == 'false' }}
+      build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
       # only build the entire stack if we are not using the test image
       build_version_specific: false
@@ -98,7 +98,7 @@ jobs:
       ghcr_repo: ${{ github.repository }}
       get_version_method: file_in_container:file=/CONTAINER_VERSION
       # set build_latest to true if github.event.inputs.use_test_image is false
-      build_latest: ${{ github.event.inputs.use_test_image == 'false' }}
+      build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
       build_baseimage_url: docker-tar1090:latest/docker-tar1090:telegraf-baseimage-test
       # only build the entire stack if we are not using the test image
