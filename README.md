@@ -387,6 +387,8 @@ It will create a separate instance of `mlat-client` for each defined MLAT server
            ...
            mlat,mlat-server1.com,port1,return_port1,uuid=1234-5678-90123,inputconnect=remote_receiver1:30005,lat=12.3456,lon=45.6789,alt=18m,--arg1 hello --arg2 world;
            mlat,mlat-server2.com,port2,return_port2,uuid=5678-9012-34567,inputconnect=remote_receiver2:30005,-lat=12.3456,lon=45.6789,alt=18m,--arg1 hello-again --arg2 universe
+    ...
+      - MLAT_USER=some_friendly_user_name
 ```
 
 where:
@@ -404,7 +406,9 @@ where:
 | `alt`             | Optional           | the altitude to be sent to the MLAT server in the form `alt=xx.xxxxx`. If omitted, the `ALT` / `READSB_ALT` parameter will be used. This is meant to be used in combination with `input_connect` for connecting to a remote Beast source and forward MLAT data to an MLAT server |
 | `extra-arguments` | Optional           | Any extra parameter you want to pass to the `mlat-client` program. Will be added verbatim to the command line |
 
-Note - the  optional parameters can be given in any order.
+Note - the optional parameters can be given in any order.
+
+The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator.
 
 #### Configuring the built-in MLAT Hub
 
