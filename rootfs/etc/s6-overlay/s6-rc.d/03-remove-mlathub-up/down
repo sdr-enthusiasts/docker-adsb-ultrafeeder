@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /etc/s6-overlay/scripts/03-remove-mlathub-up-down
