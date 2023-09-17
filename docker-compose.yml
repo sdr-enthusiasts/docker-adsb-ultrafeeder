@@ -47,11 +47,13 @@ services:
           adsb,feed.planespotters.net,30004,beast_reduce_plus_out;
           adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out;
           adsb,data.avdelphi.com,24999,beast_reduce_plus_out;
+          adsb,feed.radarplane.com,30001,beast_reduce_plus_out;
           mlat,feed.adsb.fi,31090,39000;
           mlat,in.adsb.lol,31090,39001;
           mlat,feed.adsb.one,64006,39002;
           mlat,mlat.planespotters.net,31090,39003;
           mlat,feed.theairtraffic.com,31090,39004;
+          mlat,feed.radarplane.com,31090,39005;
           mlathub,piaware,30104,beast_in;
           mlathub,rbfeeder,30105,beast_in;
           mlathub,radarvirtuel,30105,beast_in
