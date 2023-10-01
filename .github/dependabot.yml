@@ -10,6 +10,8 @@ updates:
     target-branch: "main"
     schedule:
       interval: "daily"
+    assignees:
+      - "fredclausen"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
