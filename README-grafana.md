@@ -183,7 +183,7 @@ This will add the following to the bottom of the `prometheus.xml` file:
       - targets: ['ip_xxxxxxx:9273', 'ip_xxxxxxx:9274']
 ```
 
-(If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana//prometheus/config/prometheus.yml` and fix it that way.)
+(If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana/prometheus/config/prometheus.yml` and fix it that way.)
 
 #### Prometheus scraping of `dump978`
 
@@ -203,7 +203,7 @@ This will add the following to the bottom of the `prometheus.xml` file:
       - targets: ['ip_xxxxxxx:9274']
 ```
 
-(If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana//prometheus/config/prometheus.yml` and fix it that way.)
+(If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana/prometheus/config/prometheus.yml` and fix it that way.)
 
 ### Accessing Prometheus and Grafana via your browser
 
