@@ -43,7 +43,7 @@ services:
 
 Prometheus will store a lot of data, and Grafana will do a lot of data queries. As a result, it would be better if you run these containers on a different system than your feeder Raspberry Pi. This will leave your Pi focused on data collection and processing, and unbothered by the CPU and Disk IO load that Prometheus/Grafana will cause.
 
-You *can* do it on a single system. We're assuming below that you are not. If you do it on a single system, then you can combine the `docker-compose.yml` components in a single file
+You _can_ do it on a single system. We're assuming below that you are not. If you do it on a single system, then you can combine the `docker-compose.yml` components in a single file
 
 ## Steps to install Prometheus, Grafana, and the Grafana Dashboard
 
@@ -52,11 +52,11 @@ You *can* do it on a single system. We're assuming below that you are not. If yo
 - Edit your Ultrafeeder's `docker-compose.yml` file and ensure that the following is set for the `ultrafeeder` service:
 
 ```yaml
-    environment:
-      - PROMETHEUS_ENABLE=true
-      - TAR1090_ENABLE_AC_DB=true
-    ports:
-      - 9273-9274:9273-9274
+environment:
+  - PROMETHEUS_ENABLE=true
+  - TAR1090_ENABLE_AC_DB=true
+ports:
+  - 9273-9274:9273-9274
 ```
 
 Now recreate the ultrafeeder container (`docker-compose up -d ultrafeeder`) and it will generate Prometheus data.
@@ -71,7 +71,7 @@ cd /opt/grafana
 cat > docker-compose.yml
 ```
 
-Now paste in the following text *):
+Now paste in the following text \*):
 
 <details>
   <summary>&lt;&dash;&dash; Click the arrow to see the <code>docker-compose.yml</code> text</summary>
@@ -149,7 +149,7 @@ services:
 
 </details>
 
-*) The volume definition structure is written this way purposely to ensure that the containers can place files in the persistent directories. Do not try to "directly" map volumes (`/opt/grafana/grafana/appdata:/var/lib/grafana`).
+\*) The volume definition structure is written this way purposely to ensure that the containers can place files in the persistent directories. Do not try to "directly" map volumes (`/opt/grafana/grafana/appdata:/var/lib/grafana`).
 
 You should be able to see the following directories:
 
@@ -178,9 +178,9 @@ docker compose up -d
 This will add the following to the bottom of the `prometheus.xml` file:
 
 ```yaml
-  - job_name: 'ultrafeeder'
-    static_configs:
-      - targets: ['ip_xxxxxxx:9273', 'ip_xxxxxxx:9274']
+- job_name: "ultrafeeder"
+  static_configs:
+    - targets: ["ip_xxxxxxx:9273", "ip_xxxxxxx:9274"]
 ```
 
 (If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana/prometheus/config/prometheus.yml` and fix it that way.)
@@ -198,9 +198,9 @@ docker compose up -d
 This will add the following to the bottom of the `prometheus.xml` file:
 
 ```yaml
-  - job_name: 'dump978'
-    static_configs:
-      - targets: ['ip_xxxxxxx:9274']
+- job_name: "dump978"
+  static_configs:
+    - targets: ["ip_xxxxxxx:9274"]
 ```
 
 (If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana/prometheus/config/prometheus.yml` and fix it that way.)
@@ -222,10 +222,10 @@ After you have logged into the `grafana` console the following manual steps are 
 2. Click `Prometheus` from the list of options provided
 3. Input or select the following options, if the option is not listed, do not input anything for that option:
 
-Option | Input
-------------- | -------------
-Name | ultrafeeder
-URL | `http://prometheus:9090/`
+| Option | Input                     |
+| ------ | ------------------------- |
+| Name   | ultrafeeder               |
+| URL    | `http://prometheus:9090/` |
 
 Clicking `Save & Test` should return a green message indicating success. The dashboard can now be imported with the following steps:
 
@@ -261,12 +261,12 @@ First execute all steps above, and then continue here.
 ### Step 1: Edit your Prometheus config file so the `job_name`s look like this
 
 ```yaml
-  - job_name: 'heerlen'
-    static_configs:
-      - targets: ['10.0.0.100:9273', '10.0.0.100:9274']
-  - job_name: 'trenton'
-    static_configs:
-      - targets: ['10.0.0.101:9273', '10.0.0.101:9274']
+- job_name: "heerlen"
+  static_configs:
+    - targets: ["10.0.0.100:9273", "10.0.0.100:9274"]
+- job_name: "trenton"
+  static_configs:
+    - targets: ["10.0.0.101:9273", "10.0.0.101:9274"]
 ```
 
 Here, `10.0.0.100` is the IP address of the `heerlen` station, and `10.0.0.101` is the IP address of the `trenton` station. Yours will be different. Please keep the ports as you mapped them for Ultrafeeder in each instance. You should have a `- job_name` block for each ultrafeeder instance.

@@ -100,7 +100,7 @@ do
     then
         "${s6wrap[@]}" --args echo "ERROR -- MLAT_CONFIG is malformed: \"${instance}\". Stopping MLAT execution."
          # shellcheck disable=SC2046
-        kill $(ps -s $$ -o pid=)   
+        kill $(ps -s $$ -o pid=)
         exec sleep infinity
     fi
 
@@ -151,9 +151,9 @@ do
     # add input-connect to the param array:
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
 
-    if [ -n "${MLAT_USER}" ]; then 
+    if [ -n "${MLAT_USER}" ]; then
         MLAT_PARAM+=(--user "${MLAT_USER}")
-    else 
+    else
         rnd="${RANDOM}"
         "${s6wrap[@]}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
         MLAT_PARAM+=(--user "${rnd}")

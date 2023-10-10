@@ -1,3 +1,5 @@
+#!/usr/bin/with-contenv bash
+
 # shellcheck shell=bash disable=SC2015
 #
 # This scripts should be sourced by the /etc/services.d/xxx/run modules for
@@ -30,7 +32,7 @@
 # ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
 #
 # The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`
-# Please note that the config strings cannot containe `;` or `,` -- undefined things may happen if these characters are present.
+# Please note that the config strings cannot contain `;` or `,` -- undefined things may happen if these characters are present.
 #
 # In the above configuration strings:
 # `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.

@@ -328,4 +328,3 @@ elif [[ "${LOGLEVEL,,}" == "error" ]]; then
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
     exec "${s6wrap[@]}" --quiet --ignore-stdout --ignore-stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 fi
-
