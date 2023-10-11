@@ -1,7 +1,7 @@
 repos:
   # lint yaml, line and whitespace
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-yaml
       - id: end-of-file-fixer
@@ -28,7 +28,7 @@ repos:
         exclude: ^(Dockerfile*)
 
   - repo: https://github.com/codespell-project/codespell.git
-    rev: "v2.2.5" # Use the sha / tag you want to point at
+    rev: "v2.2.6" # Use the sha / tag you want to point at
     hooks:
       - id: codespell
         types: [text]
