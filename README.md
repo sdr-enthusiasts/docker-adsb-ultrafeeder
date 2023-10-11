@@ -69,7 +69,7 @@ In order to accomplish this, the container makes use of the following underlying
 - [MLAT Client](https://github.com/adsbxchange/mlat-client.git)
 
 It builds and runs on `linux/amd64`, `linux/arm/v7 (linux/armhf)` and `linux/arm64` architectures.
-![ultrafeeder container architecture](https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder/assets/15090643/34aef162-badb-424b-8dcd-17d0b4005411)
+![ultrafeeder container architecture](https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder/assets/15090643/12b7f054-a77a-4c21-8f72-d0069cc9af84)
 
 ## Up-and-Running Quickly with `docker-compose`
 
