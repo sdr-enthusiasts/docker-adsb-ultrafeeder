@@ -1,0 +1,38 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091
+
+APPNAME="readsb"
+
+source /scripts/common
+s6wrap=(s6wrap --quiet --timestamps --prepend="${APPNAME}" --args)
+
+# First check if ADSBX is in the config string
+
+# combine ULTRAFEEDER_CONFIG and ULTRAFEEDER_NET_CONNECTOR
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG}${ULTRAFEEDER_CONFIG:+;}${ULTRAFEEDER_NET_CONNECTOR}"
+# remove any newlines:
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG//$'\n'/}"
+# Strip any extraneous spaces:
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG#"${ULTRAFEEDER_CONFIG%%[![:space:]]*}"}"   # strip leading space
+ULTRAFEEDER_CONFIG="${ULTRAFEEDER_CONFIG//; /;}"
+if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
+    "${s6wrap[@]}" echo "AdsbExchange not configured - no stats package needed"
+    exec sleep infinity
+fi
+
+# Install the Stats package:
+
+if [[ ! -f /etc/default/adsbexchange-stats ]]; then
+    echo -e "UUID_FILE=/run/uuid\nJSON_PATHS=(\"/run/readsb\")" > /etc/default/adsbexchange-stats
+fi
+
+if [[ ! -f /usr/local/bin/json-status ]]; then
+    if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/ADSBexchange/adsbexchange-stats/master/json-status; then
+        "${s6wrap[@]}" echo "ERROR: AdsbExchange configure, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
+        exec sleep infinity
+    fi
+    chmod 755 /usr/local/bin/json-status
+fi
+
+mkdir -p /run/adsbexchange-stats
+"${s6wrap[@]}" /usr/local/bin/json-status
