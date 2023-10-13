@@ -37,7 +37,7 @@ mkdir -p /run/adsbexchange-stats
 # wait until readsb is established...
 if ! pgrep readsb >/dev/null; then
     if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        "${s6wrap[@]}" --args echo "Delaying start of the AdsbExchange Stats module until container is established..."
+        "${s6wrap[@]}" echo "Delaying start of the AdsbExchange Stats module until container is established..."
     fi
     while ! pgrep readsb >/dev/null
         do
@@ -47,6 +47,6 @@ if ! pgrep readsb >/dev/null; then
     sleep 2 & wait $!
 fi
 
-"${s6wrap[@]}" --args echo "invoking: /usr/local/bin/json-status"
+"${s6wrap[@]}" echo "invoking: /usr/local/bin/json-status"
 
 "${s6wrap[@]}" /usr/local/bin/json-status
