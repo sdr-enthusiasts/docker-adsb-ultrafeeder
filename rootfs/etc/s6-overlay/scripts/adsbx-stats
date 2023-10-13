@@ -34,6 +34,7 @@ if [[ ! -f /usr/local/share/adsbexchange/adsbx-uuid ]]; then
     if [[ -n "$ADSBX_UUID" ]]; then
         mkdir -p /usr/local/share/adsbexchange
         echo "$ADSBX_UUID" > /usr/local/share/adsbexchange/adsbx-uuid
+        "${s6wrap[@]}" echo "Using UUID $ADSBX_UUID for AdsbExchange"
     else
         "${s6wrap[@]}" echo "WARNING: no UUID can be identified to be used with AdsbExchange; a random one will be generated every time the container is started."
     fi
