@@ -1,0 +1,65 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091,SC2001
+
+source /scripts/common
+source /scripts/interpret_ultrafeeder_config
+s6wrap=(s6wrap --quiet --timestamps --prepend="$(basename "$0")" --args)
+
+# Check if ADSBExchange is configured
+if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
+    "${s6wrap[@]}" echo "AdsbExchange not configured - no stats package needed"
+    sleep infinity & wait $!
+fi
+
+# prep work:
+mkdir -p /run/adsbexchange-stats
+
+# Install the Stats package:
+if [[ ! -f /etc/default/adsbexchange-stats ]]; then
+    echo -e "UUID_FILE=/run/uuid\nJSON_PATHS=(\"/run/readsb\")" > /etc/default/adsbexchange-stats
+fi
+if [[ ! -f /usr/local/bin/json-status ]]; then
+    if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/ADSBexchange/adsbexchange-stats/master/json-status; then
+        "${s6wrap[@]}" echo "ERROR: AdsbExchange configure, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
+        sleep infinity & wait $!
+    fi
+    chmod 755 /usr/local/bin/json-status
+fi
+
+# set the UUID:
+if [[ ! -f /usr/local/share/adsbexchange/adsbx-uuid ]]; then
+    ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "${READSB_CONF_ARR[@]}")" || true   # get UUID from ULTRAFEEDER_CONFIG if it exists
+    ADSBX_UUID="${ADSBX_UUID:-${UUID}}" || true # ...else get it from the UUID param
+    ADSBX_UUID="${ADSBX_UUID:-$(cat /proc/sys/kernel/random/uuid 2>/dev/null)}" || true # ...else generate a random one
+    if [[ -n "$ADSBX_UUID" ]]; then
+        mkdir -p /usr/local/share/adsbexchange
+        echo "$ADSBX_UUID" > /usr/local/share/adsbexchange/adsbx-uuid
+        "${s6wrap[@]}" echo "Using UUID $ADSBX_UUID for AdsbExchange"
+    else
+        "${s6wrap[@]}" echo "WARNING: no UUID can be identified to be used with AdsbExchange; a random one will be generated every time the container is started."
+    fi
+fi
+
+# wait until readsb is established...
+if ! pgrep readsb >/dev/null; then
+    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+        "${s6wrap[@]}" echo "Delaying start of the AdsbExchange Stats module until container is established..."
+    fi
+    while ! pgrep readsb >/dev/null
+        do
+        sleep 2 & wait $!
+    done
+    # wait 2 seconds after readsb process exists
+    sleep 2 & wait $!
+fi
+
+# Let json-status start up, and then print the Anywhere Map and Anywhere Stats URLs to the container logs:
+{   sleep 15
+    AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Map</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+    AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Stats</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+    "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Map URL is $AnywhereMap"
+    "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Stats URL is $AnywhereStats"
+} &
+
+"${s6wrap[@]}" echo "invoking: /usr/local/bin/json-status"
+"${s6wrap[@]}" /usr/local/bin/json-status
