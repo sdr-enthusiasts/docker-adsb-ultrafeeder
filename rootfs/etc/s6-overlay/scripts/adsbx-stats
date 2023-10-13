@@ -11,6 +11,12 @@ if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
     sleep infinity & wait $!
 fi
 
+# Check if ADSBExchange stats are disabled
+if chk_disabled "$ADSBX_STATS" ; then
+    "${s6wrap[@]}" echo "AdsbExchange stats disabled"
+    sleep infinity & wait $!
+fi
+
 # prep work:
 mkdir -p /run/adsbexchange-stats
 

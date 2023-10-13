@@ -333,6 +333,8 @@ There are several aggregators, both non-profit and commercial, that can directly
 | RadarPlane      | N                              | Run by a few volunteers in Canada and Portugal            | adsb: `feed.radarplane.com` port `30001`<br/>mlat: `feed.radarplane.com` port `31090`      |
 | Fly Italy ADSB  | N                              | Run by a few ADSB enthusiasts in Italy                    | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   |
 
+When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com by default. See the description of the `ADSBX_STATS` parameter on how to disable this.
+
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
 Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure incoming and outgoing connections. The variable takes a semicolon (`;`) separated list of `host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]`, see the section [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config) for explanation of these parameters.
@@ -350,7 +352,7 @@ NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use 
 
 There are many optional parameters relating to the ingestion of data and the general networking functioning of the `readsb` program that implements this functionality.
 
-| Variable                              | Description                                                                                                                                                                                                                                                                    | Controls which `readsb` option          | Default       |
+| Variable                              | Description                                                                                                                                              | Controls which `readsb` option          | Default       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------- |
 | `READSB_NET_API_PORT`                 | <https://github.com/wiedehopf/readsb/blob/dev/README-json.md#--net-api-port-query-formats>                                                                                                                                                                                     | `--net-api-port=<ports>`                | `30152`       |
 | `READSB_NET_BEAST_REDUCE_INTERVAL`    | BeastReduce position update interval, longer means less data (valid range: `0.000` - `14.999`)                                                                                                                                                                                 | `--net-beast-reduce-interval=<seconds>` | `1.0`         |
@@ -375,7 +377,8 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_JSON_INTERVAL`                | Update interval for the webinterface in seconds / interval between aircraft.json writes                                                                                                                                                                                        | `--write-json-every=<sec>`              | `1.0`         |
 | `READSB_JSON_TRACE_INTERVAL`          | Per plane interval for json position output and trace interval for globe history                                                                                                                                                                                               | `--json-trace-interval=<sec>`           | `15`          |
 | `READSB_FORWARD_MLAT_SBS`             | If set to anything, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | Unset                                   |
-| `UUID`                                | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. |                                         | unset         |
+| `UUID`                                | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. |                                         | Unset         |
+| ÀDSBX_STATS                           | Unset | | If set to `disabled`/`off`/`0`/`no`, and feeding to adsbexchange has been configured, no special statistics will be shared with AdsbExchange | Unset (on) |
 
 #### MLAT configuration
 
