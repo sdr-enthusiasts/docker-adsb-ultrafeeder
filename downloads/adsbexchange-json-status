@@ -1,0 +1,370 @@
+#!/bin/bash
+
+#
+# Upload output data from decoder to remote server
+#
+REMOTE_URL="https://adsbexchange.com/api/receive/"
+
+REMOTE_HOST=$( echo $REMOTE_URL | awk -F'/' '{print $3}' )
+
+# Set this to '0' if you don't want this script to ever try to self-cache DNS.
+# Default is on, but script will automatically not cache if resolver is localhost, or if curl version is too old.
+DNS_CACHE=1
+# Cache time, default 10min
+DNS_TTL=600
+# Set this to 1 if you want to force using the cache always even if there is a local resolver.
+DNS_IGNORE_LOCAL=0
+
+# List all paths, IN PREFERRED ORDER, separated by a SPACE
+# By default, only use the json from the feed client
+JSON_PATHS=("/run/adsbexchange-feed")
+
+######################################################################################################################
+# If you know what you're doing, and you want to override the search path, you can do it easily in
+# /etc/default/adsbexchange-stats, by setting the JSON_PATHS variable to something else (or even multiple).
+# For example, the old stats used this:
+#   JSON_PATHS=("/run/adsbexchange-feed" "/run/readsb" "/run/dump1090-fa" "/run/dump1090-mutability" "/run/dump1090" )
+# You can enable this old path by setting "USE_OLD_PATH=1", preferrably in /etc/default/adsbexchange-stats
+######################################################################################################################
+
+# UUID file
+UUID_FILE="/boot/adsbx-uuid"
+if [[ ! -f "$UUID_FILE" ]]; then
+    UUID_FILE="/usr/local/share/adsbexchange/adsbx-uuid"
+fi
+
+# source local overrides (commonly the JSON_PATH, or DNS cache settings)
+if [ -r /etc/default/adsbexchange-stats ]; then
+	. /etc/default/adsbexchange-stats
+
+	# If 'USE_OLD_PATH' is set, override the entire list
+	if [ "x$USE_OLD_PATH" != "x" ] && [ $USE_OLD_PATH -eq 1 ]; then
+		echo "Note: 'USE_OLD_PATH' is set."
+		JSON_PATHS=("/run/readsb" "/run/adsbexchange-feed")
+	fi
+fi
+
+# Small bit of sanity...
+if [ "${#JSON_PATHS[@]}" -le 0 ]; then
+	echo "FATAL - You broke something.  JSON_PATHS variable has no locations listed.  Please fix."
+	exit 5
+fi
+
+JSON_DIR=""
+
+TEMP_DIR="/run/adsbexchange-stats/"
+TMPFILE="${TEMP_DIR}/tmp.json"
+NEWFILE="${TEMP_DIR}/new.json"
+
+# Sanity to make sure we can write to our scratch dir in /run
+T=$(touch $TMPFILE 2>&1)
+RV=$?
+if [ $RV -ne 0 ]; then
+    echo "ERROR: Unable to write to $TMPFILE, aborting!  ($T)"
+    exit 99
+fi
+
+
+# load bash sleep builtin if available
+[[ -f /usr/lib/bash/sleep ]] && enable -f /usr/lib/bash/sleep sleep || true
+
+# Do this a few times, in case we're still booting up (wait a bit between checks)
+CHECK_LOOP=0
+while [ "x$JSON_DIR" = "x" ]; do
+	# Check the paths IN ORDER, preferring the first one we find
+	for i in ${!JSON_PATHS[@]}; do
+		CHECK=${JSON_PATHS[$i]}
+
+		if [ -d $CHECK ]; then
+			JSON_DIR=$CHECK
+			break
+		fi
+	done
+
+	# Couldn't find any of them...
+	if [ "x$JSON_DIR" = "x" ]; then
+		CHECK_LOOP=$(( CHECK_LOOP + 1 ))
+
+		if [ $CHECK_LOOP -gt 4 ]; then
+			# Bad news.  Complain and exit.
+			echo "ERROR: Tried multiple times, could not find any of the directories - ABORTING!"
+			exit 10
+		fi
+		echo "No valid data source directory found, do you have the adsbexchange feed scripts installed?  Tried each of: [${JSON_PATHS[@]}]"
+		sleep 20
+	fi
+done
+
+UUID=$(cat $UUID_FILE)
+
+if ! [[ $UUID =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
+    # Data in UUID file is invalid
+    echo "FATAL: Data in UUID file was invalid, exiting!"
+    exit 1
+fi
+
+#####################
+#  DNS cache setup  #
+#####################
+
+declare -A DNS_LOOKUP
+declare -A DNS_EXPIRE
+
+# Let's FIRST make sure our version of curl will support what we need (--resolve arg)
+CURL_VER=$( curl -V | head -1 | awk '{print $2}' )
+if [ "x$CURL_VER" = "x" ]; then
+	echo "FATAL - curl is malfunctioning, can't get version info."
+	exit 11
+fi
+
+# This routine assumes you do no santiy-checking.
+#
+# Checks for the host in $DNS_LOOKUP{}, and if the corresponding $DNS_EXPIRE{} is less than NOW, return success.
+# Otherwise, try looking it up.  Save value if lookup succeeded.
+#
+# Returns:
+#       On Success: returns 0, and host will be in DNS_LOOKUP assoc array.
+#       On Fail: Various return codes:
+#               - 10 = No Hostname Provided
+#               - 20 = Hostname Format Invalid
+#               - 30 = Lookup Failed even after $DNS_MAX_LOOPS tries
+DNS_WAIT=5
+DNS_MAX_LOOPS=2
+
+dns_lookup () {
+	local HOST=$1
+
+	local NOW=$( date +%s )
+
+	# You need to pass in a hostname :)
+	if [ "x$HOST" = "x" ]; then
+		echo "ERROR: dns_lookup called without a hostname" >&2
+		return 10
+	fi
+
+	# (is it even a syntactically-valid hostname?)
+	if ! [[ $HOST =~ ^[a-zA-Z0-9\.-]+$ ]]; then
+		echo "ERROR: Invalid hostname passed into dns_lookup [$HOST]" >&2
+		return 20
+	fi
+
+	# If the host is cached, and the TTL hasn't expired, return the cached data.
+	if [ ${DNS_LOOKUP[$HOST]} ]; then
+		if [ ${DNS_EXPIRE[$HOST]} -ge $NOW ]; then
+			return 0
+		fi
+	fi
+
+	# Try this several times
+	local LOOP=$DNS_MAX_LOOPS
+
+	while [ $LOOP -ge 1 ]; do
+		# Ok, let's look this hostname up!  Use the first IP returned.
+		#  - XXX : WARNING: This assumed the output format of 'host -v' doesn't change drastically! XXX -
+		#  - Because this uses the "Trying" line, it should work for non-FQDN lookups, too -
+
+		sleep $DNS_WAIT &
+		HOST_IP=$( host -v -W $DNS_WAIT -t a "$HOST" | perl -ne 'if (/^Trying "(.*)"/){$h=$1; next;} if (/^$h\.\s+(\d+)\s+IN\s+A\s+(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/) {$i=$2; last}; END {printf("%s", $i);}' )
+		RV=$?
+		# If this is empty, something failed.  Sleep some and try again...
+		if [ $RV -ne 0 ] || [ "x$HOST_IP" == "x" ]; then
+			if ping -c1 "$HOST" &>/dev/null && ! host -v -W $DNS_WAIT -t a "$HOST" &>/dev/null; then
+				echo "host not working but ping is, disabling DNS caching!"
+				DNS_CACHE=0
+				return 1
+			fi
+			echo "Failure resolving [$HOST], waiting and trying again..." >&2
+			LOOP=$(( LOOP - 1 ))
+			wait
+			continue
+		fi
+		# If we get here, we successfully resolved it
+		break;
+	done
+
+	# If LOOP is zero, Something Bad happened.
+	if [ $LOOP -le 0 ]; then
+		echo "FATAL: unable to resolve $HOST even after $DNS_MAX_LOOPS tries.  Giving up." >&2
+		return 30
+	fi
+
+	# Resolved ok!
+	NOW=$( date +%s )
+	DNS_LOOKUP["$HOST"]=$HOST_IP
+	DNS_EXPIRE["$HOST"]=$(( NOW + DNS_TTL ))
+	return 0
+}
+
+# First, see if we have a localhost resolver...
+# - Only look at the first 'nameserver' entry in resolv.conf
+# - This will assume any 127.x.x.x resolver entry is "local"
+LOCAL_RESOLVER=$( grep nameserver /etc/resolv.conf | head -1 | egrep -c '[[:space:]]127\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' )
+if [ $LOCAL_RESOLVER -ne 0 ]; then
+	if [ $DNS_IGNORE_LOCAL -eq 1 ]; then
+		echo "Found local resolver in resolv.conf, but DNS_IGNORE_LOCAL is on, so ignoring" >&2
+	else
+		echo "Found local resolver in resolv.conf, disabling DNS Cache" >&2
+		DNS_CACHE=0
+	fi
+fi
+
+if ! command -v host &>/dev/null || ! command -v perl &>/dev/null; then
+    echo "host command or perl not available, disabling DNS Cache" >&2
+    DNS_CACHE=0
+fi
+
+VER_OK=$( echo "$CURL_VER" | perl -ne '@v=split(/\./); if ($v[0] == 7) { if ($v[1] >= 22) { printf("1");exit; } else { printf("0");exit; } } if ($v[0] > 7) { pr
+intf("1");exit; } printf("0");exit;')
+if [ $VER_OK -ne 1 ]; then
+	echo "WARNING: curl version is too old ($CURL_VER < 7.22.0), not using script's DNS cache."
+	DNS_CACHE=0
+fi
+
+
+# If we have a local resolver, just use the URL.  If not, look up the host and use that IP (replace the URL appropriately)
+# -- DNS Setup done
+
+
+echo "Using UUID [${UUID}] for stats uploads"
+echo "Using JSON directory [${JSON_DIR}] for source data"
+
+
+if [ $DNS_CACHE -ne 0 ]; then
+	echo "Using script's DNS cache ($DNS_TTL seconds)"
+else
+	echo "NOT using script's DNS cache"
+fi
+
+JSON_FILE="${JSON_DIR}/aircraft.json"
+
+STAT_COUNT=0
+# Grab the current timestamp of the file.   Try in a loop a few times, in case
+while [ $STAT_COUNT -lt 5 ]; do
+	JSON_STAT=$(stat --printf="%Y" $JSON_FILE 2> /dev/null)
+	RV=$?
+
+	if [ $RV -eq 0 ]; then
+		break
+	fi
+	STAT_COUNT=$(( STAT_COUNT + 1 ))
+	sleep 15
+done
+
+# Bad juju if we still don't have a stat...
+if [ "x$JSON_STAT" = "x" ]; then
+	echo "ERROR: Can't seem to stat $JSON_FILE at startup, bailing out..."
+	exit 15
+fi
+
+# Complain if this file seems really old
+NOW=$(date +%s)
+DIFF=$(( NOW - JSON_STAT ))
+if [ $DIFF -gt 60 ]; then
+	echo "WARNING: $JSON_FILE seems old, are you sure we're using the right path?"
+fi
+
+# How long to wait before uploads, minimum (in seconds)
+WAIT_TIME=5
+
+# random sleep on startup ... reduce load spikes
+sleep "$(( RANDOM % WAIT_TIME )).$(( RANDOM % 100))"
+
+# How long curl will wait to send data (10 sec default)
+MAX_CURL_TIME=10
+
+# How much time (sec) has to pass since last JSON update before we say something
+# Initial value is "AGE_COMPLAIN", and then it complains every "AGE_INTERVAL" after that
+# Deftauls are:
+#  AGE_COMPLAIN = 30 sec
+#  AGE_INTERVAL = 30 min (1800 sec)
+AGE_COMPLAIN=30
+AGE_INTERVAL=$(( 30 * 60 ))
+OLD_AGE=$AGE_COMPLAIN
+while true; do
+    wait
+    # make this loop from now to the next start last exactly $WAIT_TIME secons
+    # sleep in the background then wait for it at the end of the loop
+    sleep $WAIT_TIME &
+
+    NOW=$(date +%s)
+
+    # Grab new stat.  If it fails, wait longer (otherwise assign to the main var)
+    NEW_STAT=$(stat --printf="%Y" $JSON_FILE 2> /dev/null)
+    RV=$?
+    if [ $RV -ne 0 ]; then
+        sleep 10
+    else
+        JSON_STAT=$NEW_STAT
+    fi
+    DIFF=$(( NOW - JSON_STAT ))
+    if [ $DIFF -gt $OLD_AGE ]; then
+        echo "WARNING: JSON file $JSON_FILE has not been updated in $DIFF seconds. Did your decoder die?"
+        OLD_AGE=$(( OLD_AGE + AGE_INTERVAL ))
+    else
+        # Reset this here, in case it comes back ;)
+        OLD_AGE=$AGE_COMPLAIN
+    fi
+
+	# Move the JSON somewhere before operating on it...
+
+	rm -f $TMPFILE $NEWFILE
+	CP=$(cp $JSON_FILE $TMPFILE 2>&1)
+	RV=$?
+	if [ $RV -ne 0 ]; then
+		# cp failed (file changed during copy, usually), wait a few and loop again
+		sleep 2
+		continue
+	fi
+
+    if STATUS=$(vcgencmd get_throttled 2>/dev/null | tr -d '"'); then
+        STATUS="${STATUS#*=}"
+    else
+        STATUS=""
+    fi
+
+    if ! jq -c \
+        --arg STATUS "$STATUS" \
+        --arg UUID "$UUID" \
+        ' .
+            | ."uuid"=$UUID
+            | ."v"=$STATUS
+            | ."rssi"=(if (.aircraft | length <= 0) then 0 else ([.aircraft[].rssi] | select(. >=0) | add / length | floor) end)
+            | ."rssi-min"=(if (.aircraft | length <= 0) then 0 else ([.aircraft[].rssi] | select(. >=0) | min | floor) end)
+            | ."rssi-max"=(if (.aircraft | length <= 0) then 0 else ([.aircraft[].rssi] | select(. >=0) | max | floor) end)
+        ' < $TMPFILE > $NEWFILE
+    then
+        # this shouldn't happen, don't spam the syslog with the error quite as much
+        sleep 15
+        # we don't have a json output, let's try again from the start
+        continue
+    fi
+
+
+	CURL_EXTRA=""
+	# If DNS_CACHE is set, use the builtin cache (and correspondingly the additional curl arg
+	if [ $DNS_CACHE -ne 0 ]; then
+		dns_lookup $REMOTE_HOST
+		RV=$?
+		if [ $RV -ne 0 ]; then
+			# Some sort of error...  We'll fall back to normal curl usage, but sleep a little.
+			echo "DNS Error for ${REMOTE_HOST}, fallback ..."
+		else
+			REMOTE_IP=${DNS_LOOKUP[$REMOTE_HOST]}
+			CURL_EXTRA="--resolve ${REMOTE_HOST}:443:$REMOTE_IP"
+		fi
+	fi
+
+    sleep 0.314
+    gzip -c <$NEWFILE >$TEMP_DIR/upload.gz
+    sleep 0.314
+
+	# Push up the data.  'curl' will wait no more than $MAX_CURL_TIME seconds for upload to complete
+	curl -m $MAX_CURL_TIME $CURL_EXTRA -sS -X POST -H "adsbx-uuid: ${UUID}" -H "Content_Encoding: gzip" --data-binary @- $REMOTE_URL 2>&1 <$TEMP_DIR/upload.gz
+	RV=$?
+
+	if [ $RV -ne 0 ]; then
+		echo "WARNING: curl process returned non-zero ($RV): [$CURL]; Sleeping a little extra."
+		sleep $(( 5 + RANDOM % 15 ))
+	fi
+done
+
