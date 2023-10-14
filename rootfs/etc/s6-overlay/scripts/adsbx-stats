@@ -25,8 +25,8 @@ if [[ ! -f /etc/default/adsbexchange-stats ]]; then
     echo -e "UUID_FILE=/run/uuid\nJSON_PATHS=(\"/run/readsb\")" > /etc/default/adsbexchange-stats
 fi
 if [[ ! -f /usr/local/bin/json-status ]]; then
-    if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/ADSBexchange/adsbexchange-stats/master/json-status; then
-        "${s6wrap[@]}" echo "ERROR: AdsbExchange configure, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
+    if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/adsbexchange-json-status; then
+        "${s6wrap[@]}" echo "ERROR: AdsbExchange configured, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
         sleep infinity & wait $!
     fi
     chmod 755 /usr/local/bin/json-status
