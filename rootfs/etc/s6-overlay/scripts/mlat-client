@@ -120,6 +120,9 @@ do
         elif header="${params[i]:0:5}" && [[ "${header,,}" == "uuid=" ]]; then
             # It's a UUID
             uuid_arg="${params[i]#*=}"
+            elif header="${params[i]:0:5}" && [[ "${header,,}" == "name=" ]]; then
+            # It's a MLAT_NAME
+            name_arg="${params[i]#*=}"
         elif header="${params[i]:0:4}" && [[ "${header,,}" == "lat=" ]]; then
             # It's a latitude
             lat_arg="${params[i]#*=}"
@@ -146,13 +149,13 @@ do
     servername=${params[0]}
 
     # add return port:
-    [ -n "${return_port_arg}" ] && MLAT_PARAM+=("--results beast,listen,${return_port_arg}") || true
+    [[ -n "${return_port_arg}" ]] && MLAT_PARAM+=("--results beast,listen,${return_port_arg}") || true
 
     # add input-connect to the param array:
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
 
-    if [ -n "${MLAT_USER}" ]; then
-        MLAT_PARAM+=(--user "${MLAT_USER}")
+    if [[ -n "${name_arg}" ]] || [[ -n "${MLAT_USER}" ]]; then
+        MLAT_PARAM+=(--user "${name_arg:-${MLAT_USER}}")
     else
         rnd="${RANDOM}"
         "${s6wrap[@]}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
@@ -160,34 +163,34 @@ do
     fi
 
     # add LAT/LON/ALT to instance:
-    if [ -n "${lat_arg}" ]; then
+    if [[ -n "${lat_arg}" ]]; then
         MLAT_PARAM+=(--lat "${lat_arg}")
-    elif [ -n "${LAT}" ]; then
+    elif [[ -n "${LAT}" ]]; then
         MLAT_PARAM+=(--lat "${LAT}")
-    elif [ -n "${READSB_LAT}" ]; then
+    elif [[ -n "${READSB_LAT}" ]]; then
         MLAT_PARAM+=(--lat "${READSB_LAT}")
     fi
 
-    if [ -n "${lon_arg}" ]; then
+    if [[ -n "${lon_arg}" ]]; then
         MLAT_PARAM+=(--lon "${lon_arg}")
-    elif [ -n "${LONG}" ]; then
+    elif [[ -n "${LONG}" ]]; then
         MLAT_PARAM+=(--lon "${LONG}")
-    elif [ -n "${READSB_LON}" ]; then
+    elif [[ -n "${READSB_LON}" ]]; then
         MLAT_PARAM+=(--lon "${READSB_LON}")
     fi
 
-    if [ -n "${alt_arg}" ]; then
+    if [[ -n "${alt_arg}" ]]; then
         MLAT_PARAM+=(--alt "${alt_arg}")
-    elif [ -n "${ALT}" ]; then
+    elif [[ -n "${ALT}" ]]; then
         MLAT_PARAM+=(--alt "${ALT}")
-    elif [ -n "${READSB_ALT}" ]; then
+    elif [[ -n "${READSB_ALT}" ]]; then
         MLAT_PARAM+=(--alt "${READSB_ALT}")
     fi
 
     # Add UUID to instance
-    if [ -n "$uuid_arg" ]; then
+    if [[ -n "$uuid_arg" ]]; then
         MLAT_PARAM+=("--uuid ${uuid_arg}")
-    elif [ -n "${UUID}" ]; then
+    elif [[ -n "${UUID}" ]]; then
         MLAT_PARAM+=("--uuid ${UUID}")
     else
         "${s6wrap[@]}" --args echo "WARNING: UUID is not defined, proceeding without UUID"
