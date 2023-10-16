@@ -289,7 +289,7 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 ```
 
 - To connect to an external ADSB (for input or output), UAT, or MLAT results source, use `- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`
-- To connect and send data to an MLAT Server, use `- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][name=Friendly_Name-123][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]`. For the optional parts in this structure, see [MLAT configuration](#mlat-configuration). Note - any MLAT results data received from the MLAT Server will automatically be aggregated in an [MLAT Hub](#configuring-the-built-in-mlat-hub) and shared with `tar1090`
+- To connect and send data to an MLAT Server, use `- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,name=Friendly_Name-123][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]`. For the optional parts in this structure, see [MLAT configuration](#mlat-configuration). Note - any MLAT results data received from the MLAT Server will automatically be aggregated in an [MLAT Hub](#configuring-the-built-in-mlat-hub) and shared with `tar1090`
 - To add MLAT results from additional MLAT Servers not configured with Ultrafeeder (for example, MLAT results from FlightRadar24 or FlightAware/piaware), use `- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
 
 In the above configuration strings:
