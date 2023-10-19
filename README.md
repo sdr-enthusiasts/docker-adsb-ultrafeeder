@@ -130,9 +130,9 @@ The general principle behind the port numbering, is:
 Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
 
 ```yaml
-ports:
-  - 8080:80 # to expose the web interface
-  - 9273-9274:9273-9274 # to expose the statistics interface to Prometheus
+    ports:
+      - 8080:80               # to expose the web interface
+      - 9273-9274:9273-9274   # to expose the statistics interface to Prometheus
 ```
 
 Json position output:
@@ -161,11 +161,11 @@ Note:
 You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to your `docker-compose.yml` file:
 
 ```yaml
-device_cgroup_rules:
-  - "c 189:* rwm"
----
-volumes:
-  - /dev:/dev:ro
+    device_cgroup_rules:
+      - 'c 189:* rwm'
+...
+    volumes:
+      - /dev:/dev:ro
 ```
 
 The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. ⚠️This feature requires a recent version of docker-compose (version >=2.3). Make sure your system is up to date if dongles are not found. ⚠️
@@ -261,7 +261,7 @@ Although not recommended, you can change the measurement intervals and low/high 
 If you need to reset AutoGain and start over determining the gain, you can do so with this command:
 
 ```bash
-docker exec -it ultrafeeder /usr/local/bin/autogain1../sdr-e-base-repo-setup/.pre-commit-config.yaml090 reset
+docker exec -it ultrafeeder /usr/local/bin/autogain1090 reset
 ```
 
 #### Connecting to external ADSB data sources
@@ -576,7 +576,7 @@ Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the 
 - Set the following environment parameter:
 
 ```yaml
-- ENABLE_AIRSPY=yes
+      - ENABLE_AIRSPY=yes
 ```
 
 - To provide the container access to the AirSpy statistics, map a volume in your `docker-compose.yml` file as follows:
@@ -651,11 +651,12 @@ Note -- there is a chance that the data isn't written back in time (due to power
 The feature assumes that you have mapped `/var/lib/collectd` to a volume (to ensure data is persistent across container recreations), and `/run` as a `tmpfs` RAM disk, as shown below and also as per the [`docker-compose.yml` example](docker-compose.yml):
 
 ```yaml
-volumes:
-  - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
----
-tmpfs:
-  - /run:exec,size=256M
+    volumes:
+      - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
+...
+    tmpfs:
+      - /run:exec,size=256M
+...
 ```
 
 | Environment Variable              | Purpose                                                                                     | Default |
@@ -740,7 +741,7 @@ In order for Telegraf to output metrics to an [InfluxDBv2](https://docs.influxda
 
 You can look at individual messages and what information they contain, either for all or for an individual aircraft by hex:
 
-```shell
+```bash
 # only for hex 3D3ED0
 docker exec -it ultrafeeder /usr/local/bin/viewadsb --show-only 3D3ED0
 
