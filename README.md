@@ -466,6 +466,10 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `HEYWHATSTHAT_ALTS`        | Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please                      | `12192m` (=40000 ft) |
 | `HTTP_ACCESS_LOG`          | Optional. Set to `true` to display HTTP server access logs.                                                                                                                                        | `false`              |
 | `HTTP_ERROR_LOG`           | Optional. Set to `false` to hide HTTP server error logs.                                                                                                                                           | `true`               |
+| `TAR1090_IMAGE_CONFIG_LINK` | An optional URL shown at the top of page, designed to be used for a link back to a configuration page. The token `HOSTNAME` in the link is replaced with the current host that tar1090 is accessed on. | `null`                       |
+| `TAR1090_IMAGE_CONFIG_TEXT` | Text to display for the config link                                                                                                                                                                    | `null`                       |
+| `TAR1090_DISABLE`           | Set to `true` to disable the web server and all websites (including the map, `graphs1090`, `heatmap`, `pTracks`, etc.)                                                                                 | Unset                        |
+| `READSB_ENABLE_HEATMAP`    | Set to `true` or leave unset to enable the HeatMap function available at `http://myip/?Heatmap`; set to `false` to disable the HeapMap function | `true` (enabled) |
 
 - For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 - TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>

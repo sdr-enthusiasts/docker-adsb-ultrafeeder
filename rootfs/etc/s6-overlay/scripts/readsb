@@ -44,8 +44,6 @@ if [ -n "${UUID}" ]; then
 fi
 
 READSB_CMD+=("--write-json=/run/readsb")
-READSB_CMD+=("--heatmap-dir=/var/globe_history")
-READSB_CMD+=("--heatmap=15")
 READSB_CMD+=("--write-state=/var/globe_history")
 READSB_CMD+=("--json-trace-interval=15")
 READSB_CMD+=("--json-reliable=1")
@@ -60,17 +58,22 @@ READSB_CMD+=("--net-json-port=30047")
 READSB_CMD+=(--net-api-port=30152)
 READSB_CMD+=(--net-sbs-in-port=32006)
 
+if chk_enabled "${READSB_ENABLE_HEATMAP:-true}"; then
+    READSB_CMD+=("--heatmap-dir=/var/globe_history")
+    READSB_CMD+=("--heatmap=${READSB_HEATMAP_INTERVAL:-15}")
+fi
+
 if ! chk_enabled "$READSB_NET_SBS_DISABLE_REDUCE"; then
     READSB_CMD+=("--net-sbs-reduce")
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT}"; then
-    "${s6wrap[@]}" --quiet --args echo "WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
+    "${s6wrap[@]}" --args echo "WARNING -- READSB_FORWARD_MLAT has been set! Do not feed the output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat")
 fi
 
 if chk_enabled "${READSB_FORWARD_MLAT_SBS}"; then
-    "${s6wrap[@]}" --quiet --args echo "WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
+    "${s6wrap[@]}" --args echo "WARNING -- READSB_FORWARD_MLAT_SBS has been set! Do not feed the SBS (BaseStation) output of this container to any aggregators!"
     READSB_CMD+=("--forward-mlat-sbs")
 fi
 
@@ -146,10 +149,6 @@ fi
 
 if [[ -n "$READSB_JSON_TRACE_INTERVAL" ]]; then
     READSB_CMD+=("--json-trace-interval=$READSB_JSON_TRACE_INTERVAL")
-fi
-
-if [[ -n "$READSB_HEATMAP_INTERVAL" ]]; then
-    READSB_CMD+=("--heatmap=$READSB_HEATMAP_INTERVAL")
 fi
 
 if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_ALT" ]]; then
@@ -320,11 +319,12 @@ if chk_enabled "$PROMETHEUS_ENABLE"; then
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
 
+LOGLEVEL="${LOGLEVEL:-verbose}"
 # shellcheck disable=SC2086,SC2069
-if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+if [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    exec "${s6wrap[@]}" --quiet --ignore-stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore-stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    exec "${s6wrap[@]}" --quiet --ignore-stdout --ignore-stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore-stdout --ignore-stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 fi
