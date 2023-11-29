@@ -57,7 +57,7 @@ services:
         mlat,skyfeed.hpradar.com,31090,39005;
         mlat,feed.radarplane.com,31090,39006;
         mlat,dati.flyitalyadsb.com,30100,39007;
-        mlathub,piaware,30104,beast_in;
+        mlathub,piaware,30105,beast_in;
         mlathub,rbfeeder,30105,beast_in;
         mlathub,radarvirtuel,30105,beast_in;
         mlathub,planewatch,30105,beast_in
