@@ -19,13 +19,12 @@
 
 trap 'pkill -P "$$" || true; s6wrap --quiet --timestamps --prepend=mlat-client --args echo "service stopping"; exit 0' SIGTERM SIGINT SIGHUP SIGQUIT
 
-APPNAME="mlat-client"
-s6wrap=(s6wrap --quiet --timestamps --prepend="${APPNAME}")
-
-"${s6wrap[@]}" --args echo "Started as an s6 service"
-
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
+
+s6wrap=(s6wrap --quiet --timestamps --prepend="$(basename "$0")")
+
+"${s6wrap[@]}" --args echo "Started as an s6 service"
 
 MLAT_CMD="/usr/bin/mlat-client"
 
