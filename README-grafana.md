@@ -121,9 +121,9 @@ services:
       - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
     # The following variables will allow you to "share/render" dashboards as PNG graphics.
     # You should also enabled the renderer container below.
-     - GF_RENDERING_SERVER_URL=http://renderer:8081/render
-     - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
-     - GF_LOG_FILTERS=rendering:debug
+      - GF_RENDERING_SERVER_URL=http://renderer:8081/render
+      - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+      - GF_LOG_FILTERS=rendering:debug
     ports:
       - 3000:3000
     volumes:
