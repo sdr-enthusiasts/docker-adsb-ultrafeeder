@@ -237,6 +237,8 @@ If you want to connect your SDR to the container, here's how to do that:
 
 If you have set `READSB_GAIN=autogain`, then the system will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
 
+Note that AutoGain is not related to the SDR's AGC setting (controlled with the `READSB_RTLSDR_ENABLE_AGC` variable). We do not recommend enabling AGC for Ultrafeeder or any other ADS-B decoder. 
+
 There are 2 distinct periods in which the container will attempt to figure out the gain:
 
 - The initial period of 2 hours, in which an adjustment is done every 5 minutes
