@@ -1,0 +1,36 @@
+#/bin/bash
+#
+# utility to print AdsbExchange Map and/or Stats URL
+# © 2024 by Ramon F. Kolb, kx1t, all rights reserved
+# Licensed under GPLv3
+#
+
+if [[ "${1,,}" == "-?" ]] || [[ "${1,,}" == "-h" ]] || [[ "${1,,}" == "--help" ]]; then
+  echo "$0: get AdsbExchange Anywhere URLs"
+  echo "-h/-?/--help: this information blurb"
+  echo "-m/--map: AdsbExchange Anywhere Map URL"
+  echo "-s/--stats: AdsbExchange Anywhere Stats URL"
+  echo "without any command line arguments: Map URL followed by Stats URL"
+  exit 0
+fi
+
+AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Map</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Stats</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+if [[ "${1,,}" == "-m" ]] || [[ "${1,,}" == "--map" ]]; then
+  if [[ -n "$AnywhereMap" ]]; then
+    echo "$AnywhereMap"
+  else 
+    echo "[ERROR] Anywhere Map not available"
+    exit 1
+  fi
+elif [[ "${1,,}" == "-s" ]] || [[ "${1,,}" == "--stats" ]]; then
+  if [[ -n "$AnywhereStats" ]]; then
+    echo "$AnywhereStats"
+  else 
+    echo "[ERROR] Anywhere Stats not available"
+    exit 1
+  fi
+else
+  echo "$AnywhereMap"
+  echo "$AnywhereStats"
+fi
