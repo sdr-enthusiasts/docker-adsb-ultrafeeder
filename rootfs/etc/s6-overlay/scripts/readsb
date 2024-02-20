@@ -131,8 +131,8 @@ fi
 READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152}")
 
 # Handle "--net-beast-reduce-interval=<seconds>"
-# Default it to 1.0 second if no value is provided
-READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-1.0}")
+# Default it to 0.5 second if no value is provided, which is reasonable for feeding aggregators
+READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-0.5}")
 
 # Handle "--net-beast-reduce-out-port=<ports>"
 if [[ -n "$READSB_NET_BEAST_REDUCE_OUT_PORT" ]]; then
