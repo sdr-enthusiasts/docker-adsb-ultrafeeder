@@ -734,6 +734,7 @@ In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, t
 | Variable            | Description                                                              |
 | ------------------- | ------------------------------------------------------------------------ |
 | `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
+| `PROMETHEUSPORT`    | TCP port for the Prometheus endpoint. Default value is `9273`            |
 
 ### Output from Ultrafeeder to InfluxDBv2
 
