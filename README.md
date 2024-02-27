@@ -137,8 +137,9 @@ Any of these ports can be made available to the host system by using the `ports:
 
 Json position output:
 
-- outputs an aircraft object for every new position received for an aircraft if the --json-trace-interval has elapsed for that aircraft
-- to make it output every received position, set READSB_JSON_TRACE_INTERVAL to 0.1
+- outputs an aircraft object for every new position received for an aircraft. The following parameters (which can be added with `READSB_EXTRA_ARGS`) control this output:
+- `--net-json-port-interval` Set minimum interval between outputs per aircraft for TCP json output, default: 0.0 (every position)
+- `--net-json-port-include-noposition` TCP json position output: include aircraft without position (state is sent for aircraft for every DF11 with CRC if the aircraft hasn't sent a position in the last 10 seconds and interval allowing)
 - each json object will be on a new line
 - <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 
