@@ -204,8 +204,8 @@ do
     execstring="$(echo ${MLAT_CMD} ${MLAT_PARAM[*]} | xargs)"
 
 
-    # stagger by 15 second so they don't all start at the same time
-    sleep 15 & wait $!
+    # stagger by 2 seconds so they don't all start at the same time
+    sleep 2 & wait $!
 
     # ------------------------------------------------
     # run this Mlat_client instance in the background:
