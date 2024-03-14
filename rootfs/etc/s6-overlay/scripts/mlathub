@@ -27,7 +27,7 @@ MLATHUB_CMD+=("--mlat")
 MLATHUB_CMD+=("--forward-mlat")
 MLATHUB_CMD+=("--forward-mlat-sbs")
 
-MLATHUB_CMD+=("--net-connector=localhost,30004,beast_reduce_out")
+MLATHUB_CMD+=("--net-connector=localhost,30004,beast_out")
 
 # define some more ports:
 MLATHUB_CMD+=("--net-sbs-port=${MLATHUB_SBS_OUT_PORT:-31003}")
