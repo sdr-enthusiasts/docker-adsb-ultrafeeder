@@ -207,6 +207,11 @@ if [[ -n "$READSB_NET_RAW_OUTPUT_INTERVAL" ]]; then
     READSB_CMD+=("--net-ro-interval=$READSB_NET_RAW_OUTPUT_INTERVAL")
 fi
 
+# use 0.12s/120ms to reduce number of packets sent to aggregators (compared to ro-interval 50ms)
+# most aggregator feed clients historically use 200ms so this is already a reduction in jitter / latency
+READSB_CMD+=("--net-ro-interval-beast-reduce=${READSB_NET_RO_INTERVAL_BEAST_REDUCE:-0.12}")
+
+
 # Handle "--net-ri-port=<ports>"
 if [[ -n "$READSB_NET_RAW_OUTPUT_PORT" ]]; then
     READSB_CMD+=("--net-ro-port=$READSB_NET_RAW_OUTPUT_PORT")
