@@ -203,6 +203,7 @@ The following parameters must be set (mandatory) for the container to function:
 | `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          |                                | Unset     |
 | `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        |                                | `3000`    |
 | `LOGLEVEL`                    | `verbose` (all messages), `error` (errors only), `none` (minimal)                                                                |                                | `verbose` |
+| `MLAT_STARTUP_STAGGER`        | mlat-client startup staggering for tidy logs (reduce for quicker startup)                                                        |                                | `15`      |
 
 `READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehopf's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 

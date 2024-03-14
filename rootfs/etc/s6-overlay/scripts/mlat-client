@@ -205,7 +205,7 @@ do
 
 
     # stagger by 15 second so they don't all start at the same time
-    sleep 15 & wait $!
+    sleep "${MLAT_STARTUP_STAGGER:-15}" & wait $!
 
     # ------------------------------------------------
     # run this Mlat_client instance in the background:
