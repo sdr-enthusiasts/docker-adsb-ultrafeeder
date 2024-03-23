@@ -1,2 +1,0 @@
-#!/bin/sh
-exec /etc/s6-overlay/scripts/02-remove-prometheus-data-down
