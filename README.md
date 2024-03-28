@@ -47,6 +47,7 @@
   - [Minimalist setup](#minimalist-setup)
   - [Logging](#logging)
   - [Getting help](#getting-help)
+  - [License](#license)
   - [Acknowledgements](#acknowledgements)
 
 ## Introduction
@@ -781,6 +782,23 @@ All logs are to the container's stdout and can be viewed with `docker logs -t [-
 Please feel free to [open an issue on the project's GitHub](https://github.com/sdr-enthusiasts/docker-tar1090/issues).
 
 We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join](https://discord.gg/sTf9uYF) and converse.
+
+## License
+
+Copyright (C) 2023-2024, Ramon F. Kolb, kx1t, and other contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 ## Acknowledgements
 
