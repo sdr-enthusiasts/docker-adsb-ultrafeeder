@@ -47,12 +47,12 @@
   - [Minimalist setup](#minimalist-setup)
   - [Logging](#logging)
   - [Getting help](#getting-help)
-  - [License](#license)
+  - [License and Trademarks](#license-and-trademarks)
   - [Acknowledgements](#acknowledgements)
 
 ## Introduction
 
-`adsb-ultrafeeder` is a ADS-B data collector container that can be used to:
+`adsb-ultrafeeder™` is a ADS-B data collector container that can be used to:
 
 - retrieve ADS-B data from your SDR or other device
 - display it on a local map, including options to show tracks, heatmaps, and system performance graphs
@@ -63,7 +63,7 @@
 
 In order to accomplish this, the container makes use of the following underlying technologies:
 
-- SDR-Enthusiasts [Docker Base-Image](https://github.com/sdr-enthusiasts/docker-baseimage)
+- SDR-Enthusiasts™ [Docker Base-Image](https://github.com/sdr-enthusiasts/docker-baseimage)
 - [Wiedehopf's branch of `readsb`](https://github.com/wiedehopf/readsb)
 - Wiedehopf's [tar1090](https://github.com/wiedehopf/tar1090) graphical interface
 - Wiedehopf's [graphs1090](https://github.com/wiedehopf/graphs1090)
@@ -783,9 +783,11 @@ Please feel free to [open an issue on the project's GitHub](https://github.com/s
 
 We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join](https://discord.gg/sTf9uYF) and converse.
 
-## License
+## License and Trademarks
 
-Copyright (C) 2023-2024, Ramon F. Kolb, kx1t, and other contributors
+### GPLv3 License
+
+Copyright (C) 2023-2024, Ramon F. Kolb kx1t, and other contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -799,6 +801,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+### Trademarks
+
+- `ultrafeeder`, `Ultrafeeder`, `docker-adsb-ultrafeeder` are Trademarks owned by Ramon F. Kolb and the SDR-Enthusiasts organization
+- `SDR-Enthusiasts` and `SDR-E` are a Trademark owned by the SDR-Enthusiasts organization
+- Other terms are trademarks of their respective owners
 
 ## Acknowledgements
 
