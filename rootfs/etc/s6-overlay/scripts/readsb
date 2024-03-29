@@ -47,16 +47,41 @@ READSB_CMD+=("--write-json=/run/readsb")
 READSB_CMD+=("--write-state=/var/globe_history")
 READSB_CMD+=("--json-trace-interval=15")
 READSB_CMD+=("--json-reliable=1")
-
+READSB_CMD+=("--net-json-port=30047")
 READSB_CMD+=("--net-ri-port=30001")
 READSB_CMD+=("--net-ro-port=30002")
 READSB_CMD+=("--net-sbs-port=30003")
-READSB_CMD+=("--net-bi-port=30004,30104")
-READSB_CMD+=("--net-bo-port=30005")
-READSB_CMD+=("--net-beast-reduce-out-port=30006")
-READSB_CMD+=("--net-json-port=30047")
-READSB_CMD+=(--net-api-port=30152)
-READSB_CMD+=(--net-sbs-in-port=32006)
+READSB_CMD+=("--net-sbs-in-port=32006")
+
+# Handle a bunch of custom port assignments:
+#
+# net-bi-port is 30004,30104,${READSB_NET_BEAST_INPUT_PORT}
+if [[ -n "${READSB_NET_BEAST_INPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_INPUT_PORT}"; else PORTS=(); fi
+PORTS+=("30004")
+PORTS+=("30104")
+IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+READSB_CMD+=("--net-bi-port=$ports")
+
+# net-bo-port is 30005,${READSB_NET_BEAST_OUTPUT_PORT}
+if [[ -n "${READSB_NET_BEAST_OUTPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_OUTPUT_PORT}"; else PORTS=(); fi
+PORTS+=("30005")
+IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+READSB_CMD+=("--net-bo-port=$ports")
+
+# net-beast-reduce-out-port is 30006,${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}
+if [[ -n "${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}"; else PORTS=(); fi
+PORTS+=("30006")
+IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+READSB_CMD+=("--net-beast-reduce-out-port=$ports")
+
+# net-bo-port is 30152,${READSB_ENABLE_API:+unix:/run/readsb/api.sock},${READSB_NET_API_PORT}
+if [[ -n "${READSB_NET_API_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_API_PORT}"; else PORTS=(); fi
+PORTS+=("30152")
+if chk_enabled "$READSB_ENABLE_API"; then PORTS+=("unix:/run/readsb/api.sock"); fi
+IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+READSB_CMD+=("--net-api-port=$ports")
+
+#########################
 
 if chk_enabled "${READSB_ENABLE_HEATMAP:-true}"; then
     READSB_CMD+=("--heatmap-dir=/var/globe_history")
@@ -124,24 +149,9 @@ if [[ -n "$READSB_RANGE_OUTLINE_HOURS" ]]; then
     READSB_CMD+=("--range-outline-hours=$READSB_RANGE_OUTLINE_HOURS")
 fi
 
-
-##### NETWORK OPTIONS #####
-#
-
-READSB_CMD+=("--net-api-port=${READSB_NET_API_PORT:-30152}")
-
-if chk_enabled "${READSB_ENABLE_API}"; then
-    READSB_CMD+=("--net-api-port=unix:/run/readsb/api.sock")
-fi
-
 # Handle "--net-beast-reduce-interval=<seconds>"
 # Default it to 0.5 second if no value is provided, which is reasonable for feeding aggregators
 READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-0.5}")
-
-# Handle "--net-beast-reduce-out-port=<ports>"
-if [[ -n "$READSB_NET_BEAST_REDUCE_OUT_PORT" ]]; then
-    READSB_CMD+=("--net-beast-reduce-out-port=$READSB_NET_BEAST_REDUCE_OUT_PORT")
-fi
 
 if chk_enabled "$READSB_NET_SBS_REDUCE"; then
     READSB_CMD+=("--net-sbs-reduce")
@@ -157,16 +167,6 @@ fi
 
 if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_ALT" ]]; then
     READSB_CMD+=("--net-beast-reduce-filter-alt=$READSB_NET_BEAST_REDUCE_FILTER_ALT")
-fi
-
-# Handle "--net-bi-port=<ports>"
-if [[ -n "$READSB_NET_BEAST_INPUT_PORT" ]]; then
-    READSB_CMD+=("--net-bi-port=$READSB_NET_BEAST_INPUT_PORT")
-fi
-
-# Handle "--net-bo-port=<ports>"
-if [[ -n "$READSB_NET_BEAST_OUTPUT_PORT" ]]; then
-    READSB_CMD+=("--net-bo-port=$READSB_NET_BEAST_OUTPUT_PORT")
 fi
 
 # Handle "--net-buffer=<n>"
