@@ -34,7 +34,12 @@ fi
 
 # set the UUID:
 if [[ ! -f /usr/local/share/adsbexchange/adsbx-uuid ]]; then
-    ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "${READSB_CONF_ARR[@]}")" || true   # get UUID from ULTRAFEEDER_CONFIG if it exists
+    # get UUID from ULTRAFEEDER_CONFIG if it exists
+    for entry in "${READSB_CONF_ARR[@]}"; do
+        if echo "$entry" | grep -q 'adsbexchange.*uuid'; then
+            ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "$entry")"
+        fi
+    done
     ADSBX_UUID="${ADSBX_UUID:-${UUID}}" || true # ...else get it from the UUID param
     ADSBX_UUID="${ADSBX_UUID:-$(cat /proc/sys/kernel/random/uuid 2>/dev/null)}" || true # ...else generate a random one
     if [[ -n "$ADSBX_UUID" ]]; then
