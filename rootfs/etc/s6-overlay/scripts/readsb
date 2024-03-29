@@ -56,29 +56,24 @@ READSB_CMD+=("--net-sbs-in-port=32006")
 # Handle a bunch of custom port assignments:
 #
 # net-bi-port is 30004,30104,${READSB_NET_BEAST_INPUT_PORT}
-if [[ -n "${READSB_NET_BEAST_INPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_INPUT_PORT}"; else PORTS=(); fi
-PORTS+=("30004")
-PORTS+=("30104")
-IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+ports="${READSB_NET_BEAST_INPUT_PORT}${READSB_NET_BEAST_INPUT_PORT:+,}30004,20104"
+ports="$(sort -nu <<< "${ports//,/$'\n'}" | sed -z 's/\n/,/g;s/^,//g;s/,$//g')" # de-duplication
 READSB_CMD+=("--net-bi-port=$ports")
 
 # net-bo-port is 30005,${READSB_NET_BEAST_OUTPUT_PORT}
-if [[ -n "${READSB_NET_BEAST_OUTPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_OUTPUT_PORT}"; else PORTS=(); fi
-PORTS+=("30005")
-IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+ports="${READSB_NET_BEAST_OUTPUT_PORT}${READSB_NET_BEAST_OUTPUT_PORT:+,}30005"
+ports="$(sort -nu <<< "${ports//,/$'\n'}" | sed -z 's/\n/,/g;s/^,//g;s/,$//g')" # de-duplication
 READSB_CMD+=("--net-bo-port=$ports")
 
 # net-beast-reduce-out-port is 30006,${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}
-if [[ -n "${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}"; else PORTS=(); fi
-PORTS+=("30006")
-IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+ports="${READSB_NET_BEAST_REDUCE_OUTPUT_PORT}${READSB_NET_BEAST_REDUCE_OUTPUT_PORT:+,}30006"
+ports="$(sort -nu <<< "${ports//,/$'\n'}" | sed -z 's/\n/,/g;s/^,//g;s/,$//g')" # de-duplication
 READSB_CMD+=("--net-beast-reduce-out-port=$ports")
 
 # net-bo-port is 30152,${READSB_ENABLE_API:+unix:/run/readsb/api.sock},${READSB_NET_API_PORT}
-if [[ -n "${READSB_NET_API_PORT}" ]]; then readarray -d, -t PORTS <<< "${READSB_NET_API_PORT}"; else PORTS=(); fi
-PORTS+=("30152")
-if chk_enabled "$READSB_ENABLE_API"; then PORTS+=("unix:/run/readsb/api.sock"); fi
-IFS=$'\n' ports="$(printf "%s\n" "${PORTS[@]}" |sort -u)"; ports="$(sed -z 's/\n/,/g;s/^,//g;s/,$//g' <<< "$ports")" # de-duplication
+ports="${READSB_NET_API_PORT}${READSB_NET_API_PORT:+,}30152"
+if chk_enabled "$READSB_ENABLE_API"; then ports="${ports},unix:/run/readsb/api.sock"; fi
+ports="$(sort -nu <<< "${ports//,/$'\n'}" | sed -z 's/\n/,/g;s/^,//g;s/,$//g')" # de-duplication
 READSB_CMD+=("--net-api-port=$ports")
 
 #########################
