@@ -2,7 +2,7 @@
 # shellcheck shell=bash disable=SC1091,SC2015,SC2016
 
 #---------------------------------------------------------------------------------------------
-# Copyright (C) 2023, Ramon F. Kolb (kx1t)
+# Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
