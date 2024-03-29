@@ -147,8 +147,12 @@ do
 
     servername=${params[0]}
 
-    # add return port:
-    [[ -n "${return_port_arg}" ]] && MLAT_PARAM+=("--results beast,listen,${return_port_arg}") || true
+    # add return port. If none is defined, send data to the MLAT:
+    if [[ -n "${return_port_arg}" ]] && ! chk_disabled "${return_port_arg}"; then
+        MLAT_PARAM+=("--results beast,listen,${return_port_arg}")
+    elif ! chk_disabled "${return_port_arg}"; then
+        MLAT_PARAM+=("--results beast,connect,localhost:31004")
+    fi
 
     # add input-connect to the param array:
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
