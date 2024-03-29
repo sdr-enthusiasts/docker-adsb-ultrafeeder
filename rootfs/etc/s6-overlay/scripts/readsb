@@ -56,7 +56,7 @@ READSB_CMD+=("--net-sbs-in-port=32006")
 # Handle a bunch of custom port assignments:
 #
 # net-bi-port is 30004,30104,${READSB_NET_BEAST_INPUT_PORT}
-ports="${READSB_NET_BEAST_INPUT_PORT}${READSB_NET_BEAST_INPUT_PORT:+,}30004,20104"
+ports="${READSB_NET_BEAST_INPUT_PORT}${READSB_NET_BEAST_INPUT_PORT:+,}30004,30104"
 ports="$(sort -nu <<< "${ports//,/$'\n'}" | sed -z 's/\n/,/g;s/^,//g;s/,$//g')" # de-duplication
 READSB_CMD+=("--net-bi-port=$ports")
 
