@@ -63,11 +63,12 @@ do
     done
 done
 
-if (( mlat_result_sources == 0 ))
-then
-    "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
-    exec sleep infinity
-fi
+# the following is no longer reliable as mlat sources can be external
+#if (( mlat_result_sources == 0 ))
+#then
+#    "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
+#    exec sleep infinity
+#fi
 
 # Add any additional net_connectors:
 if [[ -n "$MLATHUB_NET_CONNECTOR" ]]; then
@@ -113,17 +114,18 @@ fi
 # Handle "--net-heartbeat=<rate>"
 MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 
-if [[ ! -f /run/mlathub_up ]]
-then
-    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        "${s6wrap[@]}" --args echo "Delaying MLAT hub start until container is established..."
-    fi
-    while [[ ! -f /run/mlathub_up ]]
-    do
-        sleep 2
-    done
-fi
-sleep 5     # sleep a bit so everything is well established
+# No longer any need to wait, we can start up immediate
+#if [[ ! -f /run/mlathub_up ]]
+#then
+#    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+#        "${s6wrap[@]}" --args echo "Delaying MLAT hub start until container is established..."
+#    fi
+#    while [[ ! -f /run/mlathub_up ]]
+#    do
+#        sleep 2
+#    done
+#fi
+#sleep 5     # sleep a bit so everything is well established
 
 "${s6wrap[@]}" --args echo "Starting MLATHUB..."
 
