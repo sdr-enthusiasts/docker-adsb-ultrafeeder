@@ -229,10 +229,10 @@ After you have logged into the `grafana` console the following manual steps are 
 
 Clicking `Save & Test` should return a green message indicating success. The dashboard can now be imported with the following steps:
 
-1. Hover over the `four squares` icon in the sidebar, click `+ Import`
-2. Enter `18398` into the `Import via grafana.com` section and click `Load`
-3. Select `ultrafeeder` from the bottom drop down list
-4. Click `Import` on the subsequent dialogue box
+1. Click the `+` icon at the top right and select `Import dashboard`
+2. Enter `18398` into the `Find and import dashboards` section and click `Load`
+3. Select `ultrafeeder` from the bottom drop down list under `Prometheus`
+4. Click `Import` at the bottom
 
 At this point you should see a very nice dashboard, you can find it under `General` in the `Dashboards` section.
 
@@ -246,11 +246,12 @@ If you don't have access to these URLs, it'd be safe to simply delete these pane
 
 - Step a: Log into Grafana and open the Ultrafeeder dashboard that you already created
 - Step b: Click on the cogwheel (`Dashboard Settings`) in the top of the screen
-- Step c: Choose `JSON Model` from the Setting menu on the left of the screen and click anywhere in the JSON text
-- Step d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and press the `>` button to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
-- Step e: Find all (2) instances of `my_feeder` and replace them with the IP of your tar1090 map page
-- Step f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
-- Step g: Press ESC to go back to your dashboard
+- Step c: Choose `JSON Model` from the tabs under `Settings` and click anywhere in the JSON text
+- Step d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and click the `>` icon to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
+- Step e: Find all (2) instances of `feeder_url` and replace them with the IP or hostname of your graphs1090 map URL (eg. `adsb.local:8080`)
+- Step f: Click `Save changes` at the bottom of the JSON code section
+- Step g: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
+- Step h: Press ESC to go back to your dashboard
 
 ## Advanced Configuration: support for dashboards for multiple ultrafeeder instances
 
@@ -281,11 +282,12 @@ In the previous step, you replaced the `ultrafeeder` job name by two or more new
 
 - Step 2a: Log into Grafana and open the Ultrafeeder dashboard that you already created
 - Step 2b: Click on the cogwheel (`Dashboard Settings`) in the top of the screen
-- Step 2c: Choose `JSON Model` from the Setting menu on the left of the screen and click anywhere in the JSON text
-- Step 2d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and press the `>` button to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
+- Step 2c: Choose `JSON Model` from the tabs under `Settings` and click anywhere in the JSON text
+- Step 2d. Press CTRL-F (Window/Linux) or CMD-F (Mac) and click the `>` icon to show Find and Replace:<br />![image](https://user-images.githubusercontent.com/15090643/234160327-7997cfec-8726-4974-a125-859f4f16f6b7.png)
 - Step 2e: Find all instances of `job=\"ultrafeeder\"` and replace them with `job=\"heerlen\"` (or whatever name your first feeder has)
-- Step 2f: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
-- Step 2g: Press ESC to go back to your dashboard
+- Step 2f: Click `Save changes` at the bottom of the JSON code section
+- Step 2g: Press `Save dashboard` at the top right of the screen, followed by `Save` on the next screen
+- Step 2h: Press ESC to go back to your dashboard
 
 Now your first Grafana dashboard gets its data from the your first `ultrafeeder` instance.
 
