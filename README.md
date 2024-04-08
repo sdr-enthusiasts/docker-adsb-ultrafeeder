@@ -28,6 +28,7 @@
       - [`tar1090` `config.js` Configuration - Output](#tar1090-configjs-configuration---output)
       - [`tar1090` `config.js` Configuration - Map Settings](#tar1090-configjs-configuration---map-settings)
       - [`tar1090` `config.js` Configuration - Range Rings](#tar1090-configjs-configuration---range-rings)
+      - [`tar1090` `config.js` Configuration - Expert](#tar1090-configjs-configuration---expert)
       - [`tar1090` `config.js` Configuration - Route Display](#tar1090-configjs-configuration---route-display)
     - [`graphs1090` Configuration](#graphs1090-configuration)
       - [`graphs1090` Environment Parameters](#graphs1090-environment-parameters)
@@ -532,6 +533,26 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `TAR1090_RANGERINGSCOLORS`    | Colours for each of the range rings specified in `TAR1090_RANGERINGSDISTANCES`. Accepts a comma separated list of hex colour values, each enclosed in single quotes (e.g., `TAR1090_RANGERINGSCOLORS='#FFFFF','#00000'`). No spaces. | Unset             |
 | `TAR1090_ENABLE_ACTUALRANGE`    | Set to `true` or leave unset to enable the outline of the actual range of your station on the map; set to `false` to disable the this outline | `true` (enabled) |
 
+#### `tar1090` `config.js` Configuration - Expert
+
+| Environment Variable         | Purpose                                              | Default   |
+| ---------------------------- | ---------------------------------------------------- | --------- |
+| `TAR1090_CONFIGJS_APPEND`   | Append arbitrary javascript code to config.js        | Unset     |
+
+- In case a setting is available in tar1090 but not exposed via environment variable for this container
+- For a list of possible settings, see <https://github.com/wiedehopf/tar1090/blob/master/html/config.js>
+- Incorrect syntax or any capitalization errors will cause the map to not load, you have been warned!
+- Example: `TAR1090_CONFIGJS_APPEND= MapDim=false; nexradOpacity=0.2;`
+- In the environment section of a compose file you can generally use multiple lines like this:
+
+```yaml
+    environment:
+    ...
+      - TAR1090_CONFIGJS_APPEND=
+        MapDim=false;
+        nexradOpacity=0.2;
+    ...
+```
 #### `tar1090` `config.js` Configuration - Route Display
 
 | Environment Variable  | Purpose                                            | Default                               |
