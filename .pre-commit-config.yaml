@@ -41,7 +41,7 @@ repos:
       - id: shellcheck
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.28.1
+    rev: 0.28.2
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
@@ -54,7 +54,7 @@ repos:
 
     # lint python formatting
   - repo: https://github.com/psf/black
-    rev: 24.3.0
+    rev: 24.4.0
     hooks:
       - id: black
 
