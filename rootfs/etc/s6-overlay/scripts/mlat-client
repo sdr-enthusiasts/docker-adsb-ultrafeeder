@@ -218,9 +218,9 @@ do
         "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
         "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
     elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-        "${s6wrap[@]}" --ignore-stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
+        "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
     elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-        "${s6wrap[@]}" --ignore-stderr --ignore-stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
+        "${s6wrap[@]}" --ignore=stderr --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
     fi
 
     # pid_array is indexed by the PID of each mlat_client and contains the MLAT_PARAMs for that instance
@@ -254,9 +254,9 @@ do
             if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
                 "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-                "${s6wrap[@]}" --ignore-stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
+                "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-                "${s6wrap[@]}" --ignore-stderr --ignore-stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
+                "${s6wrap[@]}" --ignore=stderr --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             fi
 
             pid_array[$!]="${pid_array[${mlat_pid}]}"

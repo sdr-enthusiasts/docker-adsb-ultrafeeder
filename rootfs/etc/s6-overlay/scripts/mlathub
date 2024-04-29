@@ -149,7 +149,7 @@ MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    exec "${s6wrap[@]}" --ignore-stdout --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdout --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    exec "${s6wrap[@]}" --ignore-stdtout --ignore-stderr --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdtout --ignore=stderr --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 fi
