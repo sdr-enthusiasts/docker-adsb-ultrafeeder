@@ -347,7 +347,7 @@ LOGLEVEL="${LOGLEVEL:-verbose}"
 if [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    exec "${s6wrap[@]}" --ignore-stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    exec "${s6wrap[@]}" --ignore-stdout --ignore-stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdout --ignore=stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
 fi
