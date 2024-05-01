@@ -1,0 +1,24 @@
+#!/command/with-contenv bash
+
+source /scripts/common
+
+if ! chk_enabled "$PROMETHEUS_ENABLE"; then
+    exit 0
+fi
+
+# serve port 9274 always replying with stats.prom regardless of requested path
+
+cat > /etc/nginx/sites-enabled/prometheus_9274 <<EOF
+server {
+    listen 9274 default_server;
+    root /var/www/html;
+    server_name _;
+    location /metrics {
+        alias /run/readsb/stats.prom;
+    }
+    location / {
+        alias /run/readsb/stats.prom;
+        rewrite (.*) /metrics last;
+    }
+}
+EOF
