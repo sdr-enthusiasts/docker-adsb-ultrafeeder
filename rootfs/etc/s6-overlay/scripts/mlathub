@@ -51,41 +51,6 @@ MLATHUB_CMD+=("--net-bi-port=${MLATHUB_BEAST_IN_PORT:-31004}")
 MLATHUB_CMD+=("--net-bo-port=${MLATHUB_BEAST_OUT_PORT:-31005}")
 MLATHUB_CMD+=("--net-beast-reduce-out-port=${MLATHUB_BEAST_REDUCE_OUT_PORT:-31006}")
 
-# We need to get the mlat results ports from the parameters:
-# parse MLAT_CONFIG string into mlat_configs array
-# Strip any extraneous spaces:
-MLAT_CONFIG="${MLAT_CONFIG#"${MLAT_CONFIG%%[![:space:]]*}"}"   # strip leading space
-MLAT_CONFIG="${MLAT_CONFIG//; /;}"
-# remove any newlines:
-MLAT_CONFIG="${MLAT_CONFIG//$'\n'/}"
-readarray -td ";" mlat_configs < <(printf '%s' "${MLAT_CONFIG// /}")
-# Now loop through the MLAT_CONFIG items and add a net-connector for each of them:
-mlat_result_sources=0
-for instance in "${mlat_configs[@]}"
-do
-    # shellcheck disable=SC2015
-    [[ -z "${instance}" ]] && continue || true
-    # put individual params into the $params array:
-    readarray -td "," params < <(printf '%s' "${instance}")
-
-    for ((i=2; i<${#params[*]}; i++))
-    do
-        if [[ -n "${params[i]}" ]] && [[ "${params[i]}" =~ ^[0-9]+$ ]]; then
-            # the parameter is a number and it is assumed that this is the beast_results port
-            MLATHUB_CMD+=("--net-connector=localhost,${params[i]},beast_in")
-            (( mlat_result_sources++ )) || true
-            break
-        fi
-    done
-done
-
-# the following is no longer reliable as mlat sources can be external
-#if (( mlat_result_sources == 0 ))
-#then
-#    "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG - no need to start MLATHUB"
-#    exec sleep infinity
-#fi
-
 # Add any additional net_connectors:
 if [[ -n "$MLATHUB_NET_CONNECTOR" ]]; then
         # Strip any extraneous spaces:

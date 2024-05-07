@@ -147,10 +147,12 @@ do
 
     servername=${params[0]}
 
-    # add return port. If none is defined, send data to the MLAT:
+    # add return port if defined
     if [[ -n "${return_port_arg}" ]] && ! chk_disabled "${return_port_arg}"; then
         MLAT_PARAM+=("--results beast,listen,${return_port_arg}")
-    elif ! chk_disabled "${return_port_arg}"; then
+    fi
+    # send data to MLATHUB unless disabled
+    if ! chk_disabled "${return_port_arg}" && ! chk_enabled "${MLATHUB_DISABLE}"; then
         MLAT_PARAM+=("--results beast,connect,localhost:${MLATHUB_BEAST_IN_PORT:-31004}")
     fi
 
