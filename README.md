@@ -435,9 +435,24 @@ An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the c
 - make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
 - create outbound connections using any supported format to send your Beast data wherever you want
 
-Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` parameter. If you want to show any additional MLAT results (for example, those from `piaware`), you should add a separate `READSB_NET_CONNECTOR` for them. Adding these sources only to `MLATHUB_NET_CONNECTOR` will make the data available on the MLATHUB, but won't display them on your `tar1090` map.
+Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` or `ULTRAFEEDER_CONFIG=mlat,...` parameters. If you want to show any MLAT results from sources that have their own feeder containers (for example, those from `piaware`), you should add these sources like this:
 
-Generally, there is little to configure, but there are a few parameters that you can set or change:
+```yaml
+   - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol;
+```
+
+Where:
+
+- `host` is the hostname where the `MLAT results` are coming from. This can be another container name (e.g., `piaware`) or the IP address of your machine on which `mlat-client` is running. Note -- this is NOT the hostname or IP of the MLAT Server or aggregator that processes the MLAT data
+- `port` is the port on which the `mlat-client` on the `host` makes its results available
+- `protocol` is the output protocol which is almost always `beast_in`
+
+For example:
+```yaml
+   - ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
+```
+
+Generally, there is little else to configure, but there are a few parameters that you can set or change:
 
 | Variable                        | Description                                                                                                                                                                                                                                                                        | Default if omitted |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
@@ -445,7 +460,7 @@ Generally, there is little to configure, but there are a few parameters that you
 | `MLATHUB_BEAST_IN_PORT`         | TCP port you where you can send additional MLAT results to, in Beast format                                                                                                                                                                                                        | `31004`            |
 | `MLATHUB_BEAST_OUT_PORT`        | TCP port where consolidated MLAT results will be available in Beast format                                                                                                                                                                                                         | `31005`            |
 | `MLATHUB_BEAST_REDUCE_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format with reduced data rates                                                                                                                                                                                 | `31006`            |
-| `MLATHUB_NET_CONNECTOR`         | List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset              |
+| `MLATHUB_NET_CONNECTOR`         | (Obsolete, please use `ULTRAFEEDER_CONFIG=mlathub,...` instead.) List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset              |
 | `MLATHUB_DISABLE`               | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container                                                                                                                                                                           | Unset              |
 
 ### Web Gui (`tar1090`) Configuration
