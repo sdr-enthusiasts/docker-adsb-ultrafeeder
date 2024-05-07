@@ -232,10 +232,6 @@ done
 
 sleep 5 & wait $!
 
-# All MLAT Clients are up, so set the flag. This flag is read by MLATHUB as a sign that it's
-# safe to start up
-touch /run/mlathub_up
-
 # Now iterate over all MLAT-client instances and check if they are still running:
 while true
 do

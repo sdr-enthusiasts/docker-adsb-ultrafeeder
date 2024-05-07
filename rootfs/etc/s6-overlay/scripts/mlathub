@@ -95,19 +95,6 @@ fi
 # Handle "--net-heartbeat=<rate>"
 MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 
-# No longer any need to wait, we can start up immediate
-#if [[ ! -f /run/mlathub_up ]]
-#then
-#    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-#        "${s6wrap[@]}" --args echo "Delaying MLAT hub start until container is established..."
-#    fi
-#    while [[ ! -f /run/mlathub_up ]]
-#    do
-#        sleep 2
-#    done
-#fi
-#sleep 5     # sleep a bit so everything is well established
-
 "${s6wrap[@]}" --args echo "Starting MLATHUB..."
 
 # shellcheck disable=SC2086,SC2069
