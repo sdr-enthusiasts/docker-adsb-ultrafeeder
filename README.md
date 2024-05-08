@@ -191,7 +191,7 @@ The following parameters must be set (mandatory) for the container to function:
 ##### Optional Parameters
 
 | Variable                      | Description                                                                                                                      | Controls which `readsb` option | Default   |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------- |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
 | `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset                          |
 | `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          | Unset                          |
 | `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                       | Unset                          |
@@ -243,7 +243,7 @@ If you want to connect your SDR to the container, here's how to do that:
 
 If you have set `READSB_GAIN=autogain`, then the system will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
 
-Note that AutoGain is not related to the SDR's AGC setting (controlled with the `READSB_RTLSDR_ENABLE_AGC` variable). We do not recommend enabling AGC for Ultrafeeder or any other ADS-B decoder. 
+Note that AutoGain is not related to the SDR's AGC setting (controlled with the `READSB_RTLSDR_ENABLE_AGC` variable). We do not recommend enabling AGC for Ultrafeeder or any other ADS-B decoder.
 
 There are 2 distinct periods in which the container will attempt to figure out the gain:
 
@@ -424,7 +424,7 @@ where:
 
 Note - the optional parameters can be given in any order.
 
-The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (_). 
+The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (_).
 
 #### Configuring the built-in MLAT Hub
 
@@ -448,6 +448,7 @@ Where:
 - `protocol` is the output protocol which is almost always `beast_in`
 
 For example:
+
 ```yaml
    - ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
 ```
@@ -571,6 +572,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
         nexradOpacity=0.2;
     ...
 ```
+
 #### `tar1090` `config.js` Configuration - Route Display
 
 | Environment Variable  | Purpose                                            | Default                               |
@@ -744,8 +746,7 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 
 | Path                                                                                                          | Purpose                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`                                                      | Holds range outline data, heatmap / replay data and traces if enabled.                                                           |
-| _Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path._ |
+| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`                                                      | Holds range outline data, heatmap / replay data and traces if enabled. _Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path._ |
 | `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090`                                                      | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above)                                     |
 | `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`                                                            | Holds graphs1090 & performance data                                                                                              |
 | `/proc/diskstats:/proc/diskstats:ro`                                                                          | Makes disk statistics available to `graphs1090`                                                                                  |
