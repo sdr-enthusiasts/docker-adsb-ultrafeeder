@@ -17,10 +17,17 @@
 # If not, see <https://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------------------------
 
-APPNAME="mlathub"
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
-s6wrap=(s6wrap --quiet --timestamps --prepend="${APPNAME}")
+s6wrap=(s6wrap --quiet --timestamps --prepend="$SCRIPT_NAME")
+
+LOGLEVEL="${LOGLEVEL,,}"
+LOGLEVEL="${LOGLEVEL:-verbose}"
+chk_disabled "$LOGLEVEL" && LOGLEVEL="none" || true
+if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then 
+    [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
+    LOGLEVEL="verbose"
+fi
 
 if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]]; then
     "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
@@ -98,10 +105,10 @@ MLATHUB_CMD+=("--net-heartbeat=${READSB_NET_HEARTBEAT:-35}")
 "${s6wrap[@]}" --args echo "Starting MLATHUB..."
 
 # shellcheck disable=SC2086,SC2069
-if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+if [[ "${LOGLEVEL}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
-elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+elif [[ "${LOGLEVEL}" == "error" ]]; then
     exec "${s6wrap[@]}" --ignore=stdout --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
-elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+elif [[ "${LOGLEVEL}" == "none" ]]; then
     exec "${s6wrap[@]}" --ignore=stdtout --ignore=stderr --args "${MLATHUB_BIN}" "${MLATHUB_CMD[@]}" $MLATHUB_EXTRA_ARGS
 fi

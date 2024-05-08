@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC1091,SC2015
+# shellcheck shell=bash disable=SC1091,SC2015,SC2154
 
 source /scripts/common
 
@@ -20,4 +20,4 @@ source /scripts/common
 # If not, see <https://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------------------------
 
-[[ -f /.CONTAINER_VERSION ]] && echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true
+[[ -f /.CONTAINER_VERSION ]] && "${s6wrap[@]}" echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true

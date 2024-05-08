@@ -23,6 +23,14 @@ s6wrap=(s6wrap --quiet --timestamps --prepend="${SCRIPT_NAME}")
 
 mkdir -p /run/readsb
 
+LOGLEVEL="${LOGLEVEL,,}"
+LOGLEVEL="${LOGLEVEL:-verbose}"
+chk_disabled "$LOGLEVEL" && LOGLEVEL="none" || true
+if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then 
+    [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
+    LOGLEVEL="verbose"
+fi
+
 # Build the readsb command line based on options
 READSB_BIN="/usr/local/bin/readsb"
 
@@ -340,10 +348,6 @@ if chk_enabled "$PROMETHEUS_ENABLE"; then
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
 
-if ! [[ "${LOGLEVEL,,}" =~ ^(verbose|error|none)$ ]]; then 
-    [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
-    LOGLEVEL="verbose"
-fi
 # shellcheck disable=SC2086
 if [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS

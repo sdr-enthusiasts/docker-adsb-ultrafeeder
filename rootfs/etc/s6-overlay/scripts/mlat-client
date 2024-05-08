@@ -22,11 +22,19 @@ trap 'pkill -P "$$" || true; s6wrap --quiet --timestamps --prepend=mlat-client -
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
 
-s6wrap=(s6wrap --quiet --timestamps --prepend="$(basename "$0")")
+s6wrap=(s6wrap --quiet --timestamps --prepend="$SCRIPT_NAME")
 
 "${s6wrap[@]}" --args echo "Started as an s6 service"
 
 MLAT_CMD="/usr/bin/mlat-client"
+
+LOGLEVEL="${LOGLEVEL,,}"
+LOGLEVEL="${LOGLEVEL:-verbose}"
+chk_disabled "$LOGLEVEL" && LOGLEVEL="none" || true
+if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then 
+    [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
+    LOGLEVEL="verbose"
+fi
 
 RESTARTTIMER=15
 declare -A pid_array
@@ -215,13 +223,14 @@ do
 
     # ------------------------------------------------
     # run this Mlat_client instance in the background:
+
     #shellcheck disable=SC2069,SC2086
-    if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-        "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "starting: ${MLAT_CMD} ${MLAT_PARAM[*]}"
+    if [[ "${LOGLEVEL}" == "verbose" ]]; then
+        "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "starting: ${execstring}"
         "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
-    elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+    elif [[ "${LOGLEVEL}" == "error" ]]; then
         "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
-    elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+    elif [[ "${LOGLEVEL}" == "none" ]]; then
         "${s6wrap[@]}" --ignore=stderr --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
     fi
 
@@ -249,11 +258,11 @@ do
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
             #shellcheck disable=SC2069,SC2086
-            if [[ -z "${LOGLEVEL}" ]] || [[ "${LOGLEVEL,,}" == "verbose" ]]; then
+            if [[ "${LOGLEVEL}" == "verbose" ]]; then
                 "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
-            elif [[ "${LOGLEVEL,,}" == "error" ]]; then
+            elif [[ "${LOGLEVEL}" == "error" ]]; then
                 "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
-            elif [[ "${LOGLEVEL,,}" == "none" ]]; then
+            elif [[ "${LOGLEVEL}" == "none" ]]; then
                 "${s6wrap[@]}" --ignore=stderr --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             fi
 

@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC2015,SC2016,SC1091,SC2001
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091,SC2001,SC2154
 
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
@@ -19,7 +19,6 @@
 
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
-s6wrap=(s6wrap --quiet --timestamps --prepend="$(basename "$0")" --args)
 
 # Check if ADSBExchange is configured
 if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
