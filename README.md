@@ -190,13 +190,13 @@ The following parameters must be set (mandatory) for the container to function:
 
 ##### Optional Parameters
 
-| Variable                      | Description                                                                                                                      | Controls which `readsb` option | Default   |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset                          |
-| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          | Unset                          |
-| `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                       | Unset                          |
-| `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        | `3000`                         |
-| `READSB_MAX_RANGE`            | Optional. Maximum range (in nautical miles).                                                                                     | `300`                          |
+| Environment Variable          | Description                                                                                                                      | Controls which `readsb` option | Default   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------- |
+| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset                          |           |
+| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          | Unset                          |           |
+| `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                       | Unset                          |           |
+| `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        | `3000`                         |           |
+| `READSB_MAX_RANGE`            | Optional. Maximum range (in nautical miles).                                                                                     | `300`                          |           |
 | `READSB_ENABLE_BIASTEE`       | Set to `true` to enable bias tee on supporting interfaces                                                                        |                                | Unset     |
 | `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location in metadata: 0=no location, 1=approximate, 2=exact                                                 | `--rx-location-accuracy=<n>`   | `2`       |
 | `READSB_HEATMAP_INTERVAL`     | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value)   | `--heatmap=<sec>`              | `15`      |
