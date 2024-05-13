@@ -9,7 +9,10 @@ updates:
     directory: "/" # Location of package manifests
     target-branch: "main"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "00:00"
+      timezone: "Etc/UTC"
     assignees:
       - "fredclausen"
 
@@ -17,6 +20,9 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+      day: "saturday"
+      time: "00:00"
+      timezone: "Etc/UTC"
     assignees:
       - "fredclausen"
