@@ -175,7 +175,7 @@ docker stop prometheus
 docker compose up -d
 ```
 
-This will add the following to the bottom of the `prometheus.xml` file:
+This will add the following to the bottom of the `prometheus.yml` file:
 
 ```yaml
 - job_name: "ultrafeeder"
@@ -190,17 +190,17 @@ This will add the following to the bottom of the `prometheus.xml` file:
 If you are using the `docker-dump978` container to receive UAT data (USA only!), you can add a Prometheus scraper for this also needs to be told where to look for the data from the ultrafeeder. We add a target to the prometheus configuration file to do this. Please copy and paste the following. Make sure to replace `ip_xxxxxxx` with the IP address or hostname of the machine where `dump978` is running:
 
 ```bash
-docker exec -it prometheus sh -c "echo -e \"  - job_name: 'dump978'\n    static_configs:\n      - targets: ['ip_xxxxxxx:9274']\" >> /etc/prometheus/prometheus.yml"
+docker exec -it prometheus sh -c "echo -e \"  - job_name: 'dump978'\n    static_configs:\n      - targets: ['ip_xxxxxxx:9273']\" >> /etc/prometheus/prometheus.yml"
 docker stop prometheus
 docker compose up -d
 ```
 
-This will add the following to the bottom of the `prometheus.xml` file:
+This will add the following to the bottom of the `prometheus.yml` file:
 
 ```yaml
 - job_name: "dump978"
   static_configs:
-    - targets: ["ip_xxxxxxx:9274"]
+    - targets: ["ip_xxxxxxx:9273"]
 ```
 
 (If you screw this up, **do NOT** re-run the command. Instead, try `sudo nano /opt/grafana/prometheus/config/prometheus.yml` and fix it that way.)
