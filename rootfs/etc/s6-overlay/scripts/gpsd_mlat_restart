@@ -1,0 +1,50 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091,SC2001,SC2154
+
+#---------------------------------------------------------------------------------------------
+# Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------------------------
+
+source /scripts/common
+
+# Check if GPSD_IN has been enabled
+if ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    "${s6wrap[@]}" echo "GPSD not enabled - no need to check receiver location"
+    exec sleep infinity
+fi
+
+# Now wait a bit to allow GPS to establish itself
+sleep "${GPSD_INITIAL_WAIT:-300}"
+
+# Make sure that receiver.json exists; if it doesn't we need to wait for it
+while ! [[ -f /run/readsb/receiver.json ]]; do
+    sleep 1 & wait $!
+done
+
+# Get initial lat/lon/alt
+lat="$(jq -r .lat /run/readsb/receiver.json)"
+lon="$(jq -r .lon /run/readsb/receiver.json)"
+
+while :; do
+    sleep "${GPSD_CHECK_INTERVAL:30}" & wait $!
+    new_lat="$(jq -r .lat /run/readsb/receiver.json)"
+    new_lon="$(jq -r .lon /run/readsb/receiver.json)"
+    new_alt="$(jq -r .alt_m_amsl /run/readsb/receiver.json)"
+    distance="$(nice -n 20 distance "$lat" "$lon" "$new_lat" "$new_lon")"
+    if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE} )); then
+        "${s6wrap[@]}" echo "Receiver moved ${distance%%.*} meters - restarting all mlat-clients"
+         pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1
+    fi
+done

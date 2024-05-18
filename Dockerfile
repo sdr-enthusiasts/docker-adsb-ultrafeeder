@@ -1,3 +1,14 @@
+FROM ghcr.io/sdr-enthusiasts/docker-baseimage:base AS build
+
+RUN set -x && \
+    apt-get update -y && \
+    apt-get install -q -o Dpkg::Options::="--force-confnew" -y \
+        git gcc && \
+    cd / && \
+    git clone --depth=1 --single-branch https://github.com/sdr-enthusiasts/docker-vesselalert.git && \
+    cd /docker-vesselalert/src && \
+    gcc -static distance.c -o distance -lm -Ofast
+
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
 LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
@@ -58,6 +69,7 @@ RUN TEMP_PACKAGES=() && \
     echo "alias nano=\"nano -l\"" >> /root/.bashrc
 
 COPY rootfs/ /
+COPY --from=build /docker-vesselalert/src/distance /usr/local/bin/distance
 
 # Add Container Version
 RUN set -x && \

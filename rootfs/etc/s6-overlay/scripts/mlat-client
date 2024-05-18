@@ -51,17 +51,17 @@ then
     exec sleep infinity
 fi
 
-if [[ -z "$LAT$READSB_LAT" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined - MLAT will be disabled."
+if [[ -z "$LAT$READSB_LAT" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined or GPSD must be enabled - MLAT will be disabled."
     exec sleep infinity
 fi
 
-if [[ -z "$LONG$READSB_LON" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined - MLAT will be disabled."
+if [[ -z "$LONG$READSB_LON" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined or GPSD must be enabled - MLAT will be disabled."
     exec sleep infinity
 fi
-if [[ -z "$ALT$READSB_ALT" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined - MLAT will be disabled."
+if [[ -z "$ALT$READSB_ALT" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined or GPSD must be enabled - MLAT will be disabled."
     exec sleep infinity
 fi
 
