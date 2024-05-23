@@ -3,7 +3,7 @@ FROM ghcr.io/sdr-enthusiasts/docker-baseimage:base AS build
 RUN set -x && \
     apt-get update -y && \
     apt-get install -q -o Dpkg::Options::="--force-confnew" -y \
-        git gcc && \
+        gcc && \
     cd / && \
     curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance.c -o /distance.c && \
     gcc -static distance.c -o distance -lm -Ofast
@@ -68,7 +68,7 @@ RUN TEMP_PACKAGES=() && \
     echo "alias nano=\"nano -l\"" >> /root/.bashrc
 
 COPY rootfs/ /
-COPY --from=build /docker-vesselalert/src/distance /usr/local/bin/distance
+COPY --from=build /distance /usr/local/bin/distance
 
 # Add Container Version
 RUN set -x && \
