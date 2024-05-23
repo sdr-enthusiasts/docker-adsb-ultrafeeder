@@ -42,7 +42,7 @@ while :; do
     new_lat="$(jq -r .lat /run/readsb/gpsd.json)"
     new_lon="$(jq -r .lon /run/readsb/gpsd.json)"
     distance="$(nice -n 20 distance "$lat" "$lon" "$new_lat" "$new_lon")"
-    if (( ${distance%%.*} > GPSD_MIN_DISTANCE )); then
+    if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE:-20} )); then
         "${s6wrap[@]}" echo "Receiver moved ${distance%%.*} meters - restarting all mlat-clients"
         # flag to the mlat-client script that it should try to use GPS coords instead of the predefined LAT/LON
         touch /run/.gpsd_is_active
