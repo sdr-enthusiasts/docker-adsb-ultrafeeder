@@ -19,32 +19,35 @@
 
 source /scripts/common
 
-# Check if GPSD_IN has been enabled
-if ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
-    "${s6wrap[@]}" echo "GPSD not enabled - no need to check receiver location"
-    exec sleep infinity
+# Check every 60 secs if GPSD has been enabled
+if [[ ! -f /run/readsb/gpsd.json ]] || [[ "$(jq -r .lat /run/readsb/gpsd.json)" == "null" ]]; then
+    sleep 60 & wait $!
 fi
 
-# Now wait a bit to allow GPS to establish itself
-sleep "${GPSD_INITIAL_WAIT:-300}"
-
-# Make sure that receiver.json exists; if it doesn't we need to wait for it
-while ! [[ -f /run/readsb/receiver.json ]]; do
-    sleep 1 & wait $!
+# Then wait until all mlat-client instances have started
+while [[ ! -f /run/.all_mlatclient_instances_have_started ]]; do
+    sleep 5 & wait $!
 done
 
+rm -f /run/.all_mlatclient_instances_have_started
+
+# Now wait a bit to allow GPS to establish itself
+sleep "${GPSD_INITIAL_WAIT:-60}"
+
 # Get initial lat/lon/alt
-lat="$(jq -r .lat /run/readsb/receiver.json)"
-lon="$(jq -r .lon /run/readsb/receiver.json)"
+lat="${LAT:-${READSB_LAT:-$(jq -r .lat /run/readsb/gpsd.json)}}"
+lon="${LONG:-${READSB_LON:-$(jq -r .lon /run/readsb/gpsd.json)}}"
 
 while :; do
-    sleep "${GPSD_CHECK_INTERVAL:30}" & wait $!
-    new_lat="$(jq -r .lat /run/readsb/receiver.json)"
-    new_lon="$(jq -r .lon /run/readsb/receiver.json)"
-    new_alt="$(jq -r .alt_m_amsl /run/readsb/receiver.json)"
+    new_lat="$(jq -r .lat /run/readsb/gpsd.json)"
+    new_lon="$(jq -r .lon /run/readsb/gpsd.json)"
     distance="$(nice -n 20 distance "$lat" "$lon" "$new_lat" "$new_lon")"
-    if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE} )); then
+    if (( ${distance%%.*} > GPSD_MIN_DISTANCE )); then
         "${s6wrap[@]}" echo "Receiver moved ${distance%%.*} meters - restarting all mlat-clients"
-         pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1
+        # flag to the mlat-client script that it should try to use GPS coords instead of the predefined LAT/LON
+        touch /run/.gpsd_is_active
+        # kill the mlat-client instances so they get restarted with the new GPS coords
+        pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1
     fi
+    sleep "${GPSD_CHECK_INTERVAL:30}" & wait $!
 done
