@@ -46,10 +46,10 @@ while :; do
     distance="$(nice -n 20 distance "$lat" "$lon" "$new_lat" "$new_lon")"
     if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE:-20} )); then
         "${s6wrap[@]}" echo "Receiver moved ${distance%%.*} meters - restarting all mlat-clients"
-        # flag to the mlat-client script that it should try to use GPS coords instead of the predefined LAT/LON
-        touch /run/.gpsd_is_active
         # kill the mlat-client instances so they get restarted with the new GPS coords
         pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1
+        lat="$new_lat"
+        lon="$new_lon"
     fi
     sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
 done
