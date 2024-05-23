@@ -38,6 +38,8 @@ sleep "${GPSD_INITIAL_WAIT:-60}"
 lat="${LAT:-${READSB_LAT:-$(jq -r .lat /run/readsb/gpsd.json)}}"
 lon="${LONG:-${READSB_LON:-$(jq -r .lon /run/readsb/gpsd.json)}}"
 
+"${s6wrap[@]}" echo "GPSD is active. Your mlat-client will restart with new coordinates if you move more than ${GPSD_MIN_DISTANCE:-20} meters"
+
 while :; do
     new_lat="$(jq -r .lat /run/readsb/gpsd.json)"
     new_lon="$(jq -r .lon /run/readsb/gpsd.json)"
