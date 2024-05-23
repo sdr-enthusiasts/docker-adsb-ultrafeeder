@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC1091,SC2015,SC2016
+# shellcheck shell=bash disable=SC1091,SC2015,SC2016,SC2001
 
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
@@ -176,24 +176,39 @@ do
     fi
 
     # add LAT/LON/ALT to instance:
-    if [[ -n "${lat_arg}" ]]; then
-        MLAT_PARAM+=(--lat "${lat_arg}")
+    # see if we need to use GPS coords:
+    unset new_lat
+    unset new_lon
+    unset new_alt
+    if [[ -f /run/.gpsd_is_active && -f /run/readsb/receiver.json ]]; then
+        new_lat="$(jq -r .lat /run/readsb/receiver.json)"
+        new_lon="$(jq -r .lon /run/readsb/receiver.json)"
+        new_alt="$(jq -r .alt_m_amsl /run/readsb/receiver.json)"
+        if [[ "$new_lat" == "null" ]] || [[ "$new_lon" == "null" ]] || [[ "$new_alt" == "null" ]]; then 
+            unset new_lat
+            unset new_lon
+            unset new_alt
+        fi
+    fi
+
+    if [[ -n "${new_lat:-$lat_arg}" ]]; then
+        MLAT_PARAM+=(--lat "${new_lat:-$lat_arg}")
     elif [[ -n "${LAT}" ]]; then
         MLAT_PARAM+=(--lat "${LAT}")
     elif [[ -n "${READSB_LAT}" ]]; then
         MLAT_PARAM+=(--lat "${READSB_LAT}")
     fi
 
-    if [[ -n "${lon_arg}" ]]; then
-        MLAT_PARAM+=(--lon "${lon_arg}")
+    if [[ -n "${new_lon:-$lon_arg}" ]]; then
+        MLAT_PARAM+=(--lon "${new_lon:-$lon_arg}")
     elif [[ -n "${LONG}" ]]; then
         MLAT_PARAM+=(--lon "${LONG}")
     elif [[ -n "${READSB_LON}" ]]; then
         MLAT_PARAM+=(--lon "${READSB_LON}")
     fi
 
-    if [[ -n "${alt_arg}" ]]; then
-        MLAT_PARAM+=(--alt "${alt_arg}")
+    if [[ -n "${new_alt:-$alt_arg}" ]]; then
+        MLAT_PARAM+=(--alt "${new_alt:-$alt_arg}")
     elif [[ -n "${ALT}" ]]; then
         MLAT_PARAM+=(--alt "${ALT}")
     elif [[ -n "${READSB_ALT}" ]]; then
@@ -240,6 +255,7 @@ do
 done
 
 sleep 5 & wait $!
+touch /run/.all_mlatclient_instances_have_started
 
 # Now iterate over all MLAT-client instances and check if they are still running:
 while true
@@ -257,6 +273,18 @@ do
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
+            # If GPSD is active, then replace the lat/lon/alt params with the ones from GPSD
+            if [[ -f /run/readsb/gpsd.json ]] && [[ "$(jq -r .lat /run/readsb/gpsd.json)" != "null" ]]; then
+                new_lat="$(jq -r .lat /run/readsb/gpsd.json)"
+                new_lon="$(jq -r .lon /run/readsb/gpsd.json)"
+                new_alt="$(jq -r .altMSL /run/readsb/gpsd.json)"
+                if [[ "$new_lat" != "null" ]] && [[ "$new_lon" != "null" ]] && [[ "$new_alt" != "null" ]]; then 
+                    execstring="$(sed "s/^\(.*\s\+--lat\s\+\)[0-9.-]\+\(.*\)$/\1${new_lat}\2/g" <<< "$execstring")"
+                    execstring="$(sed "s/^\(.*\s\+--lon\s\+\)[0-9.-]\+\(.*\)$/\1${new_lon}\2/g" <<< "$execstring")"
+                    execstring="$(sed "s/^\(.*\s\+--alt\s\+\)[mft0-9.-]\+\(.*\)$/\1${new_alt}m\2/g" <<< "$execstring")"
+                fi
+            fi
+
             #shellcheck disable=SC2069,SC2086
             if [[ "${LOGLEVEL}" == "verbose" ]]; then
                 "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
@@ -270,5 +298,11 @@ do
             unset "pid_array[${mlat_pid}]"
         fi
     done
-    sleep 10 & wait $!
+
+    # If GPSD is running, do more frequent checks than if it's not running
+    if [[ -f /run/readsb/gpsd.json ]] && [[ "$(jq -r .lat /run/readsb/gpsd.json)" != "null" ]]; then
+        sleep 1 & wait $!
+    else
+        sleep 10 & wait $!
+    fi
 done
