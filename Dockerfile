@@ -2,13 +2,10 @@ FROM ghcr.io/sdr-enthusiasts/docker-baseimage:base AS build
 
 RUN set -x && \
     apt-get update -y && \
-    apt-get install -q -o Dpkg::Options::="--force-confnew" -y --no-install-recommends \
+    apt-get install -q -o Dpkg::Options::="--force-confnew" -y \
         git gcc && \
     cd / && \
-    git clone --depth=1 --single-branch https://github.com/sdr-enthusiasts/docker-vesselalert.git && \
-    cd /docker-vesselalert/src && \
-    # make the output in meters instead of nautical miles:
-    sed -i 's|/ 1852.0||g' distance.c && \
+    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance.c -o /distance.c && \
     gcc -static distance.c -o distance -lm -Ofast
 
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
