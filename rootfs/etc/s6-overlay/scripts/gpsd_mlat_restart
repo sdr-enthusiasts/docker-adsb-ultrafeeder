@@ -19,17 +19,16 @@
 
 source /scripts/common
 
-# Check every 60 secs if GPSD has been enabled
-if [[ ! -f /run/readsb/gpsd.json ]] || [[ "$(jq -r .lat /run/readsb/gpsd.json)" == "null" ]]; then
-    sleep 60 & wait $!
-fi
-
-# Then wait until all mlat-client instances have started
+# Wait until all mlat-client instances have started
 while [[ ! -f /run/.all_mlatclient_instances_have_started ]]; do
     sleep 5 & wait $!
 done
-
 rm -f /run/.all_mlatclient_instances_have_started
+
+# Check every 60 secs if GPSD has been enabled
+while [[ ! -f /run/readsb/gpsd.json ]] || [[ "$(jq -r .lat /run/readsb/gpsd.json)" == "null" ]]; do
+    sleep 60 & wait $!
+done
 
 # Now wait a bit to allow GPS to establish itself
 sleep "${GPSD_INITIAL_WAIT:-60}"
