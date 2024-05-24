@@ -123,6 +123,15 @@ do
             MLATHUB_CONF_ARR+=("--net-connector=${mlathub_str}")
         ;;
 
+        gpsd)
+            # add gpsd_in parameter to $READSB_CONF_ARR
+            readsb_str="${param[1]},${param[2]}"
+            if [[ -n "${param[3]}" ]] && [[ -n "${param[4]}" ]]; then
+                readsb_str="$readsb_str,${param[3]},${param[4]}"
+            fi
+            READSB_CONF_ARR+=("--net-connector=${readsb_str},gpsd_in")
+        ;;
+
         *)
             # Check if there's anything in ${ULTRAFEEDER_NET_CONNECTOR} -- if not, it's a bad config element. If yes, add it as if it were ADSB
             if [[ -z "${ULTRAFEEDER_NET_CONNECTOR}" ]]; then
