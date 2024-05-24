@@ -265,7 +265,10 @@ do
         if ! kill -0 "${mlat_pid}" >/dev/null 2>&1
         then
             # it exited - let's restart:
-            sleep "${RESTARTTIMER}" & wait $!
+            if [[ ! -f /run/readsb/gpsd.json ]] || [[ "$(jq -r .lat /run/readsb/gpsd.json)" == "null" ]]; then
+                # only sleep for a bit if the restarts aren't caused by GPS movement:
+                sleep "${RESTARTTIMER}" & wait $!
+            fi
             servername="$(awk '{print $4}' <<< "${pid_array[$mlat_pid]}")"
             servername="${servername%%:*}"
 
@@ -287,6 +290,7 @@ do
 
             #shellcheck disable=SC2069,SC2086
             if [[ "${LOGLEVEL}" == "verbose" ]]; then
+                "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "Restarting: ${execstring}"
                 "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             elif [[ "${LOGLEVEL}" == "error" ]]; then
                 "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
