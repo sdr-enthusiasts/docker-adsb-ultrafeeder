@@ -5,8 +5,8 @@ RUN set -x && \
     apt-get install -q -o Dpkg::Options::="--force-confnew" -y \
         gcc && \
     cd / && \
-    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance.c -o /distance.c && \
-    gcc -static distance.c -o distance -lm -Ofast
+    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance-in-meters.c -o /distance-in-meters.c && \
+    gcc -static distance-in-meters.c -o distance -lm -Ofast
 
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
