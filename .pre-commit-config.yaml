@@ -28,7 +28,7 @@ repos:
         exclude: ^(Dockerfile*)
 
   - repo: https://github.com/codespell-project/codespell.git
-    rev: "v2.2.6" # Use the sha / tag you want to point at
+    rev: "v2.3.0" # Use the sha / tag you want to point at
     hooks:
       - id: codespell
         types: [text]
@@ -41,7 +41,7 @@ repos:
       - id: shellcheck
 
   - repo: https://github.com/sirosen/check-jsonschema
-    rev: 0.28.3
+    rev: 0.28.4
     hooks:
       - id: check-github-actions
       - id: check-github-workflows
