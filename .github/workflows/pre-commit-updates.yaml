@@ -21,3 +21,4 @@ jobs:
           body: Update pre-commit hooks
           labels: dependencies
           delete-branch: True
+          assignees: "fredclausen"
