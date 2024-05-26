@@ -95,7 +95,10 @@ if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDE
     old_lon="$new_lon"
 
     # in seconds
-    no_movement_required=19
+    no_movement_required=90
+    if (( no_movement_required < "${GPSD_CHECK_INTERVAL:-30}" )); then
+        no_movement_required="${GPSD_CHECK_INTERVAL:-30}"
+    fi
     # set no_movement to a number higher than the required time of no movement
     # this way on startup there is no bogus message printed about starting mlat-clients with a new location
     no_movement=$(( 2 * no_movement_required ))
