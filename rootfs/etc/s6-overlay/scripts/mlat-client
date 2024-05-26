@@ -51,18 +51,67 @@ then
     exec sleep infinity
 fi
 
-if [[ -z "$LAT$READSB_LAT" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined or GPSD must be enabled - MLAT will be disabled."
-    exec sleep infinity
-fi
+function check_gpsd() {
+    if [[ -z "$GPSD" ]] || ! [[ -f /run/readsb/gpsd.json ]]; then
+        return 1
+    fi
+    if new_lat="$(jq -r .lat /run/readsb/gpsd.json)" \
+        && [[ "$new_lat" != "null" ]] \
+        && new_lon="$(jq -r .lon /run/readsb/gpsd.json)" \
+        && [[ "$new_lon" != "null" ]] \
+        && new_alt="$(jq -r .altMSL /run/readsb/gpsd.json)" \
+        && [[ "$new_alt" != "null" ]] \
 
-if [[ -z "$LONG$READSB_LON" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined or GPSD must be enabled - MLAT will be disabled."
-    exec sleep infinity
-fi
-if [[ -z "$ALT$READSB_ALT" ]] && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_CONFIG" && ! grep -qi "gpsd_in" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined or GPSD must be enabled - MLAT will be disabled."
-    exec sleep infinity
+    then
+        # yay, vars are set and not null
+        if ! [[ -f "$LOCATION_PERSIST" ]]; then
+            echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
+        fi
+        return 0
+    else
+        new_lat=""
+        new_lon=""
+        new_alt=""
+        return 1
+    fi
+}
+
+if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    GPSD=1
+    LOCATION_PERSIST=/var/globe_history/gpsd_last_location
+    if [[ -f "$LOCATION_PERSIST" ]] && { grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; }; then
+        read new_lat new_lon new_alt < "$LOCATION_PERSIST"
+        "${s6wrap[@]}" --args echo "Using last known GPSD location for startup: $new_lat,$new_lon (alt: $new_alt)"
+    else
+        # wait for gpsd to continue with startup
+        "${s6wrap[@]}" --args echo "GPSD configured, no location set, no persistent location found, waiting for gpsd to provide location data"
+        while ! check_gpsd; do
+            sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+        done
+        "${s6wrap[@]}" --args echo "GPSD has provided location data, starting mlat-clients"
+    fi
+    # initialize "old" location for gpsd movement detection
+    old_lat="$new_lat"
+    old_lon="$new_lon"
+
+    # in seconds
+    no_movement_required=19
+    # set no_movement to a number higher than the required time of no movement
+    # this way on startup there is no bogus message printed about starting mlat-clients with a new location
+    no_movement=$(( 2 * no_movement_required ))
+else
+    if [[ -z "$LAT$READSB_LAT" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
+    if [[ -z "$LONG$READSB_LON" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
+    if [[ -z "$ALT$READSB_ALT" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
 fi
 
 # MLAT_CONFIG has the following format:
@@ -176,20 +225,6 @@ do
     fi
 
     # add LAT/LON/ALT to instance:
-    # see if we need to use GPS coords:
-    unset new_lat
-    unset new_lon
-    unset new_alt
-    if [[ -f /run/.gpsd_is_active && -f /run/readsb/receiver.json ]]; then
-        new_lat="$(jq -r .lat /run/readsb/receiver.json)"
-        new_lon="$(jq -r .lon /run/readsb/receiver.json)"
-        new_alt="$(jq -r .alt_m_amsl /run/readsb/receiver.json)"
-        if [[ "$new_lat" == "null" ]] || [[ "$new_lon" == "null" ]] || [[ "$new_alt" == "null" ]]; then 
-            unset new_lat
-            unset new_lon
-            unset new_alt
-        fi
-    fi
 
     if [[ -n "${new_lat:-$lat_arg}" ]]; then
         MLAT_PARAM+=(--lat "${new_lat:-$lat_arg}")
@@ -255,11 +290,43 @@ do
 done
 
 sleep 5 & wait $!
-touch /run/.all_mlatclient_instances_have_started
 
 # Now iterate over all MLAT-client instances and check if they are still running:
 while true
 do
+    if check_gpsd; then
+        distance="$(distance "$old_lat" "$old_lon" "$new_lat" "$new_lon")"
+        if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE:-20} )); then
+
+            # kill the mlat-client instances so they get restarted with the new GPS coords
+            if pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1; then
+                "${s6wrap[@]}" --args echo "Receiver moved ${distance%%.*} meters - Stopping all mlat-clients"
+            else
+                "${s6wrap[@]}" --args echo "Receiver moved ${distance%%.*} meters"
+            fi
+
+            old_lat="$new_lat"
+            old_lon="$new_lon"
+
+            # new location means the receiver has moved, sleep a bit and then check again
+            no_movement=0
+            sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+            # as the recevier has moved, mlat-clients are not restarted until there has been no movement for some time
+            # thus we continue skipping the mlat-client restart section of the loop
+            continue
+        else
+            # no movement during the checking interval, allow mlat-clients to be restarted
+            (( no_movement += ${GPSD_CHECK_INTERVAL:-30} )) || true
+            if (( no_movement < no_movement_required )); then
+                sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+                continue
+            elif (( no_movement / ${GPSD_CHECK_INTERVAL:-30} == no_movement_required / ${GPSD_CHECK_INTERVAL:-30} )); then
+                "${s6wrap[@]}" --args echo "Receiver stationary - starting all mlat-clients with new location"
+                echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
+            fi
+        fi
+    fi
+
     for mlat_pid in "${!pid_array[@]}"
     do
         if ! kill -0 "${mlat_pid}" >/dev/null 2>&1
@@ -277,15 +344,10 @@ do
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
             # If GPSD is active, then replace the lat/lon/alt params with the ones from GPSD
-            if [[ -f /run/readsb/gpsd.json ]] && [[ "$(jq -r .lat /run/readsb/gpsd.json)" != "null" ]]; then
-                new_lat="$(jq -r .lat /run/readsb/gpsd.json)"
-                new_lon="$(jq -r .lon /run/readsb/gpsd.json)"
-                new_alt="$(jq -r .altMSL /run/readsb/gpsd.json)"
-                if [[ "$new_lat" != "null" ]] && [[ "$new_lon" != "null" ]] && [[ "$new_alt" != "null" ]]; then 
-                    execstring="$(sed "s/^\(.*\s\+--lat\s\+\)[0-9.-]\+\(.*\)$/\1${new_lat}\2/g" <<< "$execstring")"
-                    execstring="$(sed "s/^\(.*\s\+--lon\s\+\)[0-9.-]\+\(.*\)$/\1${new_lon}\2/g" <<< "$execstring")"
-                    execstring="$(sed "s/^\(.*\s\+--alt\s\+\)[mft0-9.-]\+\(.*\)$/\1${new_alt}m\2/g" <<< "$execstring")"
-                fi
+            if [[ -n new_lat ]];then
+                execstring="$(sed "s/^\(.*\s\+--lat\s\+\)[0-9.-]\+\(.*\)$/\1${new_lat}\2/g" <<< "$execstring")"
+                execstring="$(sed "s/^\(.*\s\+--lon\s\+\)[0-9.-]\+\(.*\)$/\1${new_lon}\2/g" <<< "$execstring")"
+                execstring="$(sed "s/^\(.*\s\+--alt\s\+\)[mft0-9.-]\+\(.*\)$/\1${new_alt}m\2/g" <<< "$execstring")"
             fi
 
             #shellcheck disable=SC2069,SC2086
@@ -303,10 +365,5 @@ do
         fi
     done
 
-    # If GPSD is running, do more frequent checks than if it's not running
-    if [[ -f /run/readsb/gpsd.json ]] && [[ "$(jq -r .lat /run/readsb/gpsd.json)" != "null" ]]; then
-        sleep 1 & wait $!
-    else
-        sleep 10 & wait $!
-    fi
+    sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
 done

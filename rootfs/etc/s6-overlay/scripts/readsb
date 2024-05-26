@@ -31,6 +31,14 @@ if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then
     LOGLEVEL="verbose"
 fi
 
+LOCATION_PERSIST=/var/globe_history/gpsd_last_location
+if [[ -f "$LOCATION_PERSIST" ]] && { grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; }; then
+    read LAT LON ALT < "$LOCATION_PERSIST"
+    READSB_LAT=""
+    READSB_LON=""
+    READSB_ALT=""
+fi
+
 # Build the readsb command line based on options
 READSB_BIN="/usr/local/bin/readsb"
 
