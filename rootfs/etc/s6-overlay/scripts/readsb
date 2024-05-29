@@ -170,6 +170,10 @@ fi
 # Default it to 0.5 second if no value is provided, which is reasonable for feeding aggregators
 READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-0.5}")
 
+if chk_enabled "$READSB_NET_BR_OPTIMIZE_FOR_MLAT"; then
+    READSB_CMD+=("--net-beast-reduce-optimize-for-mlat")
+fi
+
 if chk_enabled "$READSB_NET_SBS_REDUCE"; then
     READSB_CMD+=("--net-sbs-reduce")
 fi
@@ -350,9 +354,9 @@ fi
 
 # shellcheck disable=SC2086
 if [[ "${LOGLEVEL,,}" == "verbose" ]]; then
-    exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_AUTOMATION_ARGS $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "error" ]]; then
-    exec "${s6wrap[@]}" --ignore=stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdout --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_AUTOMATION_ARGS $READSB_EXTRA_ARGS
 elif [[ "${LOGLEVEL,,}" == "none" ]]; then
-    exec "${s6wrap[@]}" --ignore=stdout --ignore=stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_EXTRA_ARGS
+    exec "${s6wrap[@]}" --ignore=stdout --ignore=stderr --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_AUTOMATION_ARGS $READSB_EXTRA_ARGS
 fi
