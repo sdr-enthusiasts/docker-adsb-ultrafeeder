@@ -170,6 +170,10 @@ fi
 # Default it to 0.5 second if no value is provided, which is reasonable for feeding aggregators
 READSB_CMD+=("--net-beast-reduce-interval=${READSB_NET_BEAST_REDUCE_INTERVAL:-0.5}")
 
+if chk_enabled "$READSB_NET_BR_OPTIMIZE_FOR_MLAT"; then
+    READSB_CMD+=("--net-beast-reduce-optimize-for-mlat")
+fi
+
 if chk_enabled "$READSB_NET_SBS_REDUCE"; then
     READSB_CMD+=("--net-sbs-reduce")
 fi
