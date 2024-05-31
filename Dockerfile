@@ -49,6 +49,7 @@ RUN set -x && \
     # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
     # ${POST_PACKAGES[@]} && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
+    find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
     apt-get clean -q -y && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
     #
