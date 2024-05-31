@@ -51,7 +51,7 @@ RUN set -x && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
     find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
     apt-get clean -q -y && \
-    rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
+    rm -rf /src /tmp/* /var/lib/apt/lists/* /git /var/cache/* && \
     #
     # Do some stuff for kx1t's convenience:
     echo "alias dir=\"ls -alsv\"" >> /root/.bashrc && \
