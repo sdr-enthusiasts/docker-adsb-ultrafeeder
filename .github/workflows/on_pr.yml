@@ -1,0 +1,88 @@
+---
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+    # Don't trigger if it's just a documentation update
+    paths:
+      - "rust/**"
+      - "Dockerfile"
+      - "Dockerfile.build_binary"
+      - "rootfs/**"
+      - "downloads/**"
+      - ".env"
+
+# Set workflow-wide environment variables
+#  - REPO: repo name on dockerhub
+#  - IMAGE: image name on dockerhub
+env:
+  #  DOCKERHUB_REPO: sdr-enthusiasts
+  #  DOCKERHUB_IMAGE: vrs
+  GHCR_IMAGE: sdr-enthusiasts/docker-adsb-ultrafeeder
+  GHCR_REGISTRY: ghcr.io
+  GH_LABEL: main
+  GHCR_TAG: latest
+
+jobs:
+  hadolint:
+    name: Run hadolint against docker files
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4.1.6
+      - name: Pull hadolint/hadolint:latest Image
+        run: docker pull hadolint/hadolint:latest
+      - name: Run hadolint against Dockerfiles
+        run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
+
+  deploy:
+    name: Deploy without telegraf
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
+    with:
+      push_enabled: false
+      push_destinations: ghcr.io
+      ghcr_repo_owner: ${{ github.repository_owner }}
+      ghcr_repo: ${{ github.repository }}
+      get_version_method: file_in_container:file=/CONTAINER_VERSION
+      # set build_latest to true if github.event.inputs.use_test_image is false
+      build_latest: true
+      build_baseimage_test: false
+      # only build the entire stack if we are not using the test image
+      build_version_specific: false
+      build_platform_specific: false
+      build_nohealthcheck: false
+      build_baseimage_url: docker-tar1090:latest/docker-tar1090:baseimage-test
+    secrets:
+      ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # unfortunately we can't use build_and_push_image.yml to build the telegraf label because
+  # that GH Action doesn't have the capability to build specific custom-named labels
+
+  deploy_with_telegraf:
+    name: Deploy with telegraf and healthcheck
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
+    with:
+      push_enabled: false
+      push_destinations: ghcr.io
+      ghcr_repo_owner: ${{ github.repository_owner }}
+      ghcr_repo: ${{ github.repository }}
+      get_version_method: file_in_container:file=/CONTAINER_VERSION
+      # set build_latest to true if github.event.inputs.use_test_image is false
+      build_latest: true
+      build_baseimage_test: false
+      build_baseimage_url: docker-tar1090:telegraf/docker-tar1090:telegraf-baseimage-test
+      # only build the entire stack if we are not using the test image
+      build_version_specific: false
+      build_platform_specific: false
+      build_nohealthcheck: false
+      docker_latest_tag: telegraf
+      dockerfile_changes: |
+        docker-tar1090:latest/docker-tar1090:telegraf
+
+    secrets:
+      ghcr_token: ${{ secrets.GITHUB_TOKEN }}
