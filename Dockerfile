@@ -6,7 +6,7 @@ ENV URL_MLAT_CLIENT_REPO="https://github.com/wiedehopf/mlat-client.git" \
     PRIVATE_MLAT="false" \
     MLAT_INPUT_TYPE="auto"
 
-SHELL ["/bin/bash", "-o", "pipefail", "-x"]
+SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
 RUN TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
     # Git and net-tools are needed to install and run @Mikenye's HealthCheck framework
