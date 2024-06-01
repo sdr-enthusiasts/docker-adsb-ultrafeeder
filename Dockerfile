@@ -17,14 +17,14 @@ RUN set -x && \
     #
     # These are needed to compile and install the mlat_client:
     KEPT_PACKAGES+=(python3) && \
+    KEPT_PACKAGES+=(python3-pkg-resources) && \
     TEMP_PACKAGES+=(build-essential) && \
     TEMP_PACKAGES+=(debhelper) && \
-    KEPT_PACKAGES+=(python3-dev) && \
-    KEPT_PACKAGES+=(python3-distutils-extra) && \
-    KEPT_PACKAGES+=(python3-pip) && \
-    KEPT_PACKAGES+=(python3-setuptools) && \
-    KEPT_PACKAGES+=(python3-pkg-resources) && \
-    KEPT_PACKAGES+=(python3-wheel) && \
+    TEMP_PACKAGES+=(python3-dev) && \
+    TEMP_PACKAGES+=(python3-distutils-extra) && \
+    TEMP_PACKAGES+=(python3-pip) && \
+    TEMP_PACKAGES+=(python3-setuptools) && \
+    TEMP_PACKAGES+=(python3-wheel) && \
     #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
@@ -49,8 +49,9 @@ RUN set -x && \
     # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
     # ${POST_PACKAGES[@]} && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
+    find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
     apt-get clean -q -y && \
-    rm -rf /src /tmp/* /var/lib/apt/lists/* /git && \
+    rm -rf /src /tmp/* /var/lib/apt/lists/* /git /var/cache/* && \
     #
     # Do some stuff for kx1t's convenience:
     echo "alias dir=\"ls -alsv\"" >> /root/.bashrc && \
