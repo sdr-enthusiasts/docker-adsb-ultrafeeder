@@ -364,7 +364,7 @@ do
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
             # If GPSD is active, then replace the lat/lon/alt params with the ones from GPSD
-            if [[ -n new_lat ]];then
+            if (( GPSD == 1 )); then
                 execstring="$(sed "s/^\(.*\s\+--lat\s\+\)[0-9.-]\+\(.*\)$/\1${new_lat}\2/g" <<< "$execstring")"
                 execstring="$(sed "s/^\(.*\s\+--lon\s\+\)[0-9.-]\+\(.*\)$/\1${new_lon}\2/g" <<< "$execstring")"
                 execstring="$(sed "s/^\(.*\s\+--alt\s\+\)[mft0-9.-]\+\(.*\)$/\1${new_alt}m\2/g" <<< "$execstring")"
