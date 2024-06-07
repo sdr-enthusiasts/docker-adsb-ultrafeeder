@@ -52,7 +52,7 @@ then
 fi
 
 function check_gpsd() {
-    if [[ -z "$GPSD" ]] || ! [[ -f /run/readsb/gpsd.json ]]; then
+    if (( GPSD == 0 )) || ! [[ -f /run/readsb/gpsd.json ]]; then
         return 1
     fi
     if new_lat="$(jq -r .lat /run/readsb/gpsd.json)" \
@@ -64,9 +64,6 @@ function check_gpsd() {
 
     then
         # yay, vars are set and not null
-        if ! [[ -f "$LOCATION_PERSIST" ]]; then
-            echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
-        fi
         return 0
     else
         new_lat=""
@@ -76,6 +73,7 @@ function check_gpsd() {
     fi
 }
 
+GPSD=0
 if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
     GPSD=1
     LOCATION_PERSIST=/var/globe_history/gpsd_last_location
@@ -88,16 +86,32 @@ if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDE
         while ! check_gpsd; do
             sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
         done
-        "${s6wrap[@]}" --args echo "GPSD has provided location data, starting mlat-clients"
+        "${s6wrap[@]}" --args echo "GPSD has provided location data"
     fi
     # initialize "old" location for gpsd movement detection
     old_lat="$new_lat"
     old_lon="$new_lon"
 
+    GPSD_MIN_DISTANCE="${GPSD_MIN_DISTANCE:-20}"
+    # enforce gpsd min distance is no larger than 40m
+    if (( GPSD_MIN_DISTANCE > 40 )); then
+        GPSD_MIN_DISTANCE=40
+    fi
+
+    GPSD_CHECK_INTERVAL="${GPSD_CHECK_INTERVAL:-30}"
+    if (( GPSD_CHECK_INTERVAL < 5 )); then
+        GPSD_CHECK_INTERVAL=5
+    fi
+
     # in seconds
-    no_movement_required=90
-    if (( no_movement_required < "${GPSD_CHECK_INTERVAL:-30}" )); then
-        no_movement_required="${GPSD_CHECK_INTERVAL:-30}"
+    no_movement_required=${GPSD_MLAT_WAIT:-90}
+    # enforce it to be longer than the checking interval for implementation reasons
+    if (( no_movement_required < GPSD_CHECK_INTERVAL )); then
+        no_movement_required="${GPSD_CHECK_INTERVAL}"
+    fi
+    # enforce 90 second minimum
+    if (( no_movement_required < 90 )); then
+        no_movement_required=90
     fi
     # set no_movement to a number higher than the required time of no movement
     # this way on startup there is no bogus message printed about starting mlat-clients with a new location
@@ -299,6 +313,9 @@ while true
 do
     if check_gpsd; then
         distance="$(distance "$old_lat" "$old_lon" "$new_lat" "$new_lon")"
+        if ! [[ -f "$LOCATION_PERSIST" ]]; then
+            echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
+        fi
         if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE:-20} )); then
 
             # kill the mlat-client instances so they get restarted with the new GPS coords

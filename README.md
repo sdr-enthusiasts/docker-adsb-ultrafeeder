@@ -752,7 +752,22 @@ GPSD_OPTIONS="-G"
 # Automatically hot add/remove USB GPS devices via gpsdctl
 USBAUTO="true"
 EOM
-sudo systemctl restart gpsd
+cat < EOM | sudo tee /lib/systemd/system/gpsd.socket
+[Unit]
+Description=GPS (Global Positioning System) Daemon Sockets
+
+[Socket]
+ListenStream=/run/gpsd.sock
+ListenStream=[::]:2947
+ListenStream=0.0.0.0:2947
+SocketMode=0600
+BindIPv6Only=yes
+
+[Install]
+WantedBy=sockets.target
+EOM
+sudo systemctl daemon-reload
+sudo systemctl restart gpsd gpsd.socket
 ```
 
 Then, you can add the following values to `ultrafeeder` service settings in `docker-compose.yml`:
@@ -781,13 +796,13 @@ This will:
 
 ### Optional parameters regulating the restart of `mlat-client` when the location changes
 
-The following parameters are all optional. You don't need to set them unless you want to change the default behavior:
+The following parameters are all optional and are subject to change. You don't need to set them unless you want to change the default behavior:
 
 | Environment Variable | Purpose | Default |
 | -------------------- | ------- | ------- |
-| `GPSD_INITIAL_WAIT` | The initial wait period (in seconds) for the GPS data to stabilize once the container detects that GPS data is being provided | `60` (seconds) |
-| `GPSD_MIN_DISTANCE` | Distance (in meters) that your station must move before the `mlat-client`(s) are restarted with the new latitude/longitude/altitude | `20` (meters) |
-| `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. Please don't make this shorter than 30 seconds to avoid race conditions, which may cause mlat-client to stop feeding some of the aggregators | `30` (seconds) |
+| `GPSD_MIN_DISTANCE` | Distance (in meters) that your station must move before it's considered moving (maximum 40 meters) | `20` (meters) |
+| `GPSD_MLAT_WAIT` | The wait period (in seconds) your station must be stationary before mlat is started (minimum 90 seconds) | `90` (seconds) |
+| `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. (minimum 5 seconds) | `30` (seconds) |
 
 ## Web Pages
 
