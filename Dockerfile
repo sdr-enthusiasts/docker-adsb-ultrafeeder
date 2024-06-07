@@ -1,13 +1,3 @@
-FROM ghcr.io/sdr-enthusiasts/docker-baseimage:base AS build
-
-RUN set -x && \
-    apt-get update -y && \
-    apt-get install -q -o Dpkg::Options::="--force-confnew" -y \
-        gcc && \
-    cd / && \
-    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance-in-meters.c -o /distance-in-meters.c && \
-    gcc -static distance-in-meters.c -o distance -lm -Ofast
-
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
 LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
@@ -53,6 +43,10 @@ RUN TEMP_PACKAGES=() && \
     ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
     popd && \
     rm -rf /git && \
+    # Compile distance binary
+    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance-in-meters.c -o /distance-in-meters.c && \
+    gcc -static /distance-in-meters.c -o /usr/local/bin/distance -lm -Ofast && \
+    rm -f /distance-in-meters.c && \
     #
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \
@@ -68,7 +62,6 @@ RUN TEMP_PACKAGES=() && \
     echo "alias nano=\"nano -l\"" >> /root/.bashrc
 
 COPY rootfs/ /
-COPY --from=build /distance /usr/local/bin/distance
 
 # Add Container Version
 RUN set -x && \
