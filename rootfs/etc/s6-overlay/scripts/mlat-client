@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC1091,SC2015,SC2016
+# shellcheck shell=bash disable=SC1091,SC2015,SC2016,SC2001
 
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
@@ -51,18 +51,84 @@ then
     exec sleep infinity
 fi
 
-if [[ -z "$LAT$READSB_LAT" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined - MLAT will be disabled."
-    exec sleep infinity
-fi
+function check_gpsd() {
+    if (( GPSD == 0 )) || ! [[ -f /run/readsb/gpsd.json ]]; then
+        return 1
+    fi
+    if new_lat="$(jq -r .lat /run/readsb/gpsd.json)" \
+        && [[ "$new_lat" != "null" ]] \
+        && new_lon="$(jq -r .lon /run/readsb/gpsd.json)" \
+        && [[ "$new_lon" != "null" ]] \
+        && new_alt="$(jq -r .altMSL /run/readsb/gpsd.json)" \
+        && [[ "$new_alt" != "null" ]] \
 
-if [[ -z "$LONG$READSB_LON" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined - MLAT will be disabled."
-    exec sleep infinity
-fi
-if [[ -z "$ALT$READSB_ALT" ]]; then
-    "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined - MLAT will be disabled."
-    exec sleep infinity
+    then
+        # yay, vars are set and not null
+        return 0
+    else
+        new_lat=""
+        new_lon=""
+        new_alt=""
+        return 1
+    fi
+}
+
+GPSD=0
+if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; then
+    GPSD=1
+    LOCATION_PERSIST=/var/globe_history/gpsd_last_location
+    if [[ -f "$LOCATION_PERSIST" ]]; then
+        read new_lat new_lon new_alt < "$LOCATION_PERSIST"
+    fi
+    # initialize "old" location for gpsd movement detection
+    # use zero island as starting point if location persist does not exit
+    old_lat=${new_lat:-0}
+    old_lon=${new_lon:-0}
+
+    # wait for gpsd to continue with startup
+    "${s6wrap[@]}" --args echo "GPSD configured, waiting for gpsd to provide location data"
+    while ! check_gpsd; do
+        sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+    done
+    "${s6wrap[@]}" --args echo "GPSD has provided location data"
+
+    GPSD_MIN_DISTANCE="${GPSD_MIN_DISTANCE:-20}"
+    # enforce gpsd min distance is no larger than 40m
+    if (( GPSD_MIN_DISTANCE > 40 )); then
+        GPSD_MIN_DISTANCE=40
+    fi
+
+    GPSD_CHECK_INTERVAL="${GPSD_CHECK_INTERVAL:-30}"
+    if (( GPSD_CHECK_INTERVAL < 5 )); then
+        GPSD_CHECK_INTERVAL=5
+    fi
+
+    # in seconds
+    no_movement_required=${GPSD_MLAT_WAIT:-90}
+    # enforce it to be longer than the checking interval for implementation reasons
+    if (( no_movement_required < GPSD_CHECK_INTERVAL )); then
+        no_movement_required="${GPSD_CHECK_INTERVAL}"
+    fi
+    # enforce 90 second minimum
+    if (( no_movement_required < 90 )); then
+        no_movement_required=90
+    fi
+    # set no_movement to a number higher than the required time of no movement
+    # this way on startup there is no bogus message printed about starting mlat-clients with a new location
+    no_movement=$(( 2 * no_movement_required ))
+else
+    if [[ -z "$LAT$READSB_LAT" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_LAT or LAT must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
+    if [[ -z "$LONG$READSB_LON" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_LON or LONG must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
+    if [[ -z "$ALT$READSB_ALT" ]]; then
+        "${s6wrap[@]}" --args echo "ERROR: READSB_ALT or ALT must be defined or GPSD must be enabled - MLAT will be disabled."
+        exec sleep infinity
+    fi
 fi
 
 # MLAT_CONFIG has the following format:
@@ -176,24 +242,25 @@ do
     fi
 
     # add LAT/LON/ALT to instance:
-    if [[ -n "${lat_arg}" ]]; then
-        MLAT_PARAM+=(--lat "${lat_arg}")
+
+    if [[ -n "${new_lat:-$lat_arg}" ]]; then
+        MLAT_PARAM+=(--lat "${new_lat:-$lat_arg}")
     elif [[ -n "${LAT}" ]]; then
         MLAT_PARAM+=(--lat "${LAT}")
     elif [[ -n "${READSB_LAT}" ]]; then
         MLAT_PARAM+=(--lat "${READSB_LAT}")
     fi
 
-    if [[ -n "${lon_arg}" ]]; then
-        MLAT_PARAM+=(--lon "${lon_arg}")
+    if [[ -n "${new_lon:-$lon_arg}" ]]; then
+        MLAT_PARAM+=(--lon "${new_lon:-$lon_arg}")
     elif [[ -n "${LONG}" ]]; then
         MLAT_PARAM+=(--lon "${LONG}")
     elif [[ -n "${READSB_LON}" ]]; then
         MLAT_PARAM+=(--lon "${READSB_LON}")
     fi
 
-    if [[ -n "${alt_arg}" ]]; then
-        MLAT_PARAM+=(--alt "${alt_arg}")
+    if [[ -n "${new_alt:-$alt_arg}" ]]; then
+        MLAT_PARAM+=(--alt "${new_alt:-$alt_arg}")
     elif [[ -n "${ALT}" ]]; then
         MLAT_PARAM+=(--alt "${ALT}")
     elif [[ -n "${READSB_ALT}" ]]; then
@@ -217,6 +284,12 @@ do
     # shellcheck disable=SC2048,SC2086
     execstring="$(echo ${MLAT_CMD} ${MLAT_PARAM[*]} | xargs)"
 
+    if (( GPSD == 1 )); then
+        # when GPSD is active, just write the pid array, mlat-client will be started by the gpsd checking logic later
+        # use a long random PID so that it's detected as "not running"
+        pid_array["${RANDOM}${RANDOM}${RANDOM}"]="${MLAT_PARAM[*]}"
+        continue
+    fi
 
     # stagger by 15 second so they don't all start at the same time
     sleep "${MLAT_STARTUP_STAGGER:-15}" & wait $!
@@ -244,12 +317,61 @@ sleep 5 & wait $!
 # Now iterate over all MLAT-client instances and check if they are still running:
 while true
 do
+    if (( GPSD == 1 )); then
+        if ! check_gpsd; then
+            # don't do mlat client restarts if GPSD is configured but not providing a position
+            sleep "${GPSD_CHECK_INTERVAL}" & wait $!
+            continue
+        fi
+
+        distance="$(distance "$old_lat" "$old_lon" "$new_lat" "$new_lon")"
+        if ! [[ -f "$LOCATION_PERSIST" ]]; then
+            echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
+        fi
+        if (( ${distance%%.*} > ${GPSD_MIN_DISTANCE:-20} )); then
+
+            msg="Receiver moved ${distance%%.*} meters"
+
+            # kill the mlat-client instances so they get restarted with the new GPS coords
+            if pkill -f "/usr/bin/python3 /usr/bin/mlat-client" >/dev/null 2>&1; then
+                msg+=" - Stopping all mlat-clients"
+            fi
+
+            "${s6wrap[@]}" --args echo "${msg}"
+
+            old_lat="$new_lat"
+            old_lon="$new_lon"
+
+            # new location means the receiver has moved, sleep a bit and then check again
+            no_movement=0
+            sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+            # as the recevier has moved, mlat-clients are not restarted until there has been no movement for some time
+            # thus we continue skipping the mlat-client restart section of the loop
+            continue
+        else
+            # no movement during the checking interval, allow mlat-clients to be restarted
+            (( no_movement += ${GPSD_CHECK_INTERVAL:-30} )) || true
+            if (( no_movement < no_movement_required )); then
+                msg="Receiver moved less than ${GPSD_MIN_DISTANCE} meters, $(( no_movement_required - no_movement )) seconds remaining before starting mlat-clients"
+                "${s6wrap[@]}" --args echo "${msg}"
+                sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
+                continue
+            elif (( no_movement / ${GPSD_CHECK_INTERVAL:-30} == no_movement_required / ${GPSD_CHECK_INTERVAL:-30} )); then
+                "${s6wrap[@]}" --args echo "Receiver stationary - starting all mlat-clients with new location"
+                echo "$new_lat" "$new_lon" "$new_alt" > "$LOCATION_PERSIST"
+            fi
+        fi
+    fi
+
     for mlat_pid in "${!pid_array[@]}"
     do
         if ! kill -0 "${mlat_pid}" >/dev/null 2>&1
         then
             # it exited - let's restart:
-            sleep "${RESTARTTIMER}" & wait $!
+            if [[ ! -f /run/readsb/gpsd.json ]] || [[ "$(jq -r .lat /run/readsb/gpsd.json)" == "null" ]]; then
+                # only sleep for a bit if the restarts aren't caused by GPS movement:
+                sleep "${RESTARTTIMER}" & wait $!
+            fi
             servername="$(awk '{print $4}' <<< "${pid_array[$mlat_pid]}")"
             servername="${servername%%:*}"
 
@@ -257,8 +379,16 @@ do
             # shellcheck disable=SC2086
             execstring="$(echo ${MLAT_CMD} ${pid_array[$mlat_pid]} | xargs)"
 
+            # If GPSD is active, then replace the lat/lon/alt params with the ones from GPSD
+            if (( GPSD == 1 )); then
+                execstring="$(sed "s/^\(.*\s\+--lat\s\+\)[0-9.-]\+\(.*\)$/\1${new_lat}\2/g" <<< "$execstring")"
+                execstring="$(sed "s/^\(.*\s\+--lon\s\+\)[0-9.-]\+\(.*\)$/\1${new_lon}\2/g" <<< "$execstring")"
+                execstring="$(sed "s/^\(.*\s\+--alt\s\+\)[mft0-9.-]\+\(.*\)$/\1${new_alt}m\2/g" <<< "$execstring")"
+            fi
+
             #shellcheck disable=SC2069,SC2086
             if [[ "${LOGLEVEL}" == "verbose" ]]; then
+                "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "Restarting: ${execstring}"
                 "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args ${execstring} &
             elif [[ "${LOGLEVEL}" == "error" ]]; then
                 "${s6wrap[@]}" --ignore=stdout --prepend="$(basename "$0")][${servername}" --args ${execstring} &
@@ -270,5 +400,6 @@ do
             unset "pid_array[${mlat_pid}]"
         fi
     done
-    sleep 10 & wait $!
+
+    sleep "${GPSD_CHECK_INTERVAL:-30}" & wait $!
 done

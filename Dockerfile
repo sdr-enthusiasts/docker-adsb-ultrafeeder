@@ -43,6 +43,10 @@ RUN TEMP_PACKAGES=() && \
     ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
     popd && \
     rm -rf /git && \
+    # Compile distance binary
+    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance-in-meters.c -o /distance-in-meters.c && \
+    gcc -static /distance-in-meters.c -o /usr/local/bin/distance -lm -Ofast && \
+    rm -f /distance-in-meters.c && \
     #
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \

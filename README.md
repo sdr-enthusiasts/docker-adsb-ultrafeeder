@@ -38,6 +38,9 @@
       - [Configuring the Core Temperature graphs](#configuring-the-core-temperature-graphs)
       - [Reducing Disk IO for Graphs1090](#reducing-disk-io-for-graphs1090)
     - [`timelapse1090` Configuration](#timelapse1090-configuration)
+  - [Updating your location with GPSD](#updating-your-location-with-gpsd)
+    - [Basic Installation and Configuration of your GPS hardware and `gpsd` drivers](#basic-installation-and-configuration-of-your-gps-hardware-and-gpsd-drivers)
+    - [Optional parameters regulating the restart of `mlat-client` when the location changes](#optional-parameters-regulating-the-restart-of-mlat-client-when-the-location-changes)
   - [Web Pages](#web-pages)
   - [Paths](#paths)
   - [Display of Metrix with Grafana and Prometheus/InfluxDB](#display-of-metrix-with-grafana-and-prometheusinfluxdb)
@@ -727,6 +730,79 @@ Legacy: **We recommend AGAINST enabling this feature** as it has been replaced w
 | `ENABLE_TIMELAPSE1090`   | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/> | Unset   |
 | `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds                                                                                                    | `10`    |
 | `TIMELAPSE1090_HISTORY`  | Time saved in hours                                                                                                             | `24`    |
+
+## Updating your location with GPSD
+
+This feature enables you to deploy Ultrafeeder while you are moving around. It will read your current longitude/latitude/altitude from a GPS unit that is connected to `gpsd` on your host system, and ensure that the map will show your current location. It will also restart any `mlat-client` instances once it detects that you moved from your previous location.
+
+### Basic Installation and Configuration of your GPS hardware and `gpsd` drivers
+
+The simplest way of getting this to work is to acquire a ["VK163" USB GPS "Mouse"](https://a.co/d/0D7Tj0n), similar to the one in the link. You can connect this mouse to any USB port on your machine.
+
+For this to work, you should install and configure GPSD to work on your host machine. The `DEVICES` parameter is probably correct as shown below, but you may want to double-check that data is received on that device (`cat /dev/ttyACM0`) and adjust it if needed:
+
+```bash
+sudo apt update && sudo apt install -y gpsd
+cat < EOM | sudo tee /etc/default/gpsd
+# Devices gpsd should collect to at boot time.
+# They need to be read/writeable, either by user gpsd or the group dialout.
+DEVICES="/dev/ttyACM0"
+# Other options you want to pass to gpsd
+GPSD_OPTIONS="-G"
+# Automatically hot add/remove USB GPS devices via gpsdctl
+USBAUTO="true"
+EOM
+cat < EOM | sudo tee /lib/systemd/system/gpsd.socket
+[Unit]
+Description=GPS (Global Positioning System) Daemon Sockets
+
+[Socket]
+ListenStream=/run/gpsd.sock
+ListenStream=[::]:2947
+ListenStream=0.0.0.0:2947
+SocketMode=0600
+BindIPv6Only=yes
+
+[Install]
+WantedBy=sockets.target
+EOM
+sudo systemctl daemon-reload
+sudo systemctl restart gpsd gpsd.socket
+```
+
+Then, you can add the following values to `ultrafeeder` service settings in `docker-compose.yml`:
+
+```yaml
+services:
+...
+  ultrafeeder:
+    ...
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ...
+    environment:
+      ULTRAFEEDER-CONFIG=
+        gpsd,host.docker.internal,2947;
+    ...
+```
+
+Finally, restart the container with `docker compose up -d`
+
+This will:
+
+- install and configure `gpsd` (`/etc/default/gpsd`) so it makes GPS data available on the default TCP port 2947 of your host system
+- configure the ultrafeeder docker container to read GPSD data
+- configure the ultrafeeder container so the hostname `host.docker.internal` always resolves to the IP address of the underlying machine (where `gpsd` is running)
+
+### Optional parameters regulating the restart of `mlat-client` when the location changes
+
+The following parameters are all optional and are subject to change. You don't need to set them unless you want to change the default behavior:
+
+| Environment Variable | Purpose | Default |
+| -------------------- | ------- | ------- |
+| `GPSD_MIN_DISTANCE` | Distance (in meters) that your station must move before it's considered moving (maximum 40 meters) | `20` (meters) |
+| `GPSD_MLAT_WAIT` | The wait period (in seconds) your station must be stationary before mlat is started (minimum 90 seconds) | `90` (seconds) |
+| `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. (minimum 5 seconds) | `30` (seconds) |
 
 ## Web Pages
 
