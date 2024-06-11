@@ -1,3 +1,5 @@
+FROM ghcr.io/sdr-enthusiasts/docker-baseimage:mlatclient as mlatclient
+
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
 LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
@@ -7,24 +9,16 @@ ENV URL_MLAT_CLIENT_REPO="https://github.com/wiedehopf/mlat-client.git" \
     MLAT_INPUT_TYPE="auto"
 
 SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
-RUN TEMP_PACKAGES=() && \
+RUN \
+    --mount=type=bind,source=./,target=/app/ \
+    --mount=type=bind,from=mlatclient,source=/,target=/mlatclient/ \
+    TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
-    # Git and net-tools are needed to install and run @Mikenye's HealthCheck framework
-    KEPT_PACKAGES+=(git) && \
-    #
     # Needed to run the mlat_client:
-    # POST_PACKAGES+=(python3-minimal) && \
-    #
-    # These are needed to compile and install the mlat_client:
-    KEPT_PACKAGES+=(python3) && \
+    KEPT_PACKAGES+=(python3-minimal) && \
     KEPT_PACKAGES+=(python3-pkg-resources) && \
+    # needed to compile distance
     TEMP_PACKAGES+=(build-essential) && \
-    TEMP_PACKAGES+=(debhelper) && \
-    TEMP_PACKAGES+=(python3-dev) && \
-    TEMP_PACKAGES+=(python3-distutils-extra) && \
-    TEMP_PACKAGES+=(python3-pip) && \
-    TEMP_PACKAGES+=(python3-setuptools) && \
-    TEMP_PACKAGES+=(python3-wheel) && \
     #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
@@ -33,28 +27,21 @@ RUN TEMP_PACKAGES=() && \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
     "${KEPT_PACKAGES[@]}" \
     "${TEMP_PACKAGES[@]}" && \
-    #
-    # Compile and Install the mlat_client
-    mkdir -p /git && \
-    pushd /git && \
-    git clone --depth 1 $URL_MLAT_CLIENT_REPO && \
-    cd mlat-client && \
-    ./setup.py install && \
+    # Get mlat-client
+    tar zxf /mlatclient/mlatclient.tgz -C / && \
     ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
-    popd && \
-    rm -rf /git && \
     # Compile distance binary
-    curl -sSL https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/distance-in-meters.c -o /distance-in-meters.c && \
-    gcc -static /distance-in-meters.c -o /usr/local/bin/distance -lm -Ofast && \
-    rm -f /distance-in-meters.c && \
-    #
+    gcc -static /app/downloads/distance-in-meters.c -o /usr/local/bin/distance -lm -O2 && \
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \
     # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
     # ${POST_PACKAGES[@]} && \
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y && \
-    find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
     apt-get clean -q -y && \
+    # test mlat-client
+    /usr/bin/mlat-client --help > /dev/null && \
+    # remove pycache introduced by testing mlat-client
+    find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git /var/cache/* && \
     #
     # Do some stuff for kx1t's convenience:
