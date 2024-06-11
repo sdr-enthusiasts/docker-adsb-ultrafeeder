@@ -19,6 +19,8 @@ RUN \
     KEPT_PACKAGES+=(python3-pkg-resources) && \
     # needed to compile distance
     TEMP_PACKAGES+=(build-essential) && \
+    # needed for container version
+    TEMP_PACKAGES+=(git) && \
     #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
@@ -32,6 +34,13 @@ RUN \
     ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
     # Compile distance binary
     gcc -static /app/downloads/distance-in-meters.c -o /usr/local/bin/distance -lm -O2 && \
+    # Add Container Version
+    branch="##BRANCH##" && \
+    [[ "${branch:0:1}" == "#" ]] && branch="main" || true && \
+    git clone --depth=1 -b "$branch" https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder.git /tmp/clone && \
+    pushd /tmp/clone && \
+    echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(git rev-parse --short HEAD)_$(git branch --show-current)" > /.CONTAINER_VERSION && \
+    popd && \
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \
     # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
@@ -49,13 +58,3 @@ RUN \
     echo "alias nano=\"nano -l\"" >> /root/.bashrc
 
 COPY rootfs/ /
-
-# Add Container Version
-RUN set -x && \
-    branch="##BRANCH##" && \
-    [[ "${branch:0:1}" == "#" ]] && branch="main" || true && \
-    git clone --depth=1 -b "$branch" https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder.git /tmp/clone && \
-    pushd /tmp/clone && \
-    echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(git rev-parse --short HEAD)_$(git branch --show-current)" > /.CONTAINER_VERSION && \
-    popd && \
-    rm -rf /tmp/*
