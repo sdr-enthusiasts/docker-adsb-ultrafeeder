@@ -335,14 +335,14 @@ There are several aggregators, both non-profit and commercial, that can directly
 | Name            | (C)ommercial/<br/>(N)on-profit | Description                                               | Feed details                                                                               |
 | --------------- | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
 | Airplanes.live  | N                              | Run by volunteers that used to be related to adsbexchange | adsb:`feed.airplanes.live` port `30004`<br/>mlat: `feed.airplanes.live` port `31090`       |
-| ADSB.fi         | N                              | Run by a private individual located in Finland.<br/>No longer associated with any former members of adsbexchange. | adsb:`feed.adsb.fi` port `30004`<br/>mlat: `feed.adsb.fi` port `31090`                     |
-| ADSB.lol        | N                              | Run by a private individual located in the Netherlands    | adsb:`in.adsb.lol` port `30004`<br/>mlat: `in.adsb.lol` port `31090`                       |
+| ADSB.fi         | N                              | Run by a Finnish IT and aviation enthusiast | adsb:`feed.adsb.fi` port `30004`<br/>mlat: `feed.adsb.fi` port `31090`                     |
+| ADSB.lol        | N                              | Run by an aviation enthusiast located in the Netherlands    | adsb:`in.adsb.lol` port `30004`<br/>mlat: `in.adsb.lol` port `31090`                       |
 | Planespotters   | N                              | planespotters.net                                         | adsb:`feed.planespotters.net` port `30004`<br/>mlat: `mlat.planespotters.net` port `31090` |
-| The Air Traffic | N                              | Run by a private individual                               | adsb:`feed.theairtraffic.com` port `30004`<br/>mlat: `mlat.theairtraffic.com` port `31090` |
+| The Air Traffic | N                              | Run by an aviation enthusiast                               | adsb:`feed.theairtraffic.com` port `30004`<br/>mlat: `mlat.theairtraffic.com` port `31090` |
 | AVDelphi        | N                              | Aviation data-science company (non-profit)                | adsb:`data.avdelphi.com` port `24999`<br/>mlat: no MLAT                                    |
 | ADSB Exchange   | C                              | Large aggregator owned by JetNet                          | adsb:`feed1.adsbexchange.com` port `30004`<br/>mlat: `feed.adsbexchange.com` port `31090`  |
-| RadarPlane      | N                              | Run by a few volunteers in Canada and Portugal            | adsb: `feed.radarplane.com` port `30001`<br/>mlat: `feed.radarplane.com` port `31090`      |
-| Fly Italy ADSB  | N                              | Run by a few ADSB enthusiasts in Italy                    | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   |
+| RadarPlane      | N                              | Run by a few aviation enthusiasts in Canada and Portugal            | adsb: `feed.radarplane.com` port `30001`<br/>mlat: `feed.radarplane.com` port `31090`      |
+| Fly Italy ADSB  | N                              | Run by a few aviation enthusiasts in Italy                    | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   |
 
 When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com by default. See the description of the `ADSBX_STATS` parameter on how to disable this.
 
