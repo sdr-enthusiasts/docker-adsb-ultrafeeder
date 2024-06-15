@@ -7,6 +7,9 @@
 # If you are in this region and are interested in feeding to them, please see:
 # http://aussieadsb.com/
 #
+# You can run this script from any modern Debian Linux machine with this command:
+# wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/dev/aussieadsb.sh | bash -s register
+#
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2024, Ramon F. Kolb (kx1t) and contributors
 #
@@ -55,6 +58,8 @@ if ! which jq >/dev/null 2>&1; then
         sudo apt-get update -qq
         sudo apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -qq jq
     fi
+    echo ""
+    echo ""
 fi
 
 case "$argv" in
