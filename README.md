@@ -350,7 +350,7 @@ When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com 
 To feed AussieADSB (Australia/Oceania only!), execute this command on your host and follow the instructions:
 
 ```bash
-docker run -it --rm ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder 'bash -c /scripts/aussieadsb.sh -register'
+wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/dev/aussieadsb.sh | bash -s register
 ```
 
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
