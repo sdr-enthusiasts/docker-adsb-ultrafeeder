@@ -24,7 +24,10 @@
 #---------------------------------------------------------------------------------------------
 #
 
-if [[ -z "$1" ]] || [[ "${1,,}" == "-help" ]]; then
+argv="${1,,}"
+if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
+
+if [[ -z "$argv" ]] || [[ "$argv" == "-help" ]]; then
     echo "Usage: $0 <option> [key]"
     echo "Where <option> is one of the following:"
     echo "-register      -- register a new receiver"
@@ -54,8 +57,7 @@ if ! which jq >/dev/null 2>&1; then
     fi
 fi
 
-
-case "${1,,}" in
+case "$argv" in
     "-register")
         if [[ -n "$AUSSIEADSB_KEY" ]]; then
             echo "Error - your station is already registered. Try \"$0 -status\""
