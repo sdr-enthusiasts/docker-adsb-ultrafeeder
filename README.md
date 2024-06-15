@@ -343,8 +343,15 @@ There are several aggregators, both non-profit and commercial, that can directly
 | ADSB Exchange   | C                              | Large aggregator owned by JetNet                          | adsb:`feed1.adsbexchange.com` port `30004`<br/>mlat: `feed.adsbexchange.com` port `31090`  |
 | RadarPlane      | N                              | Run by a few aviation enthusiasts in Canada and Portugal            | adsb: `feed.radarplane.com` port `30001`<br/>mlat: `feed.radarplane.com` port `31090`      |
 | Fly Italy ADSB  | N                              | Run by a few aviation enthusiasts in Italy                    | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   |
+| AussieADSB | C | Small semi-commercial aggregator focused uniquely on Australia/Oceania. See <https://aussieadsb.com>. See below on how to configure a feed to them | adsb: `aussieadsb.com` port (varies)<br/>mlat: no |
 
 When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com by default. See the description of the `ADSBX_STATS` parameter on how to disable this.
+
+To feed AussieADSB (Australia/Oceania only!), execute this command on your host and follow the instructions:
+
+```bash
+docker run -it --rm ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder 'bash -c /scripts/aussieadsb.sh -register'
+```
 
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
 
