@@ -8,7 +8,7 @@
 # http://aussieadsb.com/
 #
 # You can run this script from any modern Debian Linux machine with this command:
-# wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/dev/aussieadsb.sh | bash -s register
+# wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh | bash -s register
 #
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2024, Ramon F. Kolb (kx1t) and contributors
