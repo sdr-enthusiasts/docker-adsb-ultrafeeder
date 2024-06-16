@@ -69,7 +69,7 @@ fi
 
 AUSSIEADSB_KEY="${AUSSIEADSB_KEY:-$2}"
 
-if ! which jq >/dev/null 2>&1 || ! which netcat || ! which ifconfig; then
+if ! which jq >/dev/null 2>&1 || ! which netcat >/dev/null 2>&1 || ! which ifconfig >/dev/null 2>&1; then
     echo "For registration to work, we need to do a one-time installation of JQ, NetCat, and ifconfig to your system"
     echo "Please be patient..."
 
@@ -90,6 +90,9 @@ case "$argv" in
             echo "Error - your station is already registered. Try \"$0 -status\""
             exit 1
         fi
+        echo ""
+        echo "AussieADSB Registration"
+        echo ""
         echo "Which suburb is this receiver located in?"
         echo "This will be used by the admins to set the receiver name on the site"
         read suburb
@@ -149,6 +152,10 @@ case "$argv" in
     ;;
 
     "-deregister")
+        echo ""
+        echo "AussieADSB De-registration"
+        echo ""
+        
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -185,6 +192,10 @@ case "$argv" in
     ;;
 
     "-status")
+        echo ""
+        echo "AussieADSB Feeder Status"
+        echo ""
+        
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -206,11 +217,15 @@ case "$argv" in
         echo "Registered Receiver Name: $rcvr_name"
         echo "Connection status: $connected"
         echo "Public IP address: $rcvr_ip"
-        echo
+        echo ""
         exit 0
     ;;
 
     "-updateinfo")
+        echo ""
+        echo "AussieADSB Registration Update"
+        echo ""
+        
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -263,5 +278,6 @@ case "$argv" in
     *)
         echo "Unknown option \"$1\". Please check and try again"
         exit 1
-
+    ;;
+    
 esac
