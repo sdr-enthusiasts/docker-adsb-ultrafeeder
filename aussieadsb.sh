@@ -11,7 +11,7 @@
 # wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh | bash -s register
 #
 #---------------------------------------------------------------------------------------------
-# Copyright (C) 2024, Ramon F. Kolb (kx1t) and contributors
+# Copyright (C) 2024 Ramon F. Kolb (kx1t) and contributors
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -27,10 +27,14 @@
 #---------------------------------------------------------------------------------------------
 #
 
+AAClientVersion="1.2.0"
 argv="${1,,}"
 if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
 
 while [[ "$argv" == "-" ]]; do
+    echo "AussieADSB registration utility"
+    echo "Visit https://aussieadsb.com for info"
+    echo
     echo "Select an option:"
     echo "(r)egister      -- register a new receiver"
     echo "(d)e-register    -- deregister a receiver"
@@ -108,7 +112,8 @@ case "$argv" in
         fi
         echo ""
         echo "Registering receiver..."
-        response="$(printf '{"ReceiverToken":null,"ClientVersion":"1.1.0","MessageType":"register","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
+        response="$(printf '{"ReceiverToken":null,"ClientVersion":"%s","MessageType":"register","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
+            "$AAClientVersion" \
             "$(uname -s -r -v)" \
             "$(ifconfig -a | sed -n 's/^\s*ether \([0-9a-f:]\+\) .*$/\1/p' | head -1)" \
             "$suburb $postcode" \
@@ -129,6 +134,7 @@ case "$argv" in
         echo 
         echo "In ULTRAFEEDER_CONFIG, add this line:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
+        echo "   mlat,aussieadsb.com,30000;"
         echo
         echo "Add the following parameter as well:"
         echo "- AUSSIEADSB_KEY=$rcvr_token"
@@ -138,7 +144,7 @@ case "$argv" in
         echo "Visit http://aussieadsb.com/status to check feeding status"
         echo "Currently, your receiver name is \"$rcvr_name\", but it will soon be renamed by the admins to your location."
         echo
-        echo "Please keep your AUSSIEADSB_KEY value ($rcvr_token) in a safe place - you will need it to reinstate your station if you ever update your system"
+        echo "Please keep your AUSSIEADSB_KEY value ($rcvr_token) and Port Number ($port) in a safe place - you will need it to reinstate your station if you ever update your system"
         echo
     ;;
 
@@ -147,7 +153,7 @@ case "$argv" in
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
 
-        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"1.1.0","MessageType":"status","Data":null}' "$AUSSIEADSB_KEY" | nc aussieadsb.com 5000)"
+        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"status","Data":null}' "$AUSSIEADSB_KEY" "$AAClientVersion" | nc aussieadsb.com 5000)"
         msg_type="$(jq -r .MessageType <<< "$response")"
         rcvr_name="$(jq -r .Data.Name <<< "$response")"
 
@@ -165,7 +171,7 @@ case "$argv" in
         fi
 
         echo "Deregistering station $rcvr_name with key $AUSSIEADSB_KEY..."
-        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"1.1.0","MessageType":"deregister","Data":"User"}' "$AUSSIEADSB_KEY" | nc aussieadsb.com 5000)"
+        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"deregister","Data":"User"}' "$AUSSIEADSB_KEY" "$AAClientVersion" | nc aussieadsb.com 5000)"
         if [[ "$(jq -r .MessageType <<< "$response" 2>/dev/null)" == "deregisterresponse" ]]; then
             echo "De-registration complete!"
             exit 0
@@ -183,7 +189,7 @@ case "$argv" in
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
 
-        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"1.1.0","MessageType":"status","Data":null}' "$AUSSIEADSB_KEY" | nc aussieadsb.com 5000)"
+        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"status","Data":null}' "$AUSSIEADSB_KEY" "$AAClientVersion" | nc aussieadsb.com 5000)"
         msg_type="$(jq -r .MessageType <<< "$response" 2>/dev/null)"
         rcvr_name="$(jq -r .Data.Name <<< "$response" 2>/dev/null)"
         connected="$(jq -r .Data.Connected <<< "$response" 2>/dev/null)"
@@ -200,6 +206,7 @@ case "$argv" in
         echo "Registered Receiver Name: $rcvr_name"
         echo "Connection status: $connected"
         echo "Public IP address: $rcvr_ip"
+        echo
         exit 0
     ;;
 
@@ -234,8 +241,9 @@ case "$argv" in
         fi
         echo ""
         echo "Updating receiver..."
-        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"1.1.0","MessageType":"update","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
+        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"update","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
             "$AUSSIEADSB_KEY" \
+            "$AAClientVersion" \
             "$(uname -s -r -v)" \
             "$(ifconfig -a | sed -n 's/^\s*ether \([0-9a-f:]\+\) .*$/\1/p' | head -1)" \
             "$suburb $postcode" \
