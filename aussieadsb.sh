@@ -30,7 +30,25 @@
 argv="${1,,}"
 if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
 
-if [[ -z "$argv" ]] || [[ "$argv" == "-help" ]]; then
+while [[ "$argv" == "-" ]]; do
+    echo "Select an option:"
+    echo "(r)egister      -- register a new receiver"
+    echo "(d)e-register    -- deregister a receiver"
+    echo "(u)pdateinfo    -- update your registration info"
+    echo "(s)tatus        -- show the feeding status"
+    read -n 1 argv
+    echo
+    argv="${argv,,}"
+    case "$argv" in
+        r) argv="-register" ;;
+        d) argv="-deregister" ;;
+        u) argv="-updateinfo" ;;
+        s) argv="-status" ;;
+        *) echo "invalid selection, try again" ;;
+    esac
+done
+
+if [[ "$argv" == "-help" ]]; then
     echo "Usage: $0 <option> [key]"
     echo "Where <option> is one of the following:"
     echo "-register      -- register a new receiver"
