@@ -69,16 +69,16 @@ fi
 
 AUSSIEADSB_KEY="${AUSSIEADSB_KEY:-$2}"
 
-if ! which jq >/dev/null 2>&1; then
-    echo "For registration to work, we need to do a one-time installation of JQ to your system"
+if ! which jq >/dev/null 2>&1 || ! which netcat || ! which ifconfig; then
+    echo "For registration to work, we need to do a one-time installation of JQ, NetCat, and ifconfig to your system"
     echo "Please be patient..."
 
     if (( UID == 0 )); then
         apt-get update -qq
-        apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -qq jq
+        apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -qq jq netcat-traditional net-tools
     else
         sudo apt-get update -qq
-        sudo apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -qq jq
+        sudo apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -qq jq netcat-traditional net-tools
     fi
     echo ""
     echo ""
