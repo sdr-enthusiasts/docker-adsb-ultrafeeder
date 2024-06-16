@@ -2,13 +2,15 @@
 
 # shellcheck shell=bash disable=SC2015,SC2162
 #
-# Registration and query utility for aussieadsb
+# Registration and query utility for aussieadsb,
+# Meant for those who want to feed AussieADSB with Ultrafeeder
+#
 # AussieADSB is an Australian aggregator focused on feeders in Australia/Oceania.
 # If you are in this region and are interested in feeding to them, please see:
 # http://aussieadsb.com/
 #
 # You can run this script from any modern Debian Linux machine with this command:
-# wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh | bash -s register
+# bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh)
 #
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2024 Ramon F. Kolb (kx1t) and contributors
@@ -140,7 +142,7 @@ case "$argv" in
         echo "   mlat,aussieadsb.com,30000;"
         echo
         echo "Add the following parameter as well:"
-        echo "- AUSSIEADSB_KEY=\'$rcvr_token\'"
+        echo "- AUSSIEADSB_KEY='$rcvr_token'"
         echo
         echo "After adding these, please recreate your Ultrafeeder container to start feeding AussieADSB!"
         echo
