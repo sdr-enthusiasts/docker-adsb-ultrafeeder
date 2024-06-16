@@ -137,7 +137,7 @@ case "$argv" in
         echo "   mlat,aussieadsb.com,30000;"
         echo
         echo "Add the following parameter as well:"
-        echo "- AUSSIEADSB_KEY=$rcvr_token"
+        echo "- AUSSIEADSB_KEY=\'$rcvr_token\'"
         echo
         echo "After adding these, please recreate your Ultrafeeder container to start feeding AussieADSB!"
         echo
