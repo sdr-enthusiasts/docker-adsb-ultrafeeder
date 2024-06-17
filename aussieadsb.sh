@@ -29,13 +29,13 @@
 #---------------------------------------------------------------------------------------------
 #
 
-AAClientVersion="1.2.0"
+AAClientVersion="1.1.0-ultrafeeder"
 argv="${1,,}"
 if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
 
 while [[ "$argv" == "-" ]]; do
     echo "AussieADSB registration utility"
-    echo "Visit https://aussieadsb.com for info"
+    echo "Visit http://aussieadsb.com for info"
     echo
     echo "Select an option:"
     echo "(r)egister      -- register a new receiver"
@@ -137,7 +137,7 @@ case "$argv" in
         fi
         echo "Your receiver is registered! Please add the following to your Ultrafeeder environment parameters in docker-compose.yml:"
         echo 
-        echo "In ULTRAFEEDER_CONFIG, add this line:"
+        echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
         echo "   mlat,aussieadsb.com,30000;"
         echo
@@ -222,7 +222,7 @@ case "$argv" in
         echo "Public IP address: $rcvr_ip"
         echo "Server Port to send Beast data to: $port"
         echo ""
-        echo "In ULTRAFEEDER_CONFIG, add this line:"
+        echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
         echo "   mlat,aussieadsb.com,30000;"
         echo
