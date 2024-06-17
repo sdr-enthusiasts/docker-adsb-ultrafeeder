@@ -139,7 +139,7 @@ case "$argv" in
         echo 
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
-        echo "   mlat,aussieadsb.com,30000;"
+        echo "   mlat,aussieadsb.com,30000,name=$rcvr_token;"
         echo
         echo "Add the following parameter as well:"
         echo "- AUSSIEADSB_KEY='$rcvr_token'"
@@ -224,7 +224,7 @@ case "$argv" in
         echo ""
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
-        echo "   mlat,aussieadsb.com,30000;"
+        echo "   mlat,aussieadsb.com,30000,name=$AUSSIEADSB_KEY;"
         echo
         echo "Add the following parameter as well:"
         echo "- AUSSIEADSB_KEY='$AUSSIEADSB_KEY'"
