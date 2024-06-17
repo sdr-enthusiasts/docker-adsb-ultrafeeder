@@ -183,7 +183,7 @@ do
     # If the argument starts with "uuid=", then it must be a UUID, etc.
     # If the argument isn't any of the above, then it's an "extra argument"
 
-    unset uuid_arg lat_arg lon_arg alt_arg input_connect_arg return_port_arg extra_args
+    unset name_arg uuid_arg lat_arg lon_arg alt_arg input_connect_arg return_port_arg extra_args
 
     for ((i=2; i<${#params[*]}; i++))
     do
@@ -234,7 +234,7 @@ do
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
 
     if [[ -n "${name_arg}" ]] || [[ -n "${MLAT_USER}" ]]; then
-        MLAT_PARAM+=(--user "${name_arg:-${MLAT_USER}}")
+        MLAT_PARAM+=(--user \""${name_arg:-${MLAT_USER}}"\")
     else
         rnd="${RANDOM}"
         "${s6wrap[@]}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
