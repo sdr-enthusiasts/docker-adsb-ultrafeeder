@@ -141,9 +141,6 @@ case "$argv" in
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
         echo "   mlat,aussieadsb.com,30000,name=$rcvr_token;"
         echo
-        echo "Add the following parameter as well:"
-        echo "- AUSSIEADSB_KEY='$rcvr_token'"
-        echo
         echo "After adding these, please recreate your Ultrafeeder container to start feeding AussieADSB!"
         echo
         echo "Visit http://aussieadsb.com/status to check feeding status"
@@ -225,9 +222,6 @@ case "$argv" in
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
         echo "   mlat,aussieadsb.com,30000,name=$AUSSIEADSB_KEY;"
-        echo
-        echo "Add the following parameter as well:"
-        echo "- AUSSIEADSB_KEY='$AUSSIEADSB_KEY'"
         echo
         exit 0
     ;;
