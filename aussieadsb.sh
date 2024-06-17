@@ -175,11 +175,11 @@ case "$argv" in
         read -n 1 -p "Are you sure you want to deregister station \"$rcvr_name\"? (y/N) " yesno
         echo  ""
         if [[ "$yesno" != "y" ]]; then
-            echo "Aborting deregistration!"
+            echo "Aborting de-registration!"
             exit 0
         fi
 
-        echo "Deregistering station $rcvr_name with key $AUSSIEADSB_KEY..."
+        echo "De-registering station $rcvr_name with key $AUSSIEADSB_KEY..."
         response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"deregister","Data":"User"}' "$AUSSIEADSB_KEY" "$AAClientVersion" | nc aussieadsb.com 5000)"
         if [[ "$(jq -r .MessageType <<< "$response" 2>/dev/null)" == "deregisterresponse" ]]; then
             echo "De-registration complete!"
@@ -207,7 +207,8 @@ case "$argv" in
         rcvr_name="$(jq -r .Data.Name <<< "$response" 2>/dev/null)"
         connected="$(jq -r .Data.Connected <<< "$response" 2>/dev/null)"
         rcvr_ip="$(jq -r .Data.ConnectedIP <<< "$response" 2>/dev/null)"
-
+        port="$(jq -r .Data.Port <<< "$response" 2>/dev/null)"
+        
         if [[ "$msg_type" != "statusresponse" ]] || [[ "$rcvr_name" == "null" ]]; then
             echo "Cannot find a receiver with Registration Key \"$AUSSIEADSB_KEY\"!"
             echo "Please check the key and try again!"
@@ -219,7 +220,15 @@ case "$argv" in
         echo "Registered Receiver Name: $rcvr_name"
         echo "Connection status: $connected"
         echo "Public IP address: $rcvr_ip"
+        echo "Server Port to send Beast data to: $port"
         echo ""
+        echo "In ULTRAFEEDER_CONFIG, add this line:"
+        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
+        echo "   mlat,aussieadsb.com,30000;"
+        echo
+        echo "Add the following parameter as well:"
+        echo "- AUSSIEADSB_KEY='$AUSSIEADSB_KEY'"
+        echo
         exit 0
     ;;
 
