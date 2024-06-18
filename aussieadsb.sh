@@ -29,13 +29,13 @@
 #---------------------------------------------------------------------------------------------
 #
 
-AAClientVersion="1.2.0"
+AAClientVersion="1.1.0-ultrafeeder"
 argv="${1,,}"
 if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
 
 while [[ "$argv" == "-" ]]; do
     echo "AussieADSB registration utility"
-    echo "Visit https://aussieadsb.com for info"
+    echo "Visit http://aussieadsb.com for info"
     echo
     echo "Select an option:"
     echo "(r)egister      -- register a new receiver"
@@ -137,12 +137,9 @@ case "$argv" in
         fi
         echo "Your receiver is registered! Please add the following to your Ultrafeeder environment parameters in docker-compose.yml:"
         echo 
-        echo "In ULTRAFEEDER_CONFIG, add this line:"
+        echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
-        echo "   mlat,aussieadsb.com,30000;"
-        echo
-        echo "Add the following parameter as well:"
-        echo "- AUSSIEADSB_KEY='$rcvr_token'"
+        echo "   mlat,aussieadsb.com,30000,name=$rcvr_token;"
         echo
         echo "After adding these, please recreate your Ultrafeeder container to start feeding AussieADSB!"
         echo
@@ -175,11 +172,11 @@ case "$argv" in
         read -n 1 -p "Are you sure you want to deregister station \"$rcvr_name\"? (y/N) " yesno
         echo  ""
         if [[ "$yesno" != "y" ]]; then
-            echo "Aborting deregistration!"
+            echo "Aborting de-registration!"
             exit 0
         fi
 
-        echo "Deregistering station $rcvr_name with key $AUSSIEADSB_KEY..."
+        echo "De-registering station $rcvr_name with key $AUSSIEADSB_KEY..."
         response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"deregister","Data":"User"}' "$AUSSIEADSB_KEY" "$AAClientVersion" | nc aussieadsb.com 5000)"
         if [[ "$(jq -r .MessageType <<< "$response" 2>/dev/null)" == "deregisterresponse" ]]; then
             echo "De-registration complete!"
@@ -207,7 +204,8 @@ case "$argv" in
         rcvr_name="$(jq -r .Data.Name <<< "$response" 2>/dev/null)"
         connected="$(jq -r .Data.Connected <<< "$response" 2>/dev/null)"
         rcvr_ip="$(jq -r .Data.ConnectedIP <<< "$response" 2>/dev/null)"
-
+        port="$(jq -r .Data.Port <<< "$response" 2>/dev/null)"
+        
         if [[ "$msg_type" != "statusresponse" ]] || [[ "$rcvr_name" == "null" ]]; then
             echo "Cannot find a receiver with Registration Key \"$AUSSIEADSB_KEY\"!"
             echo "Please check the key and try again!"
@@ -219,7 +217,12 @@ case "$argv" in
         echo "Registered Receiver Name: $rcvr_name"
         echo "Connection status: $connected"
         echo "Public IP address: $rcvr_ip"
+        echo "Server Port to send Beast data to: $port"
         echo ""
+        echo "In ULTRAFEEDER_CONFIG, please add these lines:"
+        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
+        echo "   mlat,aussieadsb.com,30000,name=$AUSSIEADSB_KEY;"
+        echo
         exit 0
     ;;
 
