@@ -1,4 +1,12 @@
-FROM ghcr.io/sdr-enthusiasts/docker-baseimage:mlatclient as mlatclient
+FROM ghcr.io/sdr-enthusiasts/docker-baseimage:mlatclient as buildimage
+
+SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
+RUN \
+    --mount=type=bind,source=./,target=/app/ \
+    apt-get update -q -y && \
+    apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
+    build_essential && \
+    gcc -static /app/downloads/distance-in-meters.c -o /distance -lm -O2
 
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
@@ -8,19 +16,17 @@ ENV URL_MLAT_CLIENT_REPO="https://github.com/wiedehopf/mlat-client.git" \
     PRIVATE_MLAT="false" \
     MLAT_INPUT_TYPE="auto"
 
+ARG VERSION_REPO="sdr-enthusiasts/docker-adsb-ultrafeeder" \
+    VERSION_BRANCH="##BRANCH##"
+
 SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
 RUN \
-    --mount=type=bind,source=./,target=/app/ \
-    --mount=type=bind,from=mlatclient,source=/,target=/mlatclient/ \
+    --mount=type=bind,from=buildimage,source=/,target=/buildimage/ \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
     # Needed to run the mlat_client:
     KEPT_PACKAGES+=(python3-minimal) && \
     KEPT_PACKAGES+=(python3-pkg-resources) && \
-    # needed to compile distance
-    TEMP_PACKAGES+=(build-essential) && \
-    # needed for container version
-    TEMP_PACKAGES+=(git) && \
     #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
@@ -30,17 +36,13 @@ RUN \
     "${KEPT_PACKAGES[@]}" \
     "${TEMP_PACKAGES[@]}" && \
     # Get mlat-client
-    tar zxf /mlatclient/mlatclient.tgz -C / && \
+    tar zxf /buildimage/mlatclient.tgz -C / && \
     ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
-    # Compile distance binary
-    gcc -static /app/downloads/distance-in-meters.c -o /usr/local/bin/distance -lm -O2 && \
+    # Get distance binary
+    cp -f  /buildimage/distance /usr/local/bin/distance && \
     # Add Container Version
-    branch="##BRANCH##" && \
-    [[ "${branch:0:1}" == "#" ]] && branch="main" || true && \
-    git clone --depth=1 -b "$branch" https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder.git /tmp/clone && \
-    pushd /tmp/clone && \
-    echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(git rev-parse --short HEAD)_$(git branch --show-current)" > /.CONTAINER_VERSION && \
-    popd && \
+    [[ "${VERSION_BRANCH:0:1}" == "#" ]] && VERSION_BRANCH="main" || true && \
+    echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(curl -ssL https://api.github.com/repos/$VERSION_REPO/commits/$VERSION_BRANCH | awk '{if ($1=="\"sha\":") {print substr($2,2,7); exit}}')_$VERSION_BRANCH" > /.CONTAINER_VERSION && \
     # Clean up and install POST_PACKAGES:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \
     # apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
