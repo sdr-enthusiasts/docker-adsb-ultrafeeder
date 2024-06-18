@@ -5,7 +5,7 @@ RUN \
     --mount=type=bind,source=./,target=/app/ \
     apt-get update -q -y && \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
-        buildessential && \
+        build-essential && \
     gcc -static /app/downloads/distance-in-meters.c -o /distance -lm -O2
 
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
