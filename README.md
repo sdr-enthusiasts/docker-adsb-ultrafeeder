@@ -801,6 +801,8 @@ This will:
 - configure the ultrafeeder docker container to read GPSD data
 - configure the ultrafeeder container so the hostname `host.docker.internal` always resolves to the IP address of the underlying machine (where `gpsd` is running)
 
+If you have any issues, readsb will use verbose output if you add the `GPSD_DEBUG=true` as an environment variable.
+
 ### Optional parameters regulating the restart of `mlat-client` when the location changes
 
 The following parameters are all optional and are subject to change. You don't need to set them unless you want to change the default behavior:
