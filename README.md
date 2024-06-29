@@ -21,6 +21,7 @@
         - [Alternate Configuration Method with `READSB_NET_CONNECTOR`](#alternate-configuration-method-with-readsb_net_connector)
       - [Optional Networking Parameters](#optional-networking-parameters)
       - [MLAT configuration](#mlat-configuration)
+      - [MLAT troubleshooting](#mlat-troubleshooting)
       - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
     - [Web Gui (`tar1090`) Configuration](#web-gui-tar1090-configuration)
       - [`tar1090` Core Configuration](#tar1090-core-configuration)
@@ -435,6 +436,34 @@ where:
 Note - the optional parameters can be given in any order.
 
 The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (_).
+
+#### MLAT troubleshooting
+
+Sometimes, MLAT appears not to be working correctly and you will see messages with high `bad_sync_timeout` values, like this:
+
+```text
+[2024-06-29 11:31:20.385][mlat-client][in.adsb.lol] peer_count:  15 outlier_percent: 4.6 bad_sync_timeout: 870
+```
+
+Here are a few things you may want to try to fix this:
+
+- Ensure your longitude, latitude, and altitude are ACCURATE
+- Make sure your device's clock is synced continuously with a reliable NTP service. We recommend `chronyd` over `systemd.timesyncd`
+- Do not try to send MLAT data from a centralized instance when you are using a remote receiver. Instead, feed MLAT directly from the remote station
+- On Raspberry Pi 3/3B+, disable HealthCheck by adding the following to the ultrafeeder service section in your `docker-compose.yml` file. (This has to do with docker resource spikes that mess with MLAT timing on slower machines like the Pi3/3B+) :
+
+  ```yaml
+    ultrafeeder:
+    ...
+      healthcheck:
+        disable: true
+  ```
+
+- MLAT often fails when you run your receiver on a Virtual Machine rather than directly on the hardware. Avoid virtual machines (including ProxMox and container-in-container setups) or disable MLAT on them
+- For FlightAware MLAT, make sure that your location and altitude are PRECISELY defined in your dashboard on the FlightAware website
+- Never, ever, ever resend MLAT results back to ADSB or MLAT aggregators. Please DO NOT. This will ensure your data is discarded and may get you banned from the aggregator
+- If you feed your data to multiple aggregators, please do not enable MLAT for FlightRadar24 (per their request). Note that MLAT for FR24 using our containerized setup is disabled by default
+
 
 #### Configuring the built-in MLAT Hub
 
