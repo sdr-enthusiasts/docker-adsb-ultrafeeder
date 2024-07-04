@@ -276,7 +276,7 @@ if [[ -n "$READSB_NET_VRS_PORT" ]]; then
 fi
 
 # make sure the db file exists, and if it does, use it
-if [[ "$TAR1090_ENABLE_AC_DB" == "true" ]]; then
+if chk_enabled "$TAR1090_ENABLE_AC_DB"; then
     if [[ -e $TAR1090_UPDATE_DIR/aircraft.csv.gz ]]; then
         READSB_CMD+=("--db-file=$TAR1090_UPDATE_DIR/aircraft.csv.gz")
     elif [[ -e $TAR1090_INSTALL_DIR/aircraft.csv.gz ]]; then
