@@ -647,6 +647,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `GRAPHS1090_DISABLE_CHART_DISK_IOPS`         | Set to `true` to disable the GRAPHS1090 Disk IOPS chart                                                                                   | Unset     |
 | `GRAPHS1090_DISABLE_CHART_DISK_BANDWIDTH`    | Set to `true` to disable the GRAPHS1090 Disk Bandwidth chart                                                                              | Unset     |
 | `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset     |
+| `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset     |
 
 #### Enabling UAT data
 
@@ -655,30 +656,26 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 1. Set the following environment parameters:
 
 ```yaml
-- URL_978=http://dump978/skyaware978
+      - ENABLE_978=yes
+      - URL_978=http://dump978/skyaware978
 ```
 
 2. Install the [`docker-dump978` container](https://github.com/sdr-enthusiasts/docker-dump978). Note - only containers downloaded/deployed on/after Feb 8, 2023 will work.
 
-Note that you **must** configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
+Note that you \*_must_- configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
 
 #### Enabling AirSpy graphs
 
 Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the following:
 
-- Set the following environment parameter:
+1. Set the following environment parameters:
 
 ```yaml
       - ENABLE_AIRSPY=yes
+      - URL_AIRSPY=http://airspy_adsb
 ```
 
-- To provide the container access to the AirSpy statistics, map a volume in your `docker-compose.yml` file as follows:
-
-```yaml
-    volumes:
-      - /run/airspy_adsb:/run/airspy_adsb
-      ...
-```
+2. Install the [`airspy_adsb` container](https://github.com/sdr-enthusiasts/airspy_adsb). Note - only containers downloaded/deployed on/after May 9th, 2024 will work with this method.
 
 #### Enabling Disk IO and IOPS data
 
