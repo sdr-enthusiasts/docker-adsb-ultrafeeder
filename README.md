@@ -507,7 +507,20 @@ If you want to show MLAT results from sources that have their own feeder contain
 # - `protocol` is the output protocol which is almost always `beast_in`
 #
 ```
-In your logs, you should see `[mlathub] Starting MLATHUB...`.
+In your logs, you should see `[mlathub] Starting MLATHUB...`. If you're only making use of Ultrafeeder and [sdr-enthusiasts/docker-piaware](https://github.com/sdr-enthusiasts/docker-piaware), you might see:
+```
+[2024-07-19 23:26:54.926][mlathub] No MLAT servers have been defined in MLAT_CONFIG and no external sources
+have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB
+<snip>
+feeder   | [2024-07-19 23:26:54.960][mlat-client] Warning: MLAT_CONFIG not defined - MLAT will be disabled.
+```
+
+and thus no MLAT results (yellow in tar1090) will appear. You can rectify this by providing an empty (but acceptable) value for `MLAT_CONFIG`:
+```yaml
+    - MLAT_CONFIG=;
+    - ULTRAFEEDER_CONFIG=
+          mlathub,piaware,30105,beast_in;
+```
 
 Generally, there is little else to configure, but there are a few parameters that you can set or change:
 
