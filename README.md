@@ -410,7 +410,7 @@ It will create a separate instance of `mlat-client` for each defined MLAT server
 ```yaml
     environment:
     ...
-      - ULTRAFEEDERCONFIG=
+      - ULTRAFEEDER_CONFIG=
            ...
            mlat,mlat-server1.com,port1,return_port1,uuid=1234-5678-90123,inputconnect=remote_receiver1:30005,lat=12.3456,lon=45.6789,alt=18m,--arg1 hello --arg2 world;
            mlat,mlat-server2.com,port2,return_port2,uuid=5678-9012-34567,inputconnect=remote_receiver2:30005,-lat=12.3456,lon=45.6789,alt=18m,--arg1 hello-again --arg2 universe
@@ -814,7 +814,7 @@ services:
       - "host.docker.internal:host-gateway"
     ...
     environment:
-      ULTRAFEEDER-CONFIG=
+      ULTRAFEEDER_CONFIG=
         gpsd,host.docker.internal,2947;
     ...
 ```
