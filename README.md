@@ -289,21 +289,7 @@ Note that `ULTRAFEEDER_CONFIG` and `ULTRAFEEDER_NET_CONNECTOR` can be used inter
 
 The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by a `;`. Please note that the config strings cannot contain `;` or `,` -- undefined things may happen if these characters are present.
 
-```yaml
-- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-...or...
-- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-...or to retrieve MLAT data from a remote receiver...
-- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]
-...or...
-- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
-```
-
-- To connect to an external ADSB (for input or output), UAT, or MLAT results source, use `- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`
-- To connect and send data to an MLAT Server, use `- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,name=Friendly_Name-123][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]`. For the optional parts in this structure, see [MLAT configuration](#mlat-configuration). Note - any MLAT results data received from the MLAT Server will automatically be aggregated in an [MLAT Hub](#configuring-the-built-in-mlat-hub) and shared with `tar1090`
-- To add MLAT results from additional MLAT Servers not configured with Ultrafeeder (for example, MLAT results from FlightRadar24 or FlightAware/piaware), use `- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
-
-In the above configuration strings:
+In the below configuration strings:
 
 - `host` is an IP address. Specify an IP/hostname/containername for incoming or outgoing connections.
 - `port` and `return_port` are TCP port numbers
@@ -320,6 +306,36 @@ In the above configuration strings:
 - `uuid` is a Universally Unique Identifier. You can reuse the one you generated for AdsbExchange, or you can generate a new one with this Linux command: `cat /proc/sys/kernel/random/uuid`. If omitted, it will use the `UUID` environment parameter, or if that one doesn't exist, it will leave the field empty.
 - `name` is a friendly name (containing any character of the set \[A-Za-z0-9_-\] - do not use any spaces, quotes, or other non-alphanumeric characters!) that will be sent to the MLAT Server, used to identify the station by name. If omitted, it will use the `MLAT_USER` parameter, or if that one doesn't exist, it will leave the field empty.
 
+
+
+```yaml
+- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+...or...
+- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+...or to retrieve MLAT data from a remote receiver...
+- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]
+...or...
+- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]
+```
+
+- To connect to an external ADSB (for input or output), UAT, or MLAT results source, use `- ULTRAFEEDER_CONFIG=adsb,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`
+- To connect and send data to an MLAT Server, use `- ULTRAFEEDER_CONFIG=mlat,host,port[,return_port][,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,name=Friendly_Name-123][,input_connect=remote-host:port,lat=xx.xxxx,lon=yy.yyyy,alt=zzz][,extra-arguments]`. For the optional parts in this structure, see [MLAT configuration](#mlat-configuration). Note - any MLAT results data received from the MLAT Server will automatically be aggregated in an [MLAT Hub](#configuring-the-built-in-mlat-hub) and shared with `tar1090`
+- To add MLAT results from additional MLAT Servers not configured with Ultrafeeder (for example, MLAT results from FlightRadar24 or FlightAware/piaware), use `- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,extra-arguments]`. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
+
+If you're only making use of Ultrafeeder and [sdr-enthusiasts/docker-piaware](https://github.com/sdr-enthusiasts/docker-piaware), you might see:
+```
+[2024-07-19 23:26:54.926][mlathub] No MLAT servers have been defined in MLAT_CONFIG and no external sources
+have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB
+<snip>
+feeder   | [2024-07-19 23:26:54.960][mlat-client] Warning: MLAT_CONFIG not defined - MLAT will be disabled.
+```
+
+and thus no MLAT results (yellow in tar1090) will appear. You can rectify this by providing an empty (but acceptable) value for `MLAT_CONFIG`:
+```yaml
+    - MLAT_CONFIG=;
+    - ULTRAFEEDER_CONFIG=
+          mlathub,piaware,30105,beast_in;
+```
 ##### Networking parameters
 
 | Environment Variable | Purpose                                                                                                                                                                                                                                                                               | Default |
@@ -405,7 +421,12 @@ There are many optional parameters relating to the ingestion of data and the gen
 #### MLAT configuration
 
 The Ultrafeeder contains a capability to send MLAT data to MLAT servers to be processed, and to receive the MLAT results and integrate those with an MLAT Hub and the `tar1090` map.
-It will create a separate instance of `mlat-client` for each defined MLAT server. The parameters for these `mlat-client` instances is as follows:
+
+##### Warning
+- Never, ever, ever resend MLAT results back to ADSB or MLAT aggregators. Please DO NOT. This will ensure your data is discarded and may get you banned from the aggregator
+- If you feed your data to multiple aggregators, please do not enable MLAT for FlightRadar24 (per their request). Note that MLAT for FR24 using our containerized setup is disabled by default
+
+Ultrafeeder will create a separate instance of `mlat-client` for each defined MLAT server. For example:
 
 ```yaml
     environment:
@@ -461,9 +482,6 @@ Here are a few things you may want to try to fix this:
 
 - MLAT often fails when you run your receiver on a Virtual Machine rather than directly on the hardware. Avoid virtual machines (including ProxMox and container-in-container setups) or disable MLAT on them
 - For FlightAware MLAT, make sure that your location and altitude are PRECISELY defined in your dashboard on the FlightAware website
-- Never, ever, ever resend MLAT results back to ADSB or MLAT aggregators. Please DO NOT. This will ensure your data is discarded and may get you banned from the aggregator
-- If you feed your data to multiple aggregators, please do not enable MLAT for FlightRadar24 (per their request). Note that MLAT for FR24 using our containerized setup is disabled by default
-
 
 #### Configuring the built-in MLAT Hub
 
@@ -474,23 +492,22 @@ An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the c
 - make the consolidated MLAT results available on a port in Beast or SBS (BaseStation) format
 - create outbound connections using any supported format to send your Beast data wherever you want
 
-Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` or `ULTRAFEEDER_CONFIG=mlat,...` parameters. If you want to show any MLAT results from sources that have their own feeder containers (for example, those from `piaware`), you should add these sources like this:
+Due to design limitations of `readsb`, the `tar1090` graphical interface ONLY shows MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` or `ULTRAFEEDER_CONFIG=mlat,...` parameters.
+If you want to show MLAT results from sources that have their own feeder containers (for example, those from `piaware`), you should add these sources like this:
 
 ```yaml
-   - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol;
+# environment:
+# ...
+#  - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol;
+#
+# - `host` is the hostname where the `MLAT results` are coming from.
+#     You can use a container name (e.g., `piaware`) or
+#     the IP of a machine on YOUR network on which `mlat-client` is running.   
+# - `port` is the port on which the `mlat-client` on the `host` makes its results available
+# - `protocol` is the output protocol which is almost always `beast_in`
+#
 ```
-
-Where:
-
-- `host` is the hostname where the `MLAT results` are coming from. This can be another container name (e.g., `piaware`) or the IP address of your machine on which `mlat-client` is running. Note -- this is NOT the hostname or IP of the MLAT Server or aggregator that processes the MLAT data
-- `port` is the port on which the `mlat-client` on the `host` makes its results available
-- `protocol` is the output protocol which is almost always `beast_in`
-
-For example:
-
-```yaml
-   - ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
-```
+In your logs, you should see `[mlathub] Starting MLATHUB...`.
 
 Generally, there is little else to configure, but there are a few parameters that you can set or change:
 
