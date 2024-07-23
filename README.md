@@ -21,6 +21,7 @@
         - [Alternate Configuration Method with `READSB_NET_CONNECTOR`](#alternate-configuration-method-with-readsb_net_connector)
       - [Optional Networking Parameters](#optional-networking-parameters)
       - [MLAT configuration](#mlat-configuration)
+      - [MLAT troubleshooting](#mlat-troubleshooting)
       - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
     - [Web Gui (`tar1090`) Configuration](#web-gui-tar1090-configuration)
       - [`tar1090` Core Configuration](#tar1090-core-configuration)
@@ -437,6 +438,34 @@ Note - the optional parameters can be given in any order.
 
 The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (_).
 
+#### MLAT troubleshooting
+
+Sometimes, MLAT appears not to be working correctly and you will see messages with high `bad_sync_timeout` values, like this:
+
+```text
+[2024-06-29 11:31:20.385][mlat-client][in.adsb.lol] peer_count:  15 outlier_percent: 4.6 bad_sync_timeout: 870
+```
+
+Here are a few things you may want to try to fix this:
+
+- Ensure your longitude, latitude, and altitude are ACCURATE
+- Make sure your device's clock is synced continuously with a reliable NTP service. We recommend `chronyd` over `systemd.timesyncd`
+- Do not try to send MLAT data from a centralized instance when you are using a remote receiver. Instead, feed MLAT directly from the remote station
+- On Raspberry Pi 3/3B+, disable HealthCheck by adding the following to the ultrafeeder service section in your `docker-compose.yml` file. (This has to do with docker resource spikes that mess with MLAT timing on slower machines like the Pi3/3B+) :
+
+  ```yaml
+    ultrafeeder:
+    ...
+      healthcheck:
+        disable: true
+  ```
+
+- MLAT often fails when you run your receiver on a Virtual Machine rather than directly on the hardware. Avoid virtual machines (including ProxMox and container-in-container setups) or disable MLAT on them
+- For FlightAware MLAT, make sure that your location and altitude are PRECISELY defined in your dashboard on the FlightAware website
+- Never, ever, ever resend MLAT results back to ADSB or MLAT aggregators. Please DO NOT. This will ensure your data is discarded and may get you banned from the aggregator
+- If you feed your data to multiple aggregators, please do not enable MLAT for FlightRadar24 (per their request). Note that MLAT for FR24 using our containerized setup is disabled by default
+
+
 #### Configuring the built-in MLAT Hub
 
 An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:
@@ -619,6 +648,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `GRAPHS1090_DISABLE_CHART_DISK_IOPS`         | Set to `true` to disable the GRAPHS1090 Disk IOPS chart                                                                                   | Unset     |
 | `GRAPHS1090_DISABLE_CHART_DISK_BANDWIDTH`    | Set to `true` to disable the GRAPHS1090 Disk Bandwidth chart                                                                              | Unset     |
 | `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset     |
+| `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset     |
 
 #### Enabling UAT data
 
@@ -627,30 +657,26 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 1. Set the following environment parameters:
 
 ```yaml
-- URL_978=http://dump978/skyaware978
+      - ENABLE_978=yes
+      - URL_978=http://dump978/skyaware978
 ```
 
 2. Install the [`docker-dump978` container](https://github.com/sdr-enthusiasts/docker-dump978). Note - only containers downloaded/deployed on/after Feb 8, 2023 will work.
 
-Note that you **must** configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
+Note that you \*_must_- configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
 
 #### Enabling AirSpy graphs
 
 Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the following:
 
-- Set the following environment parameter:
+1. Set the following environment parameters:
 
 ```yaml
       - ENABLE_AIRSPY=yes
+      - URL_AIRSPY=http://airspy_adsb
 ```
 
-- To provide the container access to the AirSpy statistics, map a volume in your `docker-compose.yml` file as follows:
-
-```yaml
-    volumes:
-      - /run/airspy_adsb:/run/airspy_adsb
-      ...
-```
+2. Install the [`airspy_adsb` container](https://github.com/sdr-enthusiasts/airspy_adsb). Note - only containers downloaded/deployed on/after May 9th, 2024 will work with this method.
 
 #### Enabling Disk IO and IOPS data
 
@@ -801,6 +827,8 @@ This will:
 - install and configure `gpsd` (`/etc/default/gpsd`) so it makes GPS data available on the default TCP port 2947 of your host system
 - configure the ultrafeeder docker container to read GPSD data
 - configure the ultrafeeder container so the hostname `host.docker.internal` always resolves to the IP address of the underlying machine (where `gpsd` is running)
+
+If you have any issues, readsb will use verbose output if you add the `GPSD_DEBUG=true` as an environment variable.
 
 ### Optional parameters regulating the restart of `mlat-client` when the location changes
 
