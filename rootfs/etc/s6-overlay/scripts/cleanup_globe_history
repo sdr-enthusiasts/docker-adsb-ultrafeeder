@@ -30,10 +30,11 @@ fi
 
 cutoffepoch="$(date -d"-${MAX_GLOBE_HISTORY} days" +%s)"
 
+"${s6wrap[@]}" echo "Purging globe_history older than $MAX_GLOBE_HISTORY days (before $(date -d"-${MAX_GLOBE_HISTORY} days" +%d-%b-%Y))"
 for dir in $(find /var/globe_history -maxdepth 3 -mindepth 3 | grep -o -E -e '[0-9]{4}/[0-9]{2}/[0-9]{2}$'); do
     if (( $(date -d "$dir" +%s) < cutoffepoch )); then
         rm -rf "/var/globe_history/$dir"
     fi
 done
-
+"${s6wrap[@]}" echo "Done - next purge will be in 24 hours"
 exec sleep 24h
