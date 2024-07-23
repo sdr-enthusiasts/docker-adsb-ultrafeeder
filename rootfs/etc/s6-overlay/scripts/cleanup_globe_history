@@ -32,7 +32,7 @@ cutoffepoch="$(date -d"-${MAX_GLOBE_HISTORY} days" +%s)"
 
 for dir in $(find /var/globe_history -maxdepth 3 -mindepth 3 | grep -o -E -e '[0-9]{4}/[0-9]{2}/[0-9]{2}$'); do
     if (( $(date -d "$dir" +%s) < cutoffepoch )); then
-      echo rm -rf "/var/globe_history/$dir"
+        rm -rf "/var/globe_history/$dir"
     fi
 done
 
