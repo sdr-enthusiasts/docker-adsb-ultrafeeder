@@ -210,6 +210,7 @@ The following parameters must be set (mandatory) for the container to function:
 | `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        |                                | `3000`    |
 | `LOGLEVEL`                    | `verbose` (all messages), `error` (errors only), `none` (minimal)                                                                |                                | `verbose` |
 | `MLAT_STARTUP_STAGGER`        | mlat-client startup staggering for tidy logs (reduce for quicker startup)                                                        |                                | `15`      |
+| `MAX_GLOBE_HISTORY`           | Maximum number of days that `globe_history` data (used to produce heatmaps and ptracks) is retained. Note - this parameter doesn't affect the data used to produce `graphs1090` statistics | | Unset |
 
 `READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehopf's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 
