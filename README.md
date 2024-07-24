@@ -465,7 +465,6 @@ Here are a few things you may want to try to fix this:
 - Never, ever, ever resend MLAT results back to ADSB or MLAT aggregators. Please DO NOT. This will ensure your data is discarded and may get you banned from the aggregator
 - If you feed your data to multiple aggregators, please do not enable MLAT for FlightRadar24 (per their request). Note that MLAT for FR24 using our containerized setup is disabled by default
 
-
 #### Configuring the built-in MLAT Hub
 
 An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the container is capable of sending MLAT data to multiple ADSB aggregators (like adsb.lol/fi/one, etc), we built in a capability to:

@@ -21,7 +21,7 @@ ARG VERSION_REPO="sdr-enthusiasts/docker-adsb-ultrafeeder" \
 
 SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
 RUN \
-    --mount="type=bind,from=buildimage,source=/,target=/buildimage/" \
+    --mount=type=bind,from=buildimage,source=/,target=/buildimage/ \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
     # Needed to run the mlat_client:
