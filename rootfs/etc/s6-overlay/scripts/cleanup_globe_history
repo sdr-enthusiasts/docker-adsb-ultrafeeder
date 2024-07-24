@@ -31,10 +31,17 @@ fi
 cutoffepoch="$(date -d"-${MAX_GLOBE_HISTORY} days" +%s)"
 
 "${s6wrap[@]}" echo "Purging globe_history older than $MAX_GLOBE_HISTORY days (before $(date -d"-${MAX_GLOBE_HISTORY} days" +%d-%b-%Y))"
-for dir in $(find /var/globe_history -maxdepth 3 -mindepth 3 | grep -o -E -e '[0-9]{4}/[0-9]{2}/[0-9]{2}$'); do
+for dir in $(find /var/globe_history -maxdepth 3 -mindepth 3 -type d | grep -o -E -e '[0-9]{4}/[0-9]{2}/[0-9]{2}$'); do
     if (( $(date -d "$dir" +%s) < cutoffepoch )); then
+        "${s6wrap[@]}" echo Removing "/var/globe_history/$dir"
         rm -rf "/var/globe_history/$dir"
     fi
 done
+
+# delete empty year / month directories
+# make sure the directories haven't been touched for 3 days so freshly created directories aren't removed
+# this will also delay deletion of empty parent directories by 3 days after their contents have been removed but that's fine
+find /var/globe_history/ -mindepth 1 -maxdepth 2 -type d -empty -mtime +3 -delete
+
 "${s6wrap[@]}" echo "Done - next purge will be in 24 hours"
 exec sleep 24h
