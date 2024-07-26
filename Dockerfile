@@ -51,7 +51,7 @@ RUN \
     /usr/bin/mlat-client --help > /dev/null && \
     # remove pycache introduced by testing mlat-client
     find /usr | grep -E "/__pycache__$" | xargs rm -rf || true && \
-    rm -rf /src "/tmp/*" "/var/lib/apt/lists/*" /git "/var/cache/*" && \
+    rm -rf /src /tmp/* /var/lib/apt/lists/* /git /var/cache/* && \
     #
     # Do some stuff for kx1t's convenience:
     echo "alias dir=\"ls -alsv\"" >> /root/.bashrc && \
