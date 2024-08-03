@@ -364,6 +364,12 @@ if chk_enabled "$PROMETHEUS_ENABLE"; then
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
 
+# wait 15 seconds if this is not the first startup
+if [[ $(s6-svdt /run/service/readsb | wc -l) != 0 ]]; then
+    "${s6wrap[@]}" --args echo "delaying restart by 15 seconds"
+    sleep 15
+fi
+
 # shellcheck disable=SC2086
 if [[ "${LOGLEVEL,,}" == "verbose" ]]; then
     exec "${s6wrap[@]}" --args "${READSB_BIN}" "${READSB_CMD[@]}" $READSB_AUTOMATION_ARGS $READSB_EXTRA_ARGS
