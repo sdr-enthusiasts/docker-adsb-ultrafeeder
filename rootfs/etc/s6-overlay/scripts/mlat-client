@@ -42,12 +42,14 @@ declare -A pid_array
 if [[ -z "${MLAT_CONFIG}" ]]
 then
     "${s6wrap[@]}" --args echo "Warning: MLAT_CONFIG not defined - MLAT will be disabled."
+    s6-svc -d /run/service/mlat-client
     exec sleep infinity
 fi
 
 if [[ -z "${MLAT_USER}" ]] && [[ -z "${UUID}" ]]
 then
     "${s6wrap[@]}" --args echo "ERROR: either UUID or MLAT_USER must be defined - MLAT will be disabled."
+    s6-svc -d /run/service/mlat-client
     exec sleep infinity
 fi
 

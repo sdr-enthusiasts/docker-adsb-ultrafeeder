@@ -31,11 +31,13 @@ fi
 
 if [[ -z "${MLAT_CONFIG}" ]] && [[ -z "$MLATHUB_NET_CONNECTOR" ]] && [[ ${#MLATHUB_CONF_ARR[@]} == 0 ]] && ! chk_enabled "${MLATHUB_ENABLE}"; then
     "${s6wrap[@]}" --args echo "No MLAT servers have been defined in MLAT_CONFIG and no external sources have been defined in MLATHUB_NET_CONNECTOR - no need to start MLATHUB"
+    s6-svc -d /run/service/mlathub
     exec sleep infinity
 fi
 
 if chk_enabled "${MLATHUB_DISABLE}"; then
     "${s6wrap[@]}" --args echo "MLATHUB is disabled."
+    s6-svc -d /run/service/mlathub
     exec sleep infinity
 fi
 

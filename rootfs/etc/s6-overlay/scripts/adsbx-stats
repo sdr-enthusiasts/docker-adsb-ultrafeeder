@@ -23,12 +23,14 @@ source /scripts/interpret_ultrafeeder_config
 # Check if ADSBExchange is configured
 if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
     "${s6wrap[@]}" echo "AdsbExchange not configured - no stats package needed"
+    s6-svc -d /run/service/adsbx-stats
     exec sleep infinity
 fi
 
 # Check if ADSBExchange stats are disabled
 if chk_disabled "$ADSBX_STATS" ; then
     "${s6wrap[@]}" echo "AdsbExchange stats disabled"
+    s6-svc -d /run/service/adsbx-stats
     exec sleep infinity
 fi
 
@@ -42,6 +44,7 @@ fi
 if [[ ! -f /usr/local/bin/json-status ]]; then
     if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/adsbexchange-json-status; then
         "${s6wrap[@]}" echo "ERROR: AdsbExchange configured, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
+        s6-svc -d /run/service/adsbx-stats
         exec sleep infinity
     fi
     chmod 755 /usr/local/bin/json-status
