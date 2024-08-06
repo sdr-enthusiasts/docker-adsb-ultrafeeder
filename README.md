@@ -874,8 +874,8 @@ See [README-grafana.md](README-grafana.md) for detailed instruction on how to co
 
 ```yaml
 services:
-  tar1090:
-    image: ghcr.io/sdr-enthusiasts/docker-tar1090:telegraf
+  ultrafeeder:
+    image: ghcr.io/sdr-enthusiasts/docker-ultrafeeder:telegraf
   ...
 ```
 
