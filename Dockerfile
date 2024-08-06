@@ -1,4 +1,4 @@
-FROM ghcr.io/sdr-enthusiasts/docker-baseimage:mlatclient as buildimage
+FROM ghcr.io/sdr-enthusiasts/docker-baseimage:mlatclient AS buildimage
 
 SHELL ["/bin/bash", "-x", "-o", "pipefail", "-c"]
 RUN \
