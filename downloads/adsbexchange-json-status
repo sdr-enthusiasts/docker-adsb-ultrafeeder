@@ -13,7 +13,7 @@ DNS_CACHE=1
 # Cache time, default 10min
 DNS_TTL=600
 # Set this to 1 if you want to force using the cache always even if there is a local resolver.
-DNS_IGNORE_LOCAL=0
+DNS_IGNORE_LOCAL=1
 
 # List all paths, IN PREFERRED ORDER, separated by a SPACE
 # By default, only use the json from the feed client
@@ -208,16 +208,9 @@ if [ $LOCAL_RESOLVER -ne 0 ]; then
 	fi
 fi
 
-if ! command -v host &>/dev/null || ! command -v perl &>/dev/null; then
-    echo "host command or perl not available, disabling DNS Cache" >&2
+if ! command -v host &>/dev/null; then
+    echo "host command not available, disabling DNS Cache" >&2
     DNS_CACHE=0
-fi
-
-VER_OK=$( echo "$CURL_VER" | perl -ne '@v=split(/\./); if ($v[0] == 7) { if ($v[1] >= 22) { printf("1");exit; } else { printf("0");exit; } } if ($v[0] > 7) { pr
-intf("1");exit; } printf("0");exit;')
-if [ $VER_OK -ne 1 ]; then
-	echo "WARNING: curl version is too old ($CURL_VER < 7.22.0), not using script's DNS cache."
-	DNS_CACHE=0
 fi
 
 
