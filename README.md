@@ -926,6 +926,19 @@ If you want to use `ultrafeeder` _only_ as a SDR decoder but without any mapping
 - Set the parameter `TAR1090_DISABLE=true`. This will prevent the `nginx` webserver and any websites to be launched and no `collectd` (graphs1090) or `rrd` (ADSB message history) data to be collected or retained.
 - Make sure to use `ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest` and specifically NOT the `ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf` label as Telegraf adds a LOT of resource use to the container
 
+## Offline maps
+
+There is the option to use some basic offline maps limited in zoom:
+
+- Download  the tiles (donn't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
+- Add a volume mapping so the container can access the tiles:
+
+```yaml
+    volumes:
+        - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
+```
+
+
 ## Logging
 
 All logs are to the container's stdout and can be viewed with `docker logs -t [-f] container`.
