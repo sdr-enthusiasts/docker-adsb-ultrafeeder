@@ -10,7 +10,7 @@
         - [Mandatory Parameters](#mandatory-parameters)
         - [Optional Parameters](#optional-parameters)
     - [Getting ADSB data to the Ultrafeeder](#getting-adsb-data-to-the-ultrafeeder)
-      - [Connecting to a SDR or other hardware device](#connecting-to-a-sdr-or-other-hardware-device)
+      - [Connecting to an SDR or other hardware device](#connecting-to-a-sdr-or-other-hardware-device)
         - [Mandatory parameters](#mandatory-parameters-1)
         - [Optional/Additional Parameters](#optionaladditional-parameters)
         - [AutoGain for RTLSDR Devices](#autogain-for-rtlsdr-devices)
@@ -59,7 +59,7 @@
 
 ## Introduction
 
-`adsb-ultrafeeder™` is a ADS-B data collector container that can be used to:
+`adsb-ultrafeeder™` is an ADS-B data collector container that can be used to:
 
 - retrieve ADS-B data from your SDR or other device
 - display it on a local map, including options to show tracks, heatmaps, and system performance graphs
@@ -135,7 +135,7 @@ The general principle behind the port numbering, is:
 | `9274/tcp`                  | Prometheus web interface with data from `Telegraf` |
 | `80/tcp`                    | Tar1090 (map) web interface                        |
 
-Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
+Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can be mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
 
 ```yaml
     ports:
@@ -219,12 +219,12 @@ The following parameters must be set (mandatory) for the container to function:
 
 There are two ways to provide ADSB data to the Ultrafeeder:
 
-- provide the container with access to a SDR or other hardware device that collects ADSB data
+- provide the container with access to an SDR or other hardware device that collects ADSB data
 - allow the container to connect to a ADSB data source in Beast, Raw, or SBS format
 
 These methods are not mutually exclusive - you can use both at the same time if you want.
 
-#### Connecting to a SDR or other hardware device
+#### Connecting to an SDR or other hardware device
 
 If you want to connect your SDR to the container, here's how to do that:
 
@@ -278,7 +278,7 @@ docker exec -it ultrafeeder /usr/local/bin/autogain1090 reset
 
 #### Connecting to external ADSB data sources
 
-In addition to (or instead of) connecting to a SDR or hardware device to get ADSB data, the container also supports ingesting or sending data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
+In addition to (or instead of) connecting to an SDR or hardware device to get ADSB data, the container also supports ingesting or sending data from a TCP port. Here are some parameters that you need to configure if you want to make this happen:
 
 ##### All-in-One Configuration using `ULTRAFEEDER_CONFIG`
 
@@ -508,7 +508,7 @@ Generally, there is little else to configure, but there are a few parameters tha
 
 The Container creates an interactive web interface displaying the aircraft, based on Wiedehopf's widely used [tar1090](https://github.com/wiedehopf/tar1090) software.
 
-The web interface is rendered to port `80` in the container. This can me mapped to a port on the host using the docker-compose `ports` directive.
+The web interface is rendered to port `80` in the container. This can be mapped to a port on the host using the docker-compose `ports` directive.
 
 All of the variables below are optional.
 
@@ -663,7 +663,7 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 
 2. Install the [`docker-dump978` container](https://github.com/sdr-enthusiasts/docker-dump978). Note - only containers downloaded/deployed on/after Feb 8, 2023 will work.
 
-Note that you \*_must_- configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
+Note that you *must* configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
 
 #### Enabling AirSpy graphs
 
@@ -930,7 +930,7 @@ If you want to use `ultrafeeder` _only_ as a SDR decoder but without any mapping
 
 There is the option to use some basic offline maps limited in zoom:
 
-- Download  the tiles (donn't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
+- Download  the tiles (don't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
 - Add a volume mapping so the container can access the tiles:
 
 ```yaml
