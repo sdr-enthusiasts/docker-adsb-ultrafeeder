@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# DEPRECATED, see ./rootfs/usr/local/bin/adsbexchange-json-status
+
 #
 # Upload output data from decoder to remote server
 #
