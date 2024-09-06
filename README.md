@@ -624,31 +624,35 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 
 #### `graphs1090` Environment Parameters
 
-| Variable                                     | Description                                                                                                                               | Default   |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `GRAPHS1090_DARKMODE`                        | If set to `true`, `graphs1090` will be rendered in "dark mode".                                                                           | Unset     |
-| `GRAPHS1090_RRD_STEP`                        | Interval in seconds to feed data into RRD files.                                                                                          | `60`      |
-| `GRAPHS1090_SIZE`                            | Set graph size, possible values: `small`, `default`, `large`, `huge`, `custom`.                                                           | `default` |
-| `GRAPHS1090_ALL_LARGE`                       | Make the small graphs as large as the big ones by setting to `yes`.                                                                       | `no`      |
-| `GRAPHS1090_FONT_SIZE`                       | Font size (relative to graph size).                                                                                                       | `10.0`    |
-| `GRAPHS1090_MAX_MESSAGES_LINE`               | Set to `true` to draw a reference line at the maximum message rate.                                                                       | Unset     |
-| `GRAPHS1090_LARGE_WIDTH`                     | Defines the width of the larger graphs.                                                                                                   | `1096`    |
-| `GRAPHS1090_LARGE_HEIGHT`                    | Defines the height of the larger graphs.                                                                                                  | `235`     |
-| `GRAPHS1090_SMALL_WIDTH`                     | Defines the width of the smaller graphs.                                                                                                  | `619`     |
-| `GRAPHS1090_SMALL_HEIGHT`                    | Defines the height of the smaller graphs.                                                                                                 | `324`     |
-| `GRAPHS1090_DISK_DEVICE`                     | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device                                            | Unset     |
-| `GRAPHS1090_ETHERNET_DEVICE`                 | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device                                     | Unset     |
-| `GRAPHS1090_WIFI_DEVICE`                     | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device                                    | Unset     |
-| `GRAPHS1090_DISABLE`                         | Set to `true` to disable the entire GRAPHS1090 web page and associated data collection                                                    | Unset     |
-| `GRAPHS1090_DISABLE_CHART_CPU`               | Set to `true` to disable the GRAPHS1090 CPU chart                                                                                         | Unset     |
-| `GRAPHS1090_DISABLE_CHART_TEMP`              | Set to `true` to disable the GRAPHS1090 Temperature chart                                                                                 | Unset     |
-| `GRAPHS1090_DISABLE_CHART_MEMORY`            | Set to `true` to disable the GRAPHS1090 Memory Utilization chart                                                                          | Unset     |
-| `GRAPHS1090_DISABLE_CHART_NETWORK_BANDWIDTH` | Set to `true` to disable the GRAPHS1090 Network Bandwidth chart                                                                           | Unset     |
-| `GRAPHS1090_DISABLE_CHART_DISK_USAGE`        | Set to `true` to disable the GRAPHS1090 Disk Usage chart                                                                                  | Unset     |
-| `GRAPHS1090_DISABLE_CHART_DISK_IOPS`         | Set to `true` to disable the GRAPHS1090 Disk IOPS chart                                                                                   | Unset     |
-| `GRAPHS1090_DISABLE_CHART_DISK_BANDWIDTH`    | Set to `true` to disable the GRAPHS1090 Disk Bandwidth chart                                                                              | Unset     |
-| `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset     |
-| `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset     |
+| Variable                                     | Description                                                                                                                               | Default        |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `GRAPHS1090_DARKMODE`                        | If set to `true`, `graphs1090` will be rendered in "dark mode".                                                                           | Unset          |
+| `GRAPHS1090_RRD_STEP`                        | Interval in seconds to feed data into RRD files.                                                                                          | `60`           |
+| `GRAPHS1090_SIZE`                            | Set graph size, possible values: `small`, `default`, `large`, `huge`, `custom`.                                                           | `default`      |
+| `GRAPHS1090_ALL_LARGE`                       | Make the small graphs as large as the big ones by setting to `yes`.                                                                       | `no`           |
+| `GRAPHS1090_FONT_SIZE`                       | Font size (relative to graph size).                                                                                                       | `10.0`         |
+| `GRAPHS1090_MAX_MESSAGES_LINE`               | Set to `true` to draw a reference line at the maximum message rate.                                                                       | Unset          |
+| `GRAPHS1090_LARGE_WIDTH`                     | Defines the width of the larger graphs.                                                                                                   | `1096`         |
+| `GRAPHS1090_LARGE_HEIGHT`                    | Defines the height of the larger graphs.                                                                                                  | `235`          |
+| `GRAPHS1090_SMALL_WIDTH`                     | Defines the width of the smaller graphs.                                                                                                  | `619`          |
+| `GRAPHS1090_SMALL_HEIGHT`                    | Defines the height of the smaller graphs.                                                                                                 | `324`          |
+| `GRAPHS1090_DISK_DEVICE`                     | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device                                            | Unset          |
+| `GRAPHS1090_ETHERNET_DEVICE`                 | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device                                     | Unset          |
+| `GRAPHS1090_WIFI_DEVICE`                     | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device                                    | Unset          |
+| `GRAPHS1090_DISABLE`                         | Set to `true` to disable the entire GRAPHS1090 web page and associated data collection                                                    | Unset          |
+| `GRAPHS1090_DISABLE_CHART_CPU`               | Set to `true` to disable the GRAPHS1090 CPU chart                                                                                         | Unset          |
+| `GRAPHS1090_DISABLE_CHART_TEMP`              | Set to `true` to disable the GRAPHS1090 Temperature chart                                                                                 | Unset          |
+| `GRAPHS1090_DISABLE_CHART_MEMORY`            | Set to `true` to disable the GRAPHS1090 Memory Utilization chart                                                                          | Unset          |
+| `GRAPHS1090_DISABLE_CHART_NETWORK_BANDWIDTH` | Set to `true` to disable the GRAPHS1090 Network Bandwidth chart                                                                           | Unset          |
+| `GRAPHS1090_DISABLE_CHART_DISK_USAGE`        | Set to `true` to disable the GRAPHS1090 Disk Usage chart                                                                                  | Unset          |
+| `GRAPHS1090_DISABLE_CHART_DISK_IOPS`         | Set to `true` to disable the GRAPHS1090 Disk IOPS chart                                                                                   | Unset          |
+| `GRAPHS1090_DISABLE_CHART_DISK_BANDWIDTH`    | Set to `true` to disable the GRAPHS1090 Disk Bandwidth chart                                                                              | Unset          |
+| `GRAPHS1090_WWW_TITLE`                       | Set title for the web page (displayed in the browser title or tab bar)                                                                    | `graphs1090`   |
+| `GRAPHS1090_WWW_HEADER`                      | Set header text for the web page                                                                                                          | `Perf. Graphs` |
+| `GRAPHS1090_HIDE_SYSTEM`                     | Hide the system graphs and don't render them, don't collect system data                                                                   | `no`           |
+| `GRAPHS1090_DEFAULT_APPEND`                  | Append to /etc/default/graphs1090, see <https://github.com/wiedehopf/graphs1090/blob/master/default>                                      | Unset          |
+| `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset          |
+| `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset          |
 
 #### Enabling UAT data
 
