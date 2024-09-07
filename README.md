@@ -836,13 +836,24 @@ If you have any issues, readsb will use verbose output if you add the `GPSD_DEBU
 
 ### Optional parameters regulating the restart of `mlat-client` when the location changes
 
-The following parameters are all optional and are subject to change. You don't need to set them unless you want to change the default behavior:
+The following parameters are all optional and are subject to change.  These variables should be added to the environment section of your docker-compose.yml. They will not work if entered into the .env file. You don't need to set them unless you want to change the default behavior.
 
 | Environment Variable | Purpose | Default |
 | -------------------- | ------- | ------- |
 | `GPSD_MIN_DISTANCE` | Distance (in meters) that your station must move before it's considered moving (maximum 40 meters) | `20` (meters) |
 | `GPSD_MLAT_WAIT` | The wait period (in seconds) your station must be stationary before mlat is started (minimum 90 seconds) | `90` (seconds) |
 | `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. (minimum 5 seconds) | `30` (seconds) |
+
+See example below:
+
+```yaml
+    environment:
+    ...
+      - GPSD_MIN_DISTANCE=20
+      - GPSD_MLAT_WAIT=90
+      - GPSD_CHECK_INTERVAL=30
+    ...
+```
 
 ## Web Pages
 
