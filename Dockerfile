@@ -42,7 +42,7 @@ RUN \
     # Get distance binary
     cp -f  /buildimage/distance /usr/local/bin/distance && \
     # Add Container Version
-    { [[ "${VERSION_BRANCH:0:1}" == "#" ]] && VERSION_BRANCH="main" || true; }&& \
+    { [[ "${VERSION_BRANCH:0:1}" == "#" ]] && VERSION_BRANCH="main" || true; } && \
     echo "$(TZ=UTC date +%Y%m%d-%H%M%S)_$(curl -ssL "https://api.github.com/repos/$VERSION_REPO/commits/$VERSION_BRANCH" | awk '{if ($1=="\"sha\":") {print substr($2,2,7); exit}}')_$VERSION_BRANCH" > /.CONTAINER_VERSION && \
     # Clean up:
     apt-get remove -q -y "${TEMP_PACKAGES[@]}" && \
