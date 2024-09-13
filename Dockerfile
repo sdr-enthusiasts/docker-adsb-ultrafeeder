@@ -11,7 +11,7 @@ RUN \
 
 FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
-LABEL org.opencontainers.image.source = "https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
+LABEL org.opencontainers.image.source="https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
 
 ENV URL_MLAT_CLIENT_REPO="https://github.com/wiedehopf/mlat-client.git" \
     PRIVATE_MLAT="false" \
