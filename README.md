@@ -781,7 +781,7 @@ For this to work, you should install and configure GPSD to work on your host mac
 
 ```bash
 sudo apt update && sudo apt install -y gpsd
-cat < EOM | sudo tee /etc/default/gpsd
+cat << EOM | sudo tee /etc/default/gpsd
 # Devices gpsd should collect to at boot time.
 # They need to be read/writeable, either by user gpsd or the group dialout.
 DEVICES="/dev/ttyACM0"
@@ -790,7 +790,7 @@ GPSD_OPTIONS="-G"
 # Automatically hot add/remove USB GPS devices via gpsdctl
 USBAUTO="true"
 EOM
-cat < EOM | sudo tee /lib/systemd/system/gpsd.socket
+cat << EOM | sudo tee /lib/systemd/system/gpsd.socket
 [Unit]
 Description=GPS (Global Positioning System) Daemon Sockets
 
