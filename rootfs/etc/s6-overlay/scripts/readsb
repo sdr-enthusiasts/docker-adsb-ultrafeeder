@@ -283,6 +283,9 @@ if chk_enabled "$TAR1090_ENABLE_AC_DB"; then
         # fallback to container supplied not updated csv.gz
         READSB_CMD+=("--db-file=$TAR1090_INSTALL_DIR/aircraft.csv.gz")
     fi
+    if ! chk_disabled "$TAR1090_DB_LONGTYPE"; then
+        READSB_CMD+=("--db-file-lt")
+    fi
 fi
 
 # Handle "--device-type"
