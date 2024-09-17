@@ -1,2 +1,0 @@
-#!/bin/sh
-exec /etc/s6-overlay/scripts/readsb-finish
