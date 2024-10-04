@@ -7,6 +7,9 @@ REMOTE_URL="https://adsbexchange.com/api/receive/"
 
 REMOTE_HOST=$( echo $REMOTE_URL | awk -F'/' '{print $3}' )
 
+# run with lowest priority
+renice 20 $$ || true
+
 # Set this to '0' if you don't want this script to ever try to self-cache DNS.
 # Default is on, but script will automatically not cache if resolver is localhost, or if curl version is too old.
 DNS_CACHE=1

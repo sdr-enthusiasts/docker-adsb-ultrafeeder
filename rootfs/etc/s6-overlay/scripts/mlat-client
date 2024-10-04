@@ -24,6 +24,9 @@ source /scripts/interpret_ultrafeeder_config
 
 s6wrap=(s6wrap --quiet --timestamps --prepend="$SCRIPT_NAME")
 
+# run with slightly lower priority
+renice 5 $$ || true
+
 "${s6wrap[@]}" --args echo "Started as an s6 service"
 
 MLAT_CMD="/usr/bin/mlat-client"
