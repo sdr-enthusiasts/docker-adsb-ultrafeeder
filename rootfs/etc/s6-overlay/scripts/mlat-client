@@ -239,7 +239,10 @@ do
     MLAT_PARAM+=(--input-connect "${input_connect_arg:-localhost:30005}")
 
     if [[ -n "${name_arg}" ]] || [[ -n "${MLAT_USER}" ]]; then
-        MLAT_PARAM+=(--user \""${name_arg:-${MLAT_USER}}"\")
+        # remove spaces from mlat name to avoid startup errors
+        # the readme already says not to put spaces but like this mlat will work even with space
+        name=$( sed -e 's/ /_/g' <<< "${name_arg:-${MLAT_USER}}")
+        MLAT_PARAM+=(--user "${name}")
     else
         rnd="${RANDOM}"
         "${s6wrap[@]}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
