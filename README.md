@@ -891,7 +891,7 @@ See [README-grafana.md](README-grafana.md) for detailed instruction on how to co
 ```yaml
 services:
   ultrafeeder:
-    image: ghcr.io/sdr-enthusiasts/docker-ultrafeeder:telegraf
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:telegraf
   ...
 ```
 
