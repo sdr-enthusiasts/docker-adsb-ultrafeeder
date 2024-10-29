@@ -174,7 +174,7 @@ You need to make sure that the USB device can be accessed by the container. The 
       - 'c 189:* rwm'
 ...
     volumes:
-      - /dev:/dev:rw
+      - /dev/bus/usb:/dev/bus/usb:rw
 ```
 
 The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. ⚠️This feature requires a recent version of docker-compose (version >=2.3). Make sure your system is up to date if dongles are not found. ⚠️
