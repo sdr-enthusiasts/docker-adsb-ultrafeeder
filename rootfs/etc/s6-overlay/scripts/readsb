@@ -113,6 +113,10 @@ if chk_enabled "${READSB_ENABLE_HEATMAP:-true}"; then
     READSB_CMD+=("--heatmap=${READSB_HEATMAP_INTERVAL:-15}")
 fi
 
+if chk_enabled "${READSB_ENABLE_TRACES}"; then
+    READSB_CMD+=("--write-globe-history=/var/globe_history")
+fi
+
 if ! chk_enabled "$READSB_NET_SBS_DISABLE_REDUCE"; then
     READSB_CMD+=("--net-sbs-reduce")
 fi
