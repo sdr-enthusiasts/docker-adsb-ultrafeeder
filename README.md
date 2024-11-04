@@ -411,7 +411,7 @@ It will create a separate instance of `mlat-client` for each defined MLAT server
 ```yaml
     environment:
     ...
-      - ULTRAFEEDERCONFIG=
+      - ULTRAFEEDER_CONFIG=
            ...
            mlat,mlat-server1.com,port1,return_port1,uuid=1234-5678-90123,inputconnect=remote_receiver1:30005,lat=12.3456,lon=45.6789,alt=18m,--arg1 hello --arg2 world;
            mlat,mlat-server2.com,port2,return_port2,uuid=5678-9012-34567,inputconnect=remote_receiver2:30005,-lat=12.3456,lon=45.6789,alt=18m,--arg1 hello-again --arg2 universe
@@ -537,6 +537,7 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | `TAR1090_IMAGE_CONFIG_TEXT` | Text to display for the config link                                                                                                                                                                    | `null`                       |
 | `TAR1090_DISABLE`           | Set to `true` to disable the web server and all websites (including the map, `graphs1090`, `heatmap`, `pTracks`, etc.)                                                                                 | Unset                        |
 | `READSB_ENABLE_HEATMAP`    | Set to `true` or leave unset to enable the HeatMap function available at `http://myip/?Heatmap`; set to `false` to disable the HeapMap function | `true` (enabled) |
+| `READSB_ENABLE_TRACES`     | Save detailed globe history traces (1 gzip compressed json file per day and airframe, use MAX_GLOBE_HISTORY so you don't run out of inodes / diskspace)                                                 | `false` |
 | `TAR1090_AISCATCHER_SERVER` | If you want to show vessels from your AIS-Catcher instance on the map, put the (externally reachable) URL of your AIS-Catcher or ShipFeeder website in this parameter (incl. `https://`). Note - if you are using "barebones" AIS-Catcher you should add `GEOJSON on` after the `-N` parameter on the `AIS-Catcher` command line. If you use [docker-shipfeeder](https://github.com/sdr-enthusiasts/docker-shipfeeder), no change is needed for that container | Empty |
 | `TAR1090_AISCATCHER_REFRESH` | Refresh rate (in seconds) of reading vessels from your AIS-Catcher instance. Defaults to 15 (secs) if omitted | `15` |
 
