@@ -1,0 +1,34 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091
+
+#---------------------------------------------------------------------------------------------
+# Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------------------------
+
+source /scripts/common
+source /scripts/interpret_ultrafeeder_config
+
+# wait 30 seconds for connections to be established
+sleep 30
+
+if [[ "${READSB_CONF_ARR[*]}" =~ "in.adsb.lol" ]]; then
+    myadsblol="$(curl -sLD - https://my.adsb.lol -o /dev/null -w '%{url_effective}' 2>&1 | sed '/location: /h;g;$!d;s/^.* \(.*\)$/\1/')"
+    if [[ -n "$myadsblol" ]] && [[ ! $myadsblol =~ sorry-but-i-could-not-find-your-receiver ]]; then
+        "${s6wrap[@]}" echo "ADSB.LOL station map available at $myadsblol"
+    fi
+fi
+
+# one shots have weird behaviour, just use longrun and stop the service once this is done
+stop_service
