@@ -70,8 +70,8 @@ fi
 
 # Let adsbexchange-json-status start up, and then print the Anywhere Map and Anywhere Stats URLs to the container logs:
 {   sleep 15
-    AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Map</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
-    AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Stats</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+    AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://globe.adsbexchange.com/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
+    AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://www.adsbexchange.com/api/feeders/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Map URL is $AnywhereMap"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Stats URL is $AnywhereStats"
 } &
