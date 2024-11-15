@@ -131,8 +131,8 @@ The general principle behind the port numbering, is:
 | `31004/tcp`                 | MLATHUB Beast protocol input                       |
 | `31005/tcp`                 | MLATHUB Beast protocol output                      |
 | `31006/tcp`                 | MLATHUB Beast-reduce protocol output               |
-| `9273/tcp`                  | Prometheus web interface with data from `readsb`   |
-| `9274/tcp`                  | Prometheus web interface with data from `Telegraf` |
+| `9273/tcp`                  | Prometheus http endpoint with data from `telegraf` |
+| `9274/tcp`                  | Prometheus http endpoint with data from `readsb`   |
 | `80/tcp`                    | Tar1090 (map) web interface                        |
 
 Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can be mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
@@ -907,7 +907,6 @@ In order for Telegraf to serve a [Prometheus](https://prometheus.io) endpoint, t
 | Variable            | Description                                                              |
 | ------------------- | ------------------------------------------------------------------------ |
 | `PROMETHEUS_ENABLE` | Set to `true` for a Prometheus endpoint on `http://0.0.0.0:9273/metrics` |
-| `PROMETHEUSPORT`    | TCP port for the Prometheus endpoint. Default value is `9273`            |
 
 ### Output from Ultrafeeder to InfluxDBv2
 
