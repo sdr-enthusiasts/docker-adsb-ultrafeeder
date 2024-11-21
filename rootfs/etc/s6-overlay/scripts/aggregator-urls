@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC1091
+# shellcheck shell=bash disable=SC2015,SC2016,SC1091
 
 #---------------------------------------------------------------------------------------------
 # Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
@@ -18,5 +18,17 @@
 #---------------------------------------------------------------------------------------------
 
 source /scripts/common
+source /scripts/interpret_ultrafeeder_config
 
-rm -f /run/readsb-prometheus.prom || true
+# wait 30 seconds for connections to be established
+sleep 30
+
+if [[ "${READSB_CONF_ARR[*]}" =~ "in.adsb.lol" ]]; then
+    myadsblol="$(curl -sLD - https://my.adsb.lol -o /dev/null -w '%{url_effective}' 2>&1 | sed '/location: /h;g;$!d;s/^.* \(.*\)$/\1/')"
+    if [[ -n "$myadsblol" ]] && [[ ! $myadsblol =~ sorry-but-i-could-not-find-your-receiver ]]; then
+        "${s6wrap[@]}" echo "ADSB.LOL station map available at $myadsblol"
+    fi
+fi
+
+# one shots have weird behaviour, just use longrun and stop the service once this is done
+stop_service

@@ -1,13 +1,14 @@
 #!/bin/bash
 
-# DEPRECATED, see ./rootfs/usr/local/bin/adsbexchange-json-status
-
 #
 # Upload output data from decoder to remote server
 #
 REMOTE_URL="https://adsbexchange.com/api/receive/"
 
 REMOTE_HOST=$( echo $REMOTE_URL | awk -F'/' '{print $3}' )
+
+# run with lowest priority
+renice 20 $$ || true
 
 # Set this to '0' if you don't want this script to ever try to self-cache DNS.
 # Default is on, but script will automatically not cache if resolver is localhost, or if curl version is too old.
@@ -19,7 +20,7 @@ DNS_IGNORE_LOCAL=1
 
 # List all paths, IN PREFERRED ORDER, separated by a SPACE
 # By default, only use the json from the feed client
-JSON_PATHS=("/run/adsbexchange-feed")
+JSON_PATHS=("/run/readsb")
 
 ######################################################################################################################
 # If you know what you're doing, and you want to override the search path, you can do it easily in
@@ -29,11 +30,6 @@ JSON_PATHS=("/run/adsbexchange-feed")
 # You can enable this old path by setting "USE_OLD_PATH=1", preferrably in /etc/default/adsbexchange-stats
 ######################################################################################################################
 
-# UUID file
-UUID_FILE="/boot/adsbx-uuid"
-if [[ ! -f "$UUID_FILE" ]]; then
-    UUID_FILE="/usr/local/share/adsbexchange/adsbx-uuid"
-fi
 
 # source local overrides (commonly the JSON_PATH, or DNS cache settings)
 if [ -r /etc/default/adsbexchange-stats ]; then
@@ -97,7 +93,7 @@ while [ "x$JSON_DIR" = "x" ]; do
 	fi
 done
 
-UUID=$(cat $UUID_FILE)
+UUID=$ADSBX_UUID
 
 if ! [[ $UUID =~ ^\{?[A-F0-9a-f]{8}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{4}-[A-F0-9a-f]{12}\}?$ ]]; then
     # Data in UUID file is invalid

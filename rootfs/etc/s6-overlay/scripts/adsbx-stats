@@ -23,47 +23,36 @@ source /scripts/interpret_ultrafeeder_config
 # Check if ADSBExchange is configured
 if ! grep -i adsbexchange.com <<< "$ULTRAFEEDER_CONFIG" >/dev/null 2>&1; then
     "${s6wrap[@]}" echo "AdsbExchange not configured - no stats package needed"
-    exec sleep infinity
+    stop_service
 fi
 
 # Check if ADSBExchange stats are disabled
 if chk_disabled "$ADSBX_STATS" ; then
     "${s6wrap[@]}" echo "AdsbExchange stats disabled"
-    exec sleep infinity
+    stop_service
 fi
 
 # prep work:
 mkdir -p /run/adsbexchange-stats
 
-# Install the Stats package:
-if [[ ! -f /etc/default/adsbexchange-stats ]]; then
-    echo -e "UUID_FILE=/run/uuid\nJSON_PATHS=(\"/run/readsb\")" > /etc/default/adsbexchange-stats
-fi
-if [[ ! -f /usr/local/bin/json-status ]]; then
-    if ! curl -sSL -o /usr/local/bin/json-status https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/downloads/adsbexchange-json-status; then
-        "${s6wrap[@]}" echo "ERROR: AdsbExchange configured, but cannot download stats package! AdsbExchange will be fed but stats will not be available"
-        exec sleep infinity
-    fi
-    chmod 755 /usr/local/bin/json-status
-fi
-
 # set the UUID:
-if [[ ! -f /usr/local/share/adsbexchange/adsbx-uuid ]]; then
-    # get UUID from ULTRAFEEDER_CONFIG if it exists
-    for entry in "${READSB_CONF_ARR[@]}"; do
-        if echo "$entry" | grep -q 'adsbexchange.*uuid'; then
-            ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "$entry")"
-        fi
-    done
-    ADSBX_UUID="${ADSBX_UUID:-${UUID}}" || true # ...else get it from the UUID param
-    ADSBX_UUID="${ADSBX_UUID:-$(cat /proc/sys/kernel/random/uuid 2>/dev/null)}" || true # ...else generate a random one
-    if [[ -n "$ADSBX_UUID" ]]; then
-        mkdir -p /usr/local/share/adsbexchange
-        echo "$ADSBX_UUID" > /usr/local/share/adsbexchange/adsbx-uuid
-        "${s6wrap[@]}" echo "Using UUID $ADSBX_UUID for AdsbExchange"
-    else
-        "${s6wrap[@]}" echo "WARNING: no UUID can be identified to be used with AdsbExchange; a random one will be generated every time the container is started."
+# get UUID from ULTRAFEEDER_CONFIG if it exists
+for entry in "${READSB_CONF_ARR[@]}"; do
+echo "$entry"
+    if echo "$entry" | grep -q 'adsbexchange.*uuid'; then
+        ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "$entry")"
     fi
+done
+
+ADSBX_UUID="${ADSBX_UUID:-${UUID}}" || true # ...else get it from the UUID param
+ADSBX_UUID="${ADSBX_UUID:-$(cat /proc/sys/kernel/random/uuid 2>/dev/null)}" || true # ...else generate a random one
+
+if [[ -n "$ADSBX_UUID" ]]; then
+    # export the variable, it's used by json-status which is started by this script at the very end
+    export ADSBX_UUID
+    "${s6wrap[@]}" echo "Using UUID $ADSBX_UUID for AdsbExchange"
+else
+    "${s6wrap[@]}" echo "WARNING: no UUID can be identified to be used with AdsbExchange; a random one will be generated every time the container is started."
 fi
 
 # wait until readsb is established...
@@ -79,13 +68,13 @@ if ! pgrep readsb >/dev/null; then
     sleep 2 & wait $!
 fi
 
-# Let json-status start up, and then print the Anywhere Map and Anywhere Stats URLs to the container logs:
+# Let adsbexchange-json-status start up, and then print the Anywhere Map and Anywhere Stats URLs to the container logs:
 {   sleep 15
-    AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Map</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
-    AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anywhere Stats</a>" | sed -n 's|.*\(https.*\)\" class.*|\1|p')"
+    AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://globe.adsbexchange.com/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
+    AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://www.adsbexchange.com/api/feeders/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Map URL is $AnywhereMap"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Stats URL is $AnywhereStats"
 } &
 
-"${s6wrap[@]}" echo "invoking: /usr/local/bin/json-status"
-exec "${s6wrap[@]}" /usr/local/bin/json-status
+"${s6wrap[@]}" echo "invoking: /usr/local/bin/adsbexchange-json-status"
+exec "${s6wrap[@]}" /usr/local/bin/adsbexchange-json-status
