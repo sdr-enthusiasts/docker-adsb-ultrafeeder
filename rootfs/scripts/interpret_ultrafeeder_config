@@ -97,6 +97,14 @@ do
             done
             # Now add $readsb_str to the READSB_CONF_ARR() as --net-connector argument:
             READSB_CONF_ARR+=("--net-connector=${readsb_str}")
+
+            if [[ ${param[1],,} == "in.adsb.lol" ]]; then
+                myadsblol="$(curl -sLD - https://my.adsb.lol -o /dev/null -w '%{url_effective}' 2>&1 | sed '/location: /h;g;$!d;s/^.* \(.*\)$/\1/')"
+                if [[ -n "$myadsblol" ]] && [[ ! $myadsblol =~ sorry-but-i-could-not-find-your-receiver ]]; then
+                    "${s6wrap[@]}" echo "ADSB.LOL station map available at $myadsblol"
+                fi
+            fi
+
         ;;
 
         mlat)
