@@ -83,7 +83,7 @@ if grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDE
     GPSD=1
     LOCATION_PERSIST=/var/globe_history/gpsd_last_location
     if [[ -f "$LOCATION_PERSIST" ]]; then
-        read new_lat new_lon new_alt < "$LOCATION_PERSIST"
+        read -r new_lat new_lon new_alt < "$LOCATION_PERSIST"
     fi
     # initialize "old" location for gpsd movement detection
     # use zero island as starting point if location persist does not exit

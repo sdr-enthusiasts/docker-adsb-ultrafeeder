@@ -10,10 +10,12 @@
         - [Mandatory Parameters](#mandatory-parameters)
         - [Optional Parameters](#optional-parameters)
     - [Getting ADSB data to the Ultrafeeder](#getting-adsb-data-to-the-ultrafeeder)
-      - [Connecting to an SDR or other hardware device](#connecting-to-a-sdr-or-other-hardware-device)
+      - [Connecting to an SDR or other hardware device](#connecting-to-an-sdr-or-other-hardware-device)
         - [Mandatory parameters](#mandatory-parameters-1)
         - [Optional/Additional Parameters](#optionaladditional-parameters)
-        - [AutoGain for RTLSDR Devices](#autogain-for-rtlsdr-devices)
+        - [Ultrafeeder AutoGain for RTLSDR Devices](#ultrafeeder-autogain-for-rtlsdr-devices)
+          - [Using `readsb`'s built-in AutoGain (recommended)](#using-readsbs-built-in-autogain-recommended)
+          - [Using the original AutoGain algorithm](#using-the-original-autogain-algorithm)
       - [Connecting to external ADSB data sources](#connecting-to-external-adsb-data-sources)
         - [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config)
         - [Networking parameters](#networking-parameters)
@@ -50,6 +52,7 @@
     - [Output from Ultrafeeder to InfluxDBv2](#output-from-ultrafeeder-to-influxdbv2)
   - [Message decoding introspection](#message-decoding-introspection)
   - [Minimalist setup](#minimalist-setup)
+  - [Offline maps](#offline-maps)
   - [Logging](#logging)
   - [Getting help](#getting-help)
   - [License and Trademarks](#license-and-trademarks)
@@ -240,12 +243,20 @@ If you want to connect your SDR to the container, here's how to do that:
 
 | Variable            | Description                                                                                                                                 | Controls which `readsb` option | Default  |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------- |
-| `READSB_GAIN`       | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below.                                   | `--gain=<db>`                  | Max gain |
+| `READSB_GAIN`       | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. Leave this parameter empty (recommended) to use [`readsb`'s built-in auto-gain](#using-readsbs-built-in-autogain-recommended), or set it to `omit` or `off` to not pass this parameter to `readsb`              | `--gain=<db>`                  | Max gain |
 | `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/#estimating-ppm) | `--ppm=<correction>`           | Unset    |
 
-##### AutoGain for RTLSDR Devices
+##### Ultrafeeder AutoGain for RTLSDR Devices
 
-If you have set `READSB_GAIN=autogain`, then the system will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
+###### Using `readsb`'s built-in AutoGain (recommended)
+
+As of November 2024, we are recommending to leave the `READSB_GAIN` parameter empty by not including it in your configuration. This will engage the new built-in [autogain of `readsb`](https://github.com/wiedehopf/readsb?tab=readme-ov-file#autogain). This new algorithm uses continuous noise and signal strength measurements and is highly effective in environments with a mix of strong, local signals and distant, weak signals.
+
+(Experts only:) If you want to pass in any autogain parameters to `readsb`, you can do so by setting `READSB_GAIN` to (for example) `READSB_GAIN=auto-verbose,0,25,31,243`. See the explanation at Wiedehopf's [`readsb` repository](https://github.com/wiedehopf/readsb?tab=readme-ov-file#autogain) for more information about these parameters
+
+###### Using the original AutoGain algorithm
+
+You can still use the original autogain algorithm by setting `READSB_GAIN=autogain`. That algorithm is built into the container and it will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
 
 Note that AutoGain is not related to the SDR's AGC setting (controlled with the `READSB_RTLSDR_ENABLE_AGC` variable). We do not recommend enabling AGC for Ultrafeeder or any other ADS-B decoder.
 
@@ -359,7 +370,7 @@ bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-
 
 Instead of (or in addition to) using `BEASTHOST`, you can also define ADSB data ingests using the `READSB_NET_CONNECTOR` parameter. This is the preferred way if you have multiple sources or destinations for your ADSB data. This variable allows you to configure incoming and outgoing connections. The variable takes a semicolon (`;`) separated list of `host,port,protocol[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX]`, see the section [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config) for explanation of these parameters.
 
-NOTE: If you have a UAT dongle and use `dump978` to decode this, you should use `READSB_NET_CONNECTOR` to ingest UAT data from `dump978`. See example below
+Note: if you have a UAT dongle and use `dump978` to decode this, you should use `READSB_NET_CONNECTOR` to ingest UAT data from `dump978`. See example below
 
 ```yaml
     environment:
@@ -735,7 +746,7 @@ Note - on some systems (DietPi comes to mind), `/sys/class/thermal/` may not be 
 
 #### Reducing Disk IO for Graphs1090
 
-Note - _this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly_
+Note - *this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly_
 
 If you are using a Raspberry Pi or another type of computer with an SD card, you may already be aware that these SD cards have a limited number of write-cycles that will determine their lifespan. In other words - a common reason for SD card failure is excessive writes to it.
 
@@ -875,7 +886,7 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 
 | Path                                                                                                          | Purpose                                                                                                                          |
 | ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`                                                      | Holds range outline data, heatmap / replay data and traces if enabled. _Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path._ |
+| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`                                                      | Holds range outline data, heatmap / replay data and traces if enabled. *Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path.* |
 | `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090`                                                      | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above)                                     |
 | `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`                                                            | Holds graphs1090 & performance data                                                                                              |
 | `/proc/diskstats:/proc/diskstats:ro`                                                                          | Makes disk statistics available to `graphs1090`                                                                                  |
@@ -936,7 +947,7 @@ docker exec -it ultrafeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 
 ## Minimalist setup
 
-If you want to use `ultrafeeder` _only_ as a SDR decoder but without any mapping or stats/graph websites, without MLAT connections or MLAT-hub, etc., for example to minimize CPU and RAM needs on a low CPU/memory single board computer, then do the following:
+If you want to use `ultrafeeder` *only* as a SDR decoder but without any mapping or stats/graph websites, without MLAT connections or MLAT-hub, etc., for example to minimize CPU and RAM needs on a low CPU/memory single board computer, then do the following:
 
 - in the `ULTRAFEEDER_CONFIG` parameter, remove any entry that starts with `mlat` or `mlathub`. This will prevent any `mlat-client`s or `mlathub` instances to be launched. If you still want to connect the `mlat-client`(s) to external MLAT servers but you don't want to run the overhead of a MLATHUB, you can leave any entries starting with `mlat` in the `ULTRAFEEDER_CONFIG` parameter, and set `MLATHUB_DISABLE=true`
 - Set the parameter `TAR1090_DISABLE=true`. This will prevent the `nginx` webserver and any websites to be launched and no `collectd` (graphs1090) or `rrd` (ADSB message history) data to be collected or retained.
@@ -953,7 +964,6 @@ There is the option to use some basic offline maps limited in zoom:
     volumes:
         - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
 ```
-
 
 ## Logging
 

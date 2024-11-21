@@ -28,7 +28,6 @@ services:
       - READSB_LAT=${FEEDER_LAT}
       - READSB_LON=${FEEDER_LONG}
       - READSB_ALT=${FEEDER_ALT_M}m
-      - READSB_GAIN=${ADSB_SDR_GAIN}
       - READSB_RX_LOCATION_ACCURACY=2
       - READSB_STATS_RANGE=true
       #
