@@ -746,7 +746,7 @@ Note - on some systems (DietPi comes to mind), `/sys/class/thermal/` may not be 
 
 #### Reducing Disk IO for Graphs1090
 
-Note - *this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly_
+Note - *this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly*
 
 If you are using a Raspberry Pi or another type of computer with an SD card, you may already be aware that these SD cards have a limited number of write-cycles that will determine their lifespan. In other words - a common reason for SD card failure is excessive writes to it.
 
