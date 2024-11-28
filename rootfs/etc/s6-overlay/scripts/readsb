@@ -33,11 +33,9 @@ fi
 
 LOCATION_PERSIST=/var/globe_history/gpsd_last_location
 if [[ -f "$LOCATION_PERSIST" ]] && { grep -qs "gpsd" <<< "$ULTRAFEEDER_CONFIG" || grep -qs "gpsd" <<< "$ULTRAFEEDER_NET_CONNECTOR"; }; then
-    # shellcheck disable=SC2034
-    read -r LAT LONG ALT < "$LOCATION_PERSIST"
+    read LAT LON ALT < "$LOCATION_PERSIST"
     READSB_LAT=""
     READSB_LON=""
-    # shellcheck disable=SC2034
     READSB_ALT=""
 fi
 
@@ -307,8 +305,6 @@ if [[ -n "$READSB_GAIN" ]]; then
         [[ "${READSB_GAIN,,}" == "autogain" ]] && gain="${READSB_AUTOGAIN_INITIAL_GAIN:-49.6}" || gain="${READSB_GAIN}"
     fi
     READSB_CMD+=("--gain=$gain")
-elif [[ "${READSB_GAIN,,}" != "omit" ]] && [[ "${READSB_GAIN,,}" != "off" ]]; then
-    READSB_CMD+=("--gain=auto")
 fi
 
 ##### RTL-SDR OPTIONS #####
