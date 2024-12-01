@@ -105,7 +105,6 @@ services:
     restart: unless-stopped
     container_name: grafana
     hostname: grafana
-    tty: true
     # uncomment the following section and set the variables if you are exposing Grafana to the internet behind a rev web proxy:
     environment:
     # windrose panel plugin is needed for polar plots:
