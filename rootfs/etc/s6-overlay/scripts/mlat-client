@@ -188,7 +188,7 @@ do
     # If the argument starts with "uuid=", then it must be a UUID, etc.
     # If the argument isn't any of the above, then it's an "extra argument"
 
-    unset name_arg uuid_arg lat_arg lon_arg alt_arg input_connect_arg return_port_arg extra_args
+    unset name_arg uuid_arg lat_arg lon_arg alt_arg input_connect_arg input_type_arg return_port_arg extra_args
 
     for ((i=2; i<${#params[*]}; i++))
     do
@@ -198,7 +198,7 @@ do
         elif header="${params[i]:0:5}" && [[ "${header,,}" == "uuid=" ]]; then
             # It's a UUID
             uuid_arg="${params[i]#*=}"
-            elif header="${params[i]:0:5}" && [[ "${header,,}" == "name=" ]]; then
+        elif header="${params[i]:0:5}" && [[ "${header,,}" == "name=" ]]; then
             # It's a MLAT_NAME
             name_arg="${params[i]#*=}"
         elif header="${params[i]:0:4}" && [[ "${header,,}" == "lat=" ]]; then
@@ -213,6 +213,9 @@ do
         elif header="${params[i]:0:14}" && [[ "${header,,}" == "input_connect=" ]]; then
             #It's the input_connect parameter value
             input_connect_arg="${params[i]#*=}"
+        elif header="${params[i]:0:14}" && [[ "${header,,}" == "input_type=" ]]; then
+            #It's the input_type parameter value
+            input_type_arg="${params[i]#*=}"
         else
             # It's an Extra Args string
             extra_args="$extra_args ${params[i]}"
@@ -221,7 +224,7 @@ do
 
     # ------------------------------------------------
     # Build the MLAT parameter string:
-    MLAT_PARAM=(--input-type "${MLAT_INPUT_TYPE:-auto}")
+    MLAT_PARAM=(--input-type "${input_type_arg:-${MLAT_INPUT_TYPE:-auto}}")
     MLAT_PARAM+=(--server "${params[0]}:${params[1]}")
 
     servername=${params[0]}
