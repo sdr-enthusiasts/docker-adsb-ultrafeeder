@@ -248,7 +248,7 @@ do
         MLAT_PARAM+=(--user "${name}")
     else
         rnd="${RANDOM}"
-        "${s6wrap[@]}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
+        "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "WARNING: MLAT_USER is not set - using random number \"${rnd}\" as MLAT_USER"
         MLAT_PARAM+=(--user "${rnd}")
     fi
 
@@ -279,12 +279,14 @@ do
     fi
 
     # Add UUID to instance
-    if [[ -n "$uuid_arg" ]]; then
+    if chk_disabled "$uuid_arg"; then
+        "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "UUID disabled for this mlat-client instance"
+    elif [[ -n "$uuid_arg" ]]; then
         MLAT_PARAM+=("--uuid ${uuid_arg}")
     elif [[ -n "${UUID}" ]]; then
         MLAT_PARAM+=("--uuid ${UUID}")
     else
-        "${s6wrap[@]}" --args echo "WARNING: UUID is not defined, proceeding without UUID"
+        "${s6wrap[@]}" --prepend="$(basename "$0")][${servername}" --args echo "WARNING: UUID is not defined, proceeding without UUID"
     fi
 
     MLAT_PARAM+=(--stats-json "/run/mlat-client/${params[0]}:${params[1]}.json")
