@@ -213,7 +213,7 @@ do
         elif header="${params[i]:0:14}" && [[ "${header,,}" == "input_connect=" ]]; then
             #It's the input_connect parameter value
             input_connect_arg="${params[i]#*=}"
-        elif header="${params[i]:0:14}" && [[ "${header,,}" == "input_type=" ]]; then
+        elif header="${params[i]:0:11}" && [[ "${header,,}" == "input_type=" ]]; then
             #It's the input_type parameter value
             input_type_arg="${params[i]#*=}"
         else
