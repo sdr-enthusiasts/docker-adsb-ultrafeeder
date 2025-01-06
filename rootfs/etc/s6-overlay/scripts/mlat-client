@@ -291,6 +291,12 @@ do
 
     MLAT_PARAM+=(--stats-json "/run/mlat-client/${params[0]}:${params[1]}.json")
 
+    if [[ -n "$MLAT_STATS_INTERVAL" ]]; then
+        MLAT_PARAM+=(--stats-interval "$MLAT_STATS_INTERVAL")
+    elif [[ "${LOGLEVEL}" == "error" ]] || [[ "${LOGLEVEL}" == "none" ]]; then
+        MLAT_PARAM+=(--stats-interval 0)
+    fi
+
     # Now add the extra_args, if any:
     [[ -n "${extra_args}" ]] && MLAT_PARAM+=("${extra_args}") || true
 
