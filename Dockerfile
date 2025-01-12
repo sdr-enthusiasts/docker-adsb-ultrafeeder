@@ -25,10 +25,6 @@ RUN \
     --mount=type=bind,from=buildimage,source=/,target=/buildimage/ \
     TEMP_PACKAGES=() && \
     KEPT_PACKAGES=() && \
-    # Needed to run the mlat_client:
-    KEPT_PACKAGES+=(python3-minimal) && \
-    KEPT_PACKAGES+=(python3-pkg-resources) && \
-    #
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
     # Install all these packages:
@@ -36,9 +32,6 @@ RUN \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
         "${KEPT_PACKAGES[@]}" \
         "${TEMP_PACKAGES[@]}" && \
-    # Get mlat-client
-    tar zxf /buildimage/mlatclient.tgz -C / && \
-    ln -s /usr/local/bin/mlat-client /usr/bin/mlat-client && \
     # Get distance binary
     cp -f  /buildimage/distance /usr/local/bin/distance && \
     # Add Container Version
@@ -47,10 +40,6 @@ RUN \
     # Clean up:
     apt-get autoremove -q -o APT::Autoremove::RecommendsImportant=0 -o APT::Autoremove::SuggestsImportant=0 -y "${TEMP_PACKAGES[@]}" && \
     apt-get clean -q -y && \
-    # test mlat-client
-    /usr/bin/mlat-client --help > /dev/null && \
-    # remove pycache introduced by testing mlat-client
-    { find /usr | grep -E "/__pycache__$" | xargs rm -rf || true; } && \
     rm -rf /src /tmp/* /var/lib/apt/lists/* /git /var/cache/* && \
     #
     # Do some stuff for kx1t's convenience:
