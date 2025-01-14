@@ -85,15 +85,10 @@ do
         adsb)
             # parse arguments for main readsb
             # build net-connector string into $readsb_str
-            # and add any extra arguments in as individual entries into READSB_CONF_ARR()
             readsb_str="${param[1]},${param[2]},${param[3]}"
             for ((i=4; i<${#param[*]}; i++))
             do
-                if [[ "${param[i]:0:5}" == "uuid=" ]]; then
-                    readsb_str="${readsb_str},${param[i]}"
-                elif [[ -n "${param[i]}" ]]; then
-                    READSB_CONF_ARR+=("${param[i]}")
-                fi
+                readsb_str="${readsb_str},${param[i]}"
             done
             # Now add $readsb_str to the READSB_CONF_ARR() as --net-connector argument:
             READSB_CONF_ARR+=("--net-connector=${readsb_str}")
@@ -109,15 +104,10 @@ do
         mlathub)
             # parse arguments for mlat_hub
             # build net-connector string into $readsb_str
-            # and add any extra arguments in as individual entries into MLATHUB_CONF_STR()
             mlathub_str="${param[1]},${param[2]},${param[3]}"
             for ((i=4; i<${#param[*]}; i++))
             do
-                if [[ "${param[i]:0:5}" == "uuid=" ]]; then
-                    mlathub_str="${readsb_str},${param[i]}"
-                elif [[ -n "${param[i]}" ]]; then
-                    MLATHUB_CONF_ARR+=("${param[i]}")
-                fi
+                mlathub_str="${readsb_str},${param[i]}"
             done
             # Now add $readsb_str to the READSB_CONF_STR as --net-connector argument:
             MLATHUB_CONF_ARR+=("--net-connector=${mlathub_str}")
