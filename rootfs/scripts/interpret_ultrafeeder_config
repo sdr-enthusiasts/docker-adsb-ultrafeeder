@@ -90,9 +90,9 @@ do
             for ((i=4; i<${#param[*]}; i++))
             do
                 if [[ "${param[i]:0:5}" == "uuid=" ]]; then
-                    readsb_str="${readsb_str},${param[i]}"
+                    readsb_str+=",${param[i]}"
                 elif [[ "${param[i]}" == "silent_fail" ]]; then
-                    readsb_str="${readsb_str},${param[i]}"
+                    readsb_str+=",${param[i]}"
                 elif [[ -n "${param[i]}" ]]; then
                     READSB_CONF_ARR+=("${param[i]}")
                 fi
@@ -116,9 +116,9 @@ do
             for ((i=4; i<${#param[*]}; i++))
             do
                 if [[ "${param[i]:0:5}" == "uuid=" ]]; then
-                    mlathub_str="${mlathub_str},${param[i]}"
+                    mlathub_str+=",${param[i]}"
                 elif [[ "${param[i]}" == "silent_fail" ]]; then
-                    mlathub_str="${mlathub_str},${param[i]}"
+                    mlathub_str+=",${param[i]}"
                 elif [[ -n "${param[i]}" ]]; then
                     MLATHUB_CONF_ARR+=("${param[i]}")
                 fi
