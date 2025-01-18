@@ -50,7 +50,7 @@
     - [Optional parameters regulating the restart of `mlat-client` when the location changes](#optional-parameters-regulating-the-restart-of-mlat-client-when-the-location-changes)
   - [Web Pages](#web-pages)
   - [Paths](#paths)
-  - [Display of Metrix with Grafana and Prometheus/InfluxDB](#display-of-metrix-with-grafana-and-prometheusinfluxdb)
+  - [Display of Metrics with Grafana and Prometheus/InfluxDB](#display-of-metrics-with-grafana-and-prometheusinfluxdb)
     - [Configuring Grafana](#configuring-grafana)
     - [Output from Ultrafeeder to Prometheus](#output-from-ultrafeeder-to-prometheus)
     - [Output from Ultrafeeder to InfluxDBv2](#output-from-ultrafeeder-to-influxdbv2)
@@ -398,7 +398,7 @@ For example:
 There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators. All of them use the `beast_reduce_plus` format for feeding ADSB data, and `mlat-client` for feeding MLAT:
 
 | Name            | (C)ommercial/<br/>(N)on-profit | Description                                               | Feed details                                                                               | `ULTRAFEEDER_CONFIG` snippet |
-| --------------- | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| --------------- | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------ |
 | Airplanes.live  | N                              | Run by volunteers that used to be related to adsbexchange | adsb:`feed.airplanes.live` port `30004`<br/>mlat: `feed.airplanes.live` port `31090`       | `adsb,feed.airplanes.live,30004,beast_reduce_plus_out;`<br/>`mlat,feed.airplanes.live,31090` |
 | ADSB.fi         | N                              | Run by a Finnish IT and aviation enthusiast | adsb:`feed.adsb.fi` port `30004`<br/>mlat: `feed.adsb.fi` port `31090`                     | `adsb,feed.adsb.fi,30004,beast_reduce_plus_out;`<br/>`mlat,feed.adsb.fi,31090` |
 | ADSB.lol        | N                              | Run by an aviation enthusiast located in the Netherlands    | adsb:`in.adsb.lol` port `30004`<br/>mlat: `in.adsb.lol` port `31090`                       | `adsb,in.adsb.lol,30004,beast_reduce_plus_out;`<br/>`mlat,in.adsb.lol,31090` |
@@ -415,7 +415,7 @@ When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com 
 To feed AussieADSB (Australia/Oceania only!), execute this command on your host and follow the instructions. You can also use this command to de-register your feeder, or to see its status:
 
 ```bash
-bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/dev/aussieadsb.sh)
+bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh)
 ```
 
 ##### Alternate Configuration Method with `READSB_NET_CONNECTOR`
@@ -947,7 +947,7 @@ No paths need to be mapped through to persistent storage. However, if you don't 
 | `/proc/diskstats:/proc/diskstats:ro`                                                                          | Makes disk statistics available to `graphs1090`                                                                                  |
 | `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro`                                        | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](#configuring-the-core-temperature-graphs) |
 
-## Display of Metrix with Grafana and Prometheus/InfluxDB
+## Display of Metrics with Grafana and Prometheus/InfluxDB
 
 When using the `:telegraf` tag, the image contains [Telegraf](https://docs.influxdata.com/telegraf/), which can be used to capture metrics from `ultrafeeder` if an output is enabled.
 
