@@ -37,6 +37,7 @@
       - [`tar1090` `config.js` Configuration - Range Rings](#tar1090-configjs-configuration---range-rings)
       - [`tar1090` `config.js` Configuration - Expert](#tar1090-configjs-configuration---expert)
       - [`tar1090` `config.js` Configuration - Route Display](#tar1090-configjs-configuration---route-display)
+      - [`tar1090` Configuration - Hints](#tar1090-configuration---hints)
     - [`graphs1090` Configuration](#graphs1090-configuration)
       - [`graphs1090` Environment Parameters](#graphs1090-environment-parameters)
       - [Enabling UAT data](#enabling-uat-data)
@@ -687,6 +688,14 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 | --------------------- | -------------------------------------------------- | ------------------------------------- |
 | `TAR1090_USEROUTEAPI` | Set to `true` to enable route lookup for callsigns | Unset                                 |
 | `TAR1090_ROUTEAPIURL` | API URL used                                       | `https://api.adsb.lol/api/0/routeset` |
+
+#### `tar1090` Configuration - Hints
+
+- If you want to reset the `tar1090` range outline, you can do so with this command:
+
+```bash
+docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGain"
+```
 
 ### `graphs1090` Configuration
 
