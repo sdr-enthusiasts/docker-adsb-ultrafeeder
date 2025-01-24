@@ -31,6 +31,7 @@
       - [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub)
     - [Web Gui (`tar1090`) Configuration](#web-gui-tar1090-configuration)
       - [`tar1090` Core Configuration](#tar1090-core-configuration)
+      - [Using a locally modified tar1090 version](#using-a-locally-modified-tar1090-version)
       - [`tar1090` `config.js` Configuration - Title](#tar1090-configjs-configuration---title)
       - [`tar1090` `config.js` Configuration - Output](#tar1090-configjs-configuration---output)
       - [`tar1090` `config.js` Configuration - Map Settings](#tar1090-configjs-configuration---map-settings)
@@ -610,6 +611,29 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 
 - For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 - TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>
+
+#### Using a locally modified tar1090 version
+
+`/local/custom_version` can be any folder you prefer.
+
+Clone tar1090 to a local direcotry: `git clone https://github.com/wiedehopf/tar1090 /local/custom_version`
+
+Make `/local/custom_version` available as `/var/tar1090_git_source` in the container:
+
+```
+    volumes:
+      - /local/custom_version:/var/tar1090_git_source
+```
+
+Make sure you have UPDATE_TAR1090 env var set to true.
+
+Changes in `/local/custom_version` won't be visible with a simple page reload, you need to run:
+
+```
+docker exec -it ultrafeeder bash /etc/s6-overlay/startup.d/02-tar1090-update
+```
+
+After this has finished a simple reload in the browser should do the trick.
 
 #### `tar1090` `config.js` Configuration - Title
 
