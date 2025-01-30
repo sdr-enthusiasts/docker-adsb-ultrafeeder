@@ -627,10 +627,10 @@ Make `/local/custom_version` available as `/var/tar1090_git_source` in the conta
 
 Make sure you have UPDATE_TAR1090 env var set to true.
 
-Changes in `/local/custom_version` won't be visible with a simple page reload, you need to run:
+Changes in `/local/custom_version` won't be visible with a simple page reload, you need to either restart the container or run:
 
 ```
-docker exec -it ultrafeeder bash /etc/s6-overlay/startup.d/02-tar1090-update
+docker exec -it ultrafeeder bash /tar1090-install.sh /run/readsb webroot /usr/local/share/tar1090 /var/tar1090_git_source
 ```
 
 After this has finished a simple reload in the browser should do the trick.
