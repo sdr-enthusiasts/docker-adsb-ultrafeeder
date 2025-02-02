@@ -52,6 +52,7 @@
 # `lat=xxxx` is an optional parameter that sets the latitude for this specific instance
 # `lon=xxxx` is an optional parameter that sets the longitude for this specific instance
 # `alt=xxxx` is an optional parameter that sets the altitude for this specific instance
+# `comment=xxxx` is an optional parameter for the user to leave a comment in the config; it will be ignored
 # `extra-arguments` can be any additional command line argument you want to pass to readsb, mlathub, or mlat-client
 #     Example: `--net-only`. Please make sure to only once pass in an extra argument for each of the adsb|mlat|mlathub service.
 
@@ -91,6 +92,9 @@ do
             do
                 if [[ "${param[i]:0:5}" == "uuid=" ]]; then
                     readsb_str+=",${param[i]}"
+                elif [[ "${param[i]:0:8}" == "comment=" ]]; then
+                    # skip the comment
+                    :
                 elif [[ "${param[i]}" == "silent_fail" ]]; then
                     readsb_str+=",${param[i]}"
                 elif [[ -n "${param[i]}" ]]; then
@@ -117,6 +121,9 @@ do
             do
                 if [[ "${param[i]:0:5}" == "uuid=" ]]; then
                     mlathub_str+=",${param[i]}"
+                elif [[ "${param[i]:0:8}" == "comment=" ]]; then
+                    # skip the comment
+                    :
                 elif [[ "${param[i]}" == "silent_fail" ]]; then
                     mlathub_str+=",${param[i]}"
                 elif [[ -n "${param[i]}" ]]; then
@@ -133,7 +140,7 @@ do
             if [[ -n "${param[3]}" ]] && [[ -n "${param[4]}" ]]; then
                 readsb_str="$readsb_str,${param[3]},${param[4]}"
             fi
-            READSB_CONF_ARR+=("--net-connector=${readsb_str},gpsd_in")
+            READSB_CONF_ARR+=("--net-connector=${readsb_str},
         ;;
 
         *)
