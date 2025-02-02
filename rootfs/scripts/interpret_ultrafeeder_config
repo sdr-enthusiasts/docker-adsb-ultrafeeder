@@ -140,7 +140,7 @@ do
             if [[ -n "${param[3]}" ]] && [[ -n "${param[4]}" ]]; then
                 readsb_str="$readsb_str,${param[3]},${param[4]}"
             fi
-            READSB_CONF_ARR+=("--net-connector=${readsb_str},
+            READSB_CONF_ARR+=("--net-connector=${readsb_str},gpsd_in")
         ;;
 
         *)
