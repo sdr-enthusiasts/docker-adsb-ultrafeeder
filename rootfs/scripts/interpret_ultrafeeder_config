@@ -146,7 +146,7 @@ do
         *)
             # Check if there's anything in ${ULTRAFEEDER_NET_CONNECTOR} -- if not, it's a bad config element. If yes, add it as if it were ADSB
             if [[ -z "${ULTRAFEEDER_NET_CONNECTOR}" ]]; then
-                echo "[$(date)][${APPNAME}] Warning: skipping unknown ULTRAFEEDER_CONFIG config element \"${instance}\""
+                if [[ "${instance:0:1}" != "!" ]]; then echo "[$(date)][${APPNAME}] Warning: skipping unknown ULTRAFEEDER_CONFIG config element \"${instance}\""; fi
             else
                 # parse arguments for main readsb
                 # build net-connector string into $readsb_str
