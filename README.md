@@ -635,6 +635,10 @@ docker exec -it ultrafeeder bash /tar1090-install.sh /run/readsb webroot /usr/lo
 
 After this has finished a simple reload in the browser should do the trick.
 
+Another option is to bind / mount a folder to /var/custom_html in the container and set
+CUSTOM_HTML=true, be aware no cache busting will be done, nor will any of the tar1090 configuration
+settings be applied. The folder will be served as is with aircraft data available as usual at /data.
+
 #### `tar1090` `config.js` Configuration - Title
 
 | Environment Variable         | Purpose                                              | Default   |
