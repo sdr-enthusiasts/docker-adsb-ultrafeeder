@@ -208,7 +208,6 @@ The following parameters must be set (mandatory) for the container to function:
 | `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset                          |           |
 | `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          | Unset                          |           |
 | `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                       | Unset                          |           |
-| `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        | `3000`                         |           |
 | `READSB_ENABLE_BIASTEE`       | Set to `true` to enable bias tee on supporting interfaces                                                                        |                                | Unset     |
 | `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location in metadata: 0=no location, 1=approximate, 2=exact (`HEYWHATSTHAT_PANORAMA_ID` also has location)  | `--rx-location-accuracy=<n>`   | `2`       |
 | `READSB_HEATMAP_INTERVAL`     | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value)   | `--heatmap=<sec>`              | `15`      |
@@ -217,10 +216,10 @@ The following parameters must be set (mandatory) for the container to function:
 | `READSB_STATS_RANGE`          | Set this to `true` to collect range statistics for polar plot.                                                                   | `--stats-range`                | Unset     |
 | `READSB_RANGE_OUTLINE_HOURS`  | Change which past timeframe the range outline is based on                                                                        | `--range-outline-hours`        | `24`      |
 | `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          |                                | Unset     |
-| `S6_SERVICES_GRACETIME`       | Optional, set to 30000 when saving traces / globe_history                                                                        |                                | `3000`    |
+| `S6_SERVICES_GRACETIME`       | Optional, set shorter for faster container stop (orderly shutdown should not depend on this)                                     |                                | `3000`    |
 | `LOGLEVEL`                    | `verbose` (all messages), `error` (errors only), `none` (minimal)                                                                |                                | `verbose` |
 | `MLAT_STARTUP_STAGGER`        | mlat-client startup staggering for tidy logs (reduce for quicker startup)                                                        |                                | `15`      |
-| `MAX_GLOBE_HISTORY`           | Maximum number of days that `globe_history` data (used to produce heatmaps and ptracks) is retained. Note - this parameter doesn't affect the data used to produce `graphs1090` statistics | | Unset |
+| `MAX_GLOBE_HISTORY`           | Maximum number of days that `globe_history` data (heatmap / replay / traces) is retained. Note - this parameter doesn't affect the data used to produce `graphs1090` statistics | | Unset |
 
 `READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehopf's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 
@@ -758,6 +757,7 @@ docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGai
 | `GRAPHS1090_DEFAULT_APPEND`                  | Append to /etc/default/graphs1090, see <https://github.com/wiedehopf/graphs1090/blob/master/default>                                      | Unset          |
 | `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset          |
 | `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset          |
+| `URL_1090_SIGNAL`                            | Optional. Retrieve gain and signal data from an URL where the readsb stats are available, i.e. `http://192.168.2.34/tar1090`              | Unset          |
 
 #### Enabling UAT data
 
