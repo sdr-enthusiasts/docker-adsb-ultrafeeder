@@ -76,8 +76,10 @@ if [ -n "${UUID}" ]; then
 fi
 
 READSB_CMD+=("--write-json=/run/readsb")
-READSB_CMD+=("--write-state=/var/globe_history")
-READSB_CMD+=("--json-trace-interval=15")
+# no need to write state when tar1090_disable is used for a minimal setup
+if ! chk_enabled "${TAR1090_DISABLE}"; then
+    READSB_CMD+=("--write-state=/var/globe_history")
+fi
 READSB_CMD+=("--json-reliable=1")
 READSB_CMD+=("--net-json-port=30047")
 READSB_CMD+=("--net-ri-port=30001")
@@ -110,9 +112,11 @@ READSB_CMD+=("--net-api-port=$ports")
 
 #########################
 
-if chk_enabled "${READSB_ENABLE_HEATMAP:-true}"; then
-    READSB_CMD+=("--heatmap-dir=/var/globe_history")
-    READSB_CMD+=("--heatmap=${READSB_HEATMAP_INTERVAL:-15}")
+if ! chk_disabled "${READSB_ENABLE_HEATMAP}"; then
+    if chk_enabled "${READSB_ENABLE_HEATMAP}" || ! chk_enabled "${TAR1090_DISABLE}"; then
+        READSB_CMD+=("--heatmap-dir=/var/globe_history")
+        READSB_CMD+=("--heatmap=${READSB_HEATMAP_INTERVAL:-15}")
+    fi
 fi
 
 if chk_enabled "${READSB_ENABLE_TRACES}"; then
@@ -200,9 +204,7 @@ if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_DIST" ]]; then
     READSB_CMD+=("--net-beast-reduce-filter-dist=$READSB_NET_BEAST_REDUCE_FILTER_DIST")
 fi
 
-if [[ -n "$READSB_JSON_TRACE_INTERVAL" ]]; then
-    READSB_CMD+=("--json-trace-interval=$READSB_JSON_TRACE_INTERVAL")
-fi
+READSB_CMD+=("--json-trace-interval=${READSB_JSON_TRACE_INTERVAL:-15}")
 
 if [[ -n "$READSB_NET_BEAST_REDUCE_FILTER_ALT" ]]; then
     READSB_CMD+=("--net-beast-reduce-filter-alt=$READSB_NET_BEAST_REDUCE_FILTER_ALT")
