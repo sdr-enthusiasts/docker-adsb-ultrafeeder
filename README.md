@@ -1050,12 +1050,25 @@ If you want to use `ultrafeeder` *only* as a SDR decoder but without any mapping
 There is the option to use some basic offline maps limited in zoom:
 
 - Download  the tiles (don't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
-- Add a volume mapping so the container can access the tiles:
+- Add a volume mapping so the container can access the tiles. (If you're using an [ADSB.im](https://my.adsb.im/home) image this is already complete at first boot):
 
 ```yaml
     volumes:
         - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
 ```
+- Find the container ID of ultrafeeder:
+```bash
+docker ps
+```
+- Initiate a bash session inside the container:
+```bash
+docker exec -it <containerID> sh
+```
+- Run the tar1090 install/update script to recognize the offline files and modify the web interface:
+```bash
+./tar1090-install.sh
+```
+- You should now see a layer under 'Worldwide' at the top called 'OpenStreetMap Offline'
 
 ## Logging
 
