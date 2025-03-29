@@ -121,7 +121,7 @@ Some common ports are as follows (which may or may not be in use depending on yo
 
 The general principle behind the port numbering, is:
 
-- `30xxx` ports are connected to the main instance `readsb` that decodes and processes the SDR data
+- `30xxx` and `32xxx` ports are connected to the main instance `readsb` that decodes and processes the SDR data
 - `31xxx` ports are connected to the MLAT Hub
 - `92xx` ports are for Prometheus statistics output
 - `80` contains the Tar1090 web interface
@@ -132,6 +132,7 @@ The general principle behind the port numbering, is:
 | `30002/tcp`                 | Raw protocol output                                |
 | `30003/tcp`                 | SBS/Basestation protocol output                    |
 | `32006/tcp`                 | SBS/Basestation protocol input                     |
+| `32009/tcp`                 | JAERO SBS/Basestation protocol input               |
 | `30004/tcp`<br/>`30104/tcp` | Beast protocol input                               |
 | `30005/tcp`                 | Beast protocol output                              |
 | `30006/tcp`                 | Beast reduce protocol output                       |
@@ -462,6 +463,8 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_NET_SBS_DISABLE_REDUCE`       | Disable application of "reduce" logic to SBS/BaseStation output. (By default, this is enabled)                                                                                                                                                                                 | `--net-sbs-reduce`                      | Unset         |
 | `REASSB_NET_VERBATIM`                 | Set this to `true` to forward messages unchanged.                                                                                                                                                                                                                              | `--net-verbatim`                        | Unset         |
 | `READSB_NET_VRS_PORT`                 | TCP VRS JSON output listen ports.                                                                                                                                                                                                                                              | `--net-vrs-port=<ports>`                | Unset         |
+| `READSB_NET_SBS_JAERO_IN_PORT`       | TCP Jaero SBS input listen port. This port accepts SBS data and has a very long time-out (see `READSB_JAERO_TIMEOUT` below) before the aircraft disappear from the map. This port is often used to receive Satellite (ADS-C) or HFDL (shortwave) data from Jaero or DumpHFDL. | `--net-sbs-jaero-in-port`                      | 32009         |
+| `READSB_JAERO_TIMEOUT`       | Time-out (in minutes) for aircraft that are received on the Jaero In Port (`READSB_NET_SBS_JAERO_IN_PORT` above)  | `--jaero-timeout`                      | 720         |
 | `READSB_WRITE_STATE_ONLY_ON_EXIT`     | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb`                                                                                                                                                                            | `--write-state-only-on-exit`            | Unset         |
 | `READSB_JSON_INTERVAL`                | Update interval for the webinterface in seconds / interval between aircraft.json writes                                                                                                                                                                                        | `--write-json-every=<sec>`              | `1.0`         |
 | `READSB_JSON_TRACE_INTERVAL`          | Per plane interval for json position output and trace interval for globe history                                                                                                                                                                                               | `--json-trace-interval=<sec>`           | `15`          |
@@ -620,7 +623,7 @@ Clone tar1090 to a local direcotry: `git clone https://github.com/wiedehopf/tar1
 
 Make `/local/custom_version` available as `/var/tar1090_git_source` in the container:
 
-```
+```yaml
     volumes:
       - /local/custom_version:/var/tar1090_git_source
 ```
@@ -629,7 +632,7 @@ Make sure you have UPDATE_TAR1090 env var set to true.
 
 Changes in `/local/custom_version` won't be visible with a simple page reload, you need to either restart the container or run:
 
-```
+```bash
 docker exec -it ultrafeeder bash /tar1090-install.sh /run/readsb webroot /usr/local/share/tar1090 /var/tar1090_git_source
 ```
 
@@ -1057,18 +1060,25 @@ There is the option to use some basic offline maps limited in zoom:
     volumes:
         - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
 ```
+
 - Find the container ID of ultrafeeder:
+
 ```bash
 docker ps
 ```
+
 - Initiate a bash session inside the container:
+
 ```bash
 docker exec -it <containerID> sh
 ```
+
 - Run the tar1090 install/update script to recognize the offline files and modify the web interface:
+
 ```bash
 ./tar1090-install.sh
 ```
+
 - You should now see a layer under 'Worldwide' at the top called 'OpenStreetMap Offline'
 
 ## Logging
