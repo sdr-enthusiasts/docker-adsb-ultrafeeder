@@ -561,6 +561,8 @@ For example:
    - ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
 ```
 
+Alternatively, you can push Beat formatted MLAT Results from sources external to Ultrafeeder to port 31004.
+
 Generally, there is little else to configure, but there are a few parameters that you can set or change:
 
 | Variable                        | Description                                                                                                                                                                                                                                                                        | Default if omitted |
@@ -572,7 +574,6 @@ Generally, there is little else to configure, but there are a few parameters tha
 | `MLATHUB_BEAST_REDUCE_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format with reduced data rates                                                                                                                                                                                 | `31006`            |
 | `MLATHUB_NET_CONNECTOR`         | (Obsolete, please use `ULTRAFEEDER_CONFIG=mlathub,...` instead.) List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset              |
 | `MLATHUB_DISABLE`               | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container                                                                                                                                                                           | Unset              |
-| `MLATHUB_ENABLE`                | If set to `true`, the MLATHUB will be enabled even if there are no `mlat-client`s running in the container                                                                                                                                                                         | Unset              |
 
 ### Web Gui (`tar1090`) Configuration
 
