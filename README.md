@@ -896,7 +896,7 @@ cat << EOM | sudo tee /etc/default/gpsd
 # They need to be read/writeable, either by user gpsd or the group dialout.
 DEVICES="/dev/ttyACM0"
 # Other options you want to pass to gpsd
-GPSD_OPTIONS="-G"
+GPSD_OPTIONS="-G -p"
 # Automatically hot add/remove USB GPS devices via gpsdctl
 USBAUTO="true"
 EOM
