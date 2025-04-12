@@ -1,0 +1,31 @@
+  globe:
+    image: ghcr.io/sdr-enthusiasts/docker-adsb-ultrafeeder:latest
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+    container_name: globe
+    hostname: globe
+    environment:
+      - S6_KILL_GRACETIME=100
+      - TZ=UTC
+      - UPDATE_TAR1090=true
+      - UPDATE_TAR1090_DAYS=7
+      - READSB_ENABLE_API=true
+      - TAR1090_ENABLE_AC_DB=True
+      - TAR1090_HISTORY_DISABLE=true
+      - READSB_EXTRA_ARGS=
+          --tar1090-use-api --write-json-globe-index
+          --json-reliable=2 --ac-hash-bits 18
+          --net-receiver-id
+      - READSB_ENABLE_TRACES=true
+      #- TAR1090_USEROUTEAPI=True
+      #- MAX_GLOBE_HISTORY=365
+    ports:
+      - 8077:80 # change 8077 to whatever port you want the webserver to listen on
+      - 50004:30004 # change 50004 to whatever port you want to ingest data on
+    tmpfs:
+      - /run:exec,size=8192M
+    volumes:
+      - /opt/ultrafeeder/globe_history:/var/globe_history
+      - /opt/ultrafeeder/graphs1090:/var/lib/collectd
+      - /proc/diskstats:/proc/diskstats:ro
