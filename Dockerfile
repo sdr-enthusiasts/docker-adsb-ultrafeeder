@@ -27,6 +27,7 @@ RUN \
     KEPT_PACKAGES=() && \
     # packages needed for debugging - these can stay out in production builds:
     #KEPT_PACKAGES+=(procps nano aptitude psmisc) && \
+    KEPT_PACKAGES+=(libjemalloc2) && \
     # Install all these packages:
     apt-get update -q -y && \
     apt-get install -o Dpkg::Options::="--force-confnew" -y --no-install-recommends -q \
