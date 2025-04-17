@@ -384,6 +384,10 @@ if chk_enabled "$PROMETHEUS_ENABLE"; then
     READSB_CMD+=("--write-prom=/run/readsb-prometheus.prom")
 fi
 
+if chk_enabled "$READSB_JEMALLOC"; then
+    export LD_PRELOAD="libjemalloc.so.2"
+fi
+
 # wait 15 seconds if this is not the first startup
 if [[ $(s6-svdt /run/service/readsb | wc -l) != 0 ]]; then
     "${s6wrap[@]}" --args echo "delaying restart by 15 seconds"

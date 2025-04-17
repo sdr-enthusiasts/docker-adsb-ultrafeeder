@@ -10,6 +10,7 @@
       - TZ=UTC
       - UPDATE_TAR1090=true
       - UPDATE_TAR1090_DAYS=7
+      - READSB_JEMALLOC=true
       - READSB_ENABLE_API=true
       - TAR1090_ENABLE_AC_DB=True
       - TAR1090_HISTORY_DISABLE=true
