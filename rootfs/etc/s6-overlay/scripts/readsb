@@ -380,6 +380,9 @@ fi
 
 if chk_enabled "$READSB_JEMALLOC"; then
     export LD_PRELOAD="libjemalloc.so.2"
+    if [[ -z "$MALLOC_CONF" ]] ;then
+        export MALLOC_CONF="narenas:1,tcache:false"
+    fi
 fi
 
 # wait 15 seconds if this is not the first startup
