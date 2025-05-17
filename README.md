@@ -249,14 +249,14 @@ If you want to connect your SDR to the container, here's how to do that:
 
 | Variable            | Description                                                                                                                                 | Controls which `readsb` option | Default  |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------- |
-| `READSB_GAIN`       | Set gain (in dB). Use `autogain` to have the container determine an appropriate gain, more on this below. Leave this parameter empty (recommended) to use [`readsb`'s built-in auto-gain](#using-readsbs-built-in-autogain-recommended), or set it to `omit` or `off` to not pass this parameter to `readsb`              | `--gain=<db>`                  | Max gain |
+| `READSB_GAIN`       | Set gain (in dB). Set to `auto` to use the quickly adjusting [`readsb`'s built-in auto-gain](#using-readsbs-built-in-autogain-recommended). Use `autogain` to use the slow adjusting legacy autogain script, more on this below.               | `--gain=<value>`                  | `auto` |
 | `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/#estimating-ppm) | `--ppm=<correction>`           | Unset    |
 
 ##### Ultrafeeder AutoGain for RTLSDR Devices
 
 ###### Using `readsb`'s built-in AutoGain (recommended)
 
-As of November 2024, we are recommending to leave the `READSB_GAIN` parameter empty by not including it in your configuration. This will engage the new built-in [autogain of `readsb`](https://github.com/wiedehopf/readsb?tab=readme-ov-file#autogain). This new algorithm uses continuous noise and signal strength measurements and is highly effective in environments with a mix of strong, local signals and distant, weak signals.
+As of November 2024, we are recommending to set the `READSB_GAIN` parameter to `auto`. This will engage the new built-in [autogain of `readsb`](https://github.com/wiedehopf/readsb?tab=readme-ov-file#autogain). This new algorithm uses continuous noise and signal strength measurements and is highly effective in environments with a mix of strong, local signals and distant, weak signals.
 
 (Experts only:) If you want to pass in any autogain parameters to `readsb`, you can do so by setting `READSB_GAIN` to (for example) `READSB_GAIN=auto-verbose,0,25,31,243`. See the explanation at Wiedehopf's [`readsb` repository](https://github.com/wiedehopf/readsb?tab=readme-ov-file#autogain) for more information about these parameters
 

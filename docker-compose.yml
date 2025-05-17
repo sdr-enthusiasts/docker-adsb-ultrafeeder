@@ -20,6 +20,7 @@ services:
       # --------------------------------------------------
       # SDR related parameters:
       - READSB_DEVICE_TYPE=rtlsdr
+      - READSB_GAIN=auto
       - READSB_RTLSDR_DEVICE=${ADSB_SDR_SERIAL}
       - READSB_RTLSDR_PPM=${ADSB_SDR_PPM}
       #
