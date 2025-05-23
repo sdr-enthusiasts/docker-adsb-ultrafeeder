@@ -123,6 +123,10 @@ services:
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
       - GF_LOG_FILTERS=rendering:debug
+    # Required for iframe panels, however this has serious security implications - delete the line below if:
+    # 1. You let untrusted users or the public edit your dashboard
+    # 2. You use this Grafana instance for other (non-Ultrafeeder) dashboards
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
     ports:
       - 3000:3000
     volumes:
