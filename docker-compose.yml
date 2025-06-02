@@ -46,7 +46,6 @@ services:
         adsb,feed.theairtraffic.com,30004,beast_reduce_plus_out;
         adsb,data.avdelphi.com,24999,beast_reduce_plus_out;
         adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out;
-        adsb,feed.radarplane.com,30001,beast_reduce_plus_out;
         adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out;
         mlat,feed.adsb.fi,31090,39000;
         mlat,in.adsb.lol,31090,39001;
