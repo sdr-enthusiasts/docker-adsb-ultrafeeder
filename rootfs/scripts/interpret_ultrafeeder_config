@@ -2,7 +2,7 @@
 
 # shellcheck shell=bash disable=SC2015,SC2154
 #
-# This scripts should be sourced by the /etc/services.d/xxx/run modules for
+# This script should be sourced by the /etc/services.d/xxx/run modules for
 # readsb, mlat-client, and mlathub. It interprets the ULTRAFEEDER_CONFIG / ULTRAFEEDER_NET_CONNECTOR parameter
 # and makes individual net-connector strings available for these three modules.
 #
