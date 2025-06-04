@@ -26,7 +26,7 @@ mkdir -p /run/readsb
 LOGLEVEL="${LOGLEVEL,,}"
 LOGLEVEL="${LOGLEVEL:-verbose}"
 chk_disabled "$LOGLEVEL" && LOGLEVEL="none" || true
-if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then 
+if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then
     [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
     LOGLEVEL="verbose"
 fi
@@ -87,7 +87,7 @@ READSB_CMD+=("--net-ro-port=30002")
 READSB_CMD+=("--net-sbs-port=30003")
 READSB_CMD+=("--net-sbs-in-port=32006")
 
-# add jaero SBS in port -- for compatibility with systems that may have 
+# add jaero SBS in port -- for compatibility with systems that may have
 # defined this port already in $READSB_EXTRA_ARGS, we'll check first
 if ! grep -qs "net-sbs-jaero-in-port" <<< "${READSB_EXTRA_ARGS}"; then
     READSB_CMD+=("--net-sbs-jaero-in-port=${READSB_NET_SBS_JAERO_IN_PORT:-32009}")
@@ -281,7 +281,7 @@ if [[ -n "$READSB_NET_SBS_OUTPUT_PORT" ]]; then
 fi
 
 # Handle "--net-verbatim"
-if chk_enabled "$REASSB_NET_VERBATIM"; then
+if chk_enabled "$READSB_NET_VERBATIM"; then
     READSB_CMD+=("--net-verbatim")
 fi
 

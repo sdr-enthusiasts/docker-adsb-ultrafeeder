@@ -40,8 +40,16 @@ jobs:
       - name: Run hadolint against Dockerfiles
         run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
 
+  precommit:
+    name: Run pre-commit
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: pre-commit/action@v3.0.0
+
   deploy:
     name: Deploy without telegraf
+    needs: precommit
     uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
     with:
       push_enabled: false
@@ -65,6 +73,7 @@ jobs:
 
   deploy_with_telegraf:
     name: Deploy with telegraf and healthcheck
+    needs: precommit
     uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
     with:
       push_enabled: false

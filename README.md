@@ -18,7 +18,7 @@
           - [Using the original AutoGain algorithm](#using-the-original-autogain-algorithm)
       - [Connecting to external ADSB data sources](#connecting-to-external-adsb-data-sources)
         - [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config)
-          - [`adsb` constuct: connecting to an ADSB data source or sending ADSB data to another host or port](#adsb-constuct-connecting-to-an-adsb-data-source-or-sending-adsb-data-to-another-host-or-port)
+          - [`adsb` construct: connecting to an ADSB data source or sending ADSB data to another host or port](#adsb-construct-connecting-to-an-adsb-data-source-or-sending-adsb-data-to-another-host-or-port)
           - [`mlat` construct: sending MLAT data to a MLAT Server](#mlat-construct-sending-mlat-data-to-a-mlat-server)
           - [Integrate external MLAT return data with Ultrafeeder](#integrate-external-mlat-return-data-with-ultrafeeder)
           - [`ULTRAFEEDER_CONFIG` parameters](#ultrafeeder_config-parameters)
@@ -310,7 +310,7 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 The parameters and their potential values are explained below the construct definitions.
 The following constructs are available: `adsb`, `mlat`, and `mlathub`.
 
-###### `adsb` constuct: connecting to an ADSB data source or sending ADSB data to another host or port
+###### `adsb` construct: connecting to an ADSB data source or sending ADSB data to another host or port
 
 ```yaml
 - ULTRAFEEDER_CONFIG=adsb,<host>,<port>,<protocol>[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,silent_fail][,<extra-arguments>]
@@ -461,7 +461,7 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_NET_SBS_INPUT_PORT`           | TCP BaseStation input listen ports.                                                                                                                                                                                                                                            | `--net-sbs-in-port=<ports>`             | Unset         |
 | `READSB_NET_SBS_OUTPUT_PORT`          | TCP BaseStation output listen ports.                                                                                                                                                                                                                                           | `--net-sbs-port=<ports>`                | `30003`       |
 | `READSB_NET_SBS_DISABLE_REDUCE`       | Disable application of "reduce" logic to SBS/BaseStation output. (By default, this is enabled)                                                                                                                                                                                 | `--net-sbs-reduce`                      | Unset         |
-| `REASSB_NET_VERBATIM`                 | Set this to `true` to forward messages unchanged.                                                                                                                                                                                                                              | `--net-verbatim`                        | Unset         |
+| `READSB_NET_VERBATIM`                 | Set this to `true` to forward messages unchanged.                                                                                                                                                                                                                              | `--net-verbatim`                        | Unset         |
 | `READSB_NET_VRS_PORT`                 | TCP VRS JSON output listen ports.                                                                                                                                                                                                                                              | `--net-vrs-port=<ports>`                | Unset         |
 | `READSB_NET_SBS_JAERO_IN_PORT`       | TCP JAERO SBS input listen port. This port accepts SBS data and has a very long time-out (see `READSB_JAERO_TIMEOUT` below) before the aircraft disappear from the map. This port is often used to receive Satellite (ADS-C) or HFDL (shortwave) data from Jaero or DumpHFDL. | `--net-sbs-jaero-in-port=<ports>`                      | 32009         |
 | `READSB_JAERO_TIMEOUT`       | Time-out (in minutes) for aircraft that are received on the Jaero In Port (see `READSB_NET_SBS_JAERO_IN_PORT` above)  | `--jaero-timeout`                      | 720         |
