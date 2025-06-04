@@ -18,7 +18,7 @@
           - [Using the original AutoGain algorithm](#using-the-original-autogain-algorithm)
       - [Connecting to external ADSB data sources](#connecting-to-external-adsb-data-sources)
         - [All-in-One Configuration using `ULTRAFEEDER_CONFIG`](#all-in-one-configuration-using-ultrafeeder_config)
-          - [`adsb` constuct: connecting to an ADSB data source or sending ADSB data to another host or port](#adsb-constuct-connecting-to-an-adsb-data-source-or-sending-adsb-data-to-another-host-or-port)
+          - [`adsb` construct: connecting to an ADSB data source or sending ADSB data to another host or port](#adsb-construct-connecting-to-an-adsb-data-source-or-sending-adsb-data-to-another-host-or-port)
           - [`mlat` construct: sending MLAT data to a MLAT Server](#mlat-construct-sending-mlat-data-to-a-mlat-server)
           - [Integrate external MLAT return data with Ultrafeeder](#integrate-external-mlat-return-data-with-ultrafeeder)
           - [`ULTRAFEEDER_CONFIG` parameters](#ultrafeeder_config-parameters)
@@ -310,7 +310,7 @@ The ULTRAFEEDER_CONFIG parameter can have multiple config strings, separated by 
 The parameters and their potential values are explained below the construct definitions.
 The following constructs are available: `adsb`, `mlat`, and `mlathub`.
 
-###### `adsb` constuct: connecting to an ADSB data source or sending ADSB data to another host or port
+###### `adsb` construct: connecting to an ADSB data source or sending ADSB data to another host or port
 
 ```yaml
 - ULTRAFEEDER_CONFIG=adsb,<host>,<port>,<protocol>[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,silent_fail][,<extra-arguments>]
