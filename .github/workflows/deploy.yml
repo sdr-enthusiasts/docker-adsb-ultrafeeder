@@ -13,18 +13,6 @@ on:
         description: "Use base image testpr"
         default: false
 
-  push:
-    branches:
-      - main
-    # Don't trigger if it's just a documentation update
-    paths:
-      - "rust/**"
-      - "Dockerfile"
-      - "Dockerfile.build_binary"
-      - "rootfs/**"
-      - "downloads/**"
-      - ".env"
-
 # Set workflow-wide environment variables
 #  - REPO: repo name on dockerhub
 #  - IMAGE: image name on dockerhub
@@ -66,44 +54,31 @@ jobs:
 
   deploy:
     name: Deploy without telegraf
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@main
     with:
       push_enabled: true
       push_destinations: ghcr.io
       ghcr_repo_owner: ${{ github.repository_owner }}
       ghcr_repo: ${{ github.repository }}
-      get_version_method: file_in_container:file=/CONTAINER_VERSION
       # set build_latest to true if github.event.inputs.use_test_image is false
       build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
-      # only build the entire stack if we are not using the test image
-      build_version_specific: false
-      build_platform_specific: false
-      build_nohealthcheck: false
       build_baseimage_url: docker-tar1090:latest/docker-tar1090:baseimage-test
     secrets:
       ghcr_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # unfortunately we can't use build_and_push_image.yml to build the telegraf label because
-  # that GH Action doesn't have the capability to build specific custom-named labels
-
   deploy_with_telegraf:
     name: Deploy with telegraf and healthcheck
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/build_and_push_image.yml@main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@main
     with:
       push_enabled: true
       push_destinations: ghcr.io
       ghcr_repo_owner: ${{ github.repository_owner }}
       ghcr_repo: ${{ github.repository }}
-      get_version_method: file_in_container:file=/CONTAINER_VERSION
       # set build_latest to true if github.event.inputs.use_test_image is false
       build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
       build_baseimage_url: docker-tar1090:telegraf/docker-tar1090:telegraf-baseimage-test
-      # only build the entire stack if we are not using the test image
-      build_version_specific: false
-      build_platform_specific: false
-      build_nohealthcheck: false
       docker_latest_tag: telegraf
       dockerfile_changes: |
         docker-tar1090:latest/docker-tar1090:telegraf
