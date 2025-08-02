@@ -764,6 +764,7 @@ docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGai
 | `GRAPHS1090_DEFAULT_APPEND`                  | Append to /etc/default/graphs1090, see <https://github.com/wiedehopf/graphs1090/blob/master/default>                                      | Unset          |
 | `GRAPHS1090_CPU_TEMP`                        | container internal path to thermal zone with CPU temp. defaults to /sys/class/thermal/thermal_zone0/temp | Unset          |
 | `GRAPHS1090_OTHER_TEMP1`                     | container internal path to file that the user must update with temperature in C divided by 1000        | Unset          |
+| `GRAPHS1090_RANGE_INCLUDE_NONADSB`           | include non-ADSB positions in the range graph (HFDL, ADS-C, MLAT, TIS-B, Other)                        |  False          |
 | `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset          |
 | `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset          |
 | `URL_1090_SIGNAL`                            | Optional. Retrieve gain and signal data from an URL where the readsb stats are available, i.e. `http://192.168.2.34/tar1090`              | Unset          |
