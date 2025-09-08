@@ -747,6 +747,8 @@ docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGai
 | `GRAPHS1090_LARGE_HEIGHT`                    | Defines the height of the larger graphs. (if size is set to custom)                                                                       | `235`          |
 | `GRAPHS1090_SMALL_WIDTH`                     | Defines the width of the smaller graphs. (if size is set to custom)                                                                       | `619`          |
 | `GRAPHS1090_SMALL_HEIGHT`                    | Defines the height of the smaller graphs. (if size is set to custom)                                                                      | `324`          |
+| `GRAPHS1090_RANGE_UNITS`                     | Units for range graph: nautical, statute or metric                                                     | `nautical`     |
+| `GRAPHS1090_TEMP_UNITS`                      | Units for temperature graph: celsius or fahrenheit                                                     | `celsius`      |
 | `GRAPHS1090_DISK_DEVICE`                     | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device                                            | Unset          |
 | `GRAPHS1090_ETHERNET_DEVICE`                 | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device                                     | Unset          |
 | `GRAPHS1090_WIFI_DEVICE`                     | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device                                    | Unset          |
