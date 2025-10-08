@@ -15,7 +15,7 @@ services:
     environment:
       # --------------------------------------------------
       # general parameters:
-      - LOGLEVEL=error
+      - LOGLEVEL=${LOGLEVEL-verbose}
       - TZ=${FEEDER_TZ}
       # --------------------------------------------------
       # SDR related parameters:
