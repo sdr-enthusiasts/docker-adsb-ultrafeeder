@@ -69,8 +69,6 @@ services:
       # --------------------------------------------------
       # TAR1090 (Map Web Page) parameters:
       - UPDATE_TAR1090=true
-      - TAR1090_DEFAULTCENTERLAT=${FEEDER_LAT}
-      - TAR1090_DEFAULTCENTERLON=${FEEDER_LONG}
       - TAR1090_MESSAGERATEINTITLE=true
       - TAR1090_PAGETITLE=${FEEDER_NAME}
       - TAR1090_PLANECOUNTINTITLE=true
