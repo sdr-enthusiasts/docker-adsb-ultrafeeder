@@ -350,9 +350,10 @@ Here, `<host>` and `<port>` are mandatory, <return_port> is optional (and can be
 
 ###### Integrate external MLAT return data with Ultrafeeder
 
-Even though MLAT return data received from any MLAT Servers connected directly to Ultrafeeder are automatically integrated with Ultrafeeder, this is not the case if you are using external containers or software to send MLAT data to a MLAT Server. The latter would be the case if you use the FlightAware/PiAware container, the FR24 container, RadarVirtuel container, etc.
+Even though MLAT return data received from any MLAT Servers connected directly to Ultrafeeder are automatically integrated with Ultrafeeder, this is not the case if you are using external containers or software to send MLAT data to a MLAT Server. The latter would be the case if you use the FlightAware/PiAware container, RadarVirtuel container, etc. (FR24 does not provide MLAT results)
 
-In this case, you can use the `mlathub` construct to collect MLAT return data from these external MLAT clients, and integrate them with Ultrafeeder data. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub).
+It is recommended to push the MLAT results from those containers back into ultrafeeder. (for example in piaware containter: MLAT_RESULTS_BEASTHOST=ultrafeeder)
+Or you can use the `mlathub` construct to collect MLAT return data from these external MLAT clients, and integrate them with Ultrafeeder data. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub).
 
 ```yaml
 - ULTRAFEEDER_CONFIG=mlathub,<host>,<port>,<protocol>[,uuid=XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX][,silent_fail][,<extra-arguments>]
