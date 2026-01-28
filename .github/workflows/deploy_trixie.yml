@@ -53,7 +53,7 @@ jobs:
       # set build_latest to true if github.event.inputs.use_test_image is false
       build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
-      build_baseimage_url: docker-tar1090:telegraf/docker-tar1090:trixie-telegraf/g;s/docker-baseimage:mlatclient/docker-baseimage:trixie-mlatclient
+      build_baseimage_url: docker-tar1090:latest/docker-tar1090:trixie-latest/g;s/docker-baseimage:mlatclient/docker-baseimage:trixie-mlatclient
       docker_latest_tag: trixie-latest
       dockerfile_changes: |
         docker-tar1090:latest/docker-tar1090:trixie-latest
@@ -71,7 +71,7 @@ jobs:
       # set build_latest to true if github.event.inputs.use_test_image is false
       build_latest: ${{ github.event.inputs.use_test_image == 'false' || github.event.inputs.use_test_image == ''  }}
       build_baseimage_test: ${{ github.event.inputs.use_test_image == 'true' }}
-      build_baseimage_url: docker-tar1090:telegraf/docker-tar1090:trixie-telegraf/g;s/docker-baseimage:mlatclient/docker-baseimage:trixie-mlatclient
+      build_baseimage_url: docker-tar1090:latest/docker-tar1090:trixie-telegraf/g;s/docker-baseimage:mlatclient/docker-baseimage:trixie-mlatclient
       docker_latest_tag: trixie-telegraf
       dockerfile_changes: |
         docker-tar1090:latest/docker-tar1090:trixie-telegraf
