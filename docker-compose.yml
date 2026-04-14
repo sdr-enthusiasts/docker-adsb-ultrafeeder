@@ -100,5 +100,3 @@ services:
       - /dev/bus/usb:/dev/bus/usb
     tmpfs:
       - /run:exec,size=256M
-      - /tmp:size=128M
-      - /var/log:size=32M
