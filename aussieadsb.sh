@@ -136,7 +136,7 @@ case "$argv" in
             exit 1
         fi
         echo "Your receiver is registered! Please add the following to your Ultrafeeder environment parameters in docker-compose.yml:"
-        echo 
+        echo
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
         echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
         echo "   mlat,aussieadsb.com,30000,name=$rcvr_token;"
@@ -154,7 +154,7 @@ case "$argv" in
         echo ""
         echo "AussieADSB De-registration"
         echo ""
-        
+
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -194,7 +194,7 @@ case "$argv" in
         echo ""
         echo "AussieADSB Feeder Status"
         echo ""
-        
+
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -205,7 +205,7 @@ case "$argv" in
         connected="$(jq -r .Data.Connected <<< "$response" 2>/dev/null)"
         rcvr_ip="$(jq -r .Data.ConnectedIP <<< "$response" 2>/dev/null)"
         port="$(jq -r .Data.Port <<< "$response" 2>/dev/null)"
-        
+
         if [[ "$msg_type" != "statusresponse" ]] || [[ "$rcvr_name" == "null" ]]; then
             echo "Cannot find a receiver with Registration Key \"$AUSSIEADSB_KEY\"!"
             echo "Please check the key and try again!"
@@ -230,7 +230,7 @@ case "$argv" in
         echo ""
         echo "AussieADSB Registration Update"
         echo ""
-        
+
         while [[ -z "$AUSSIEADSB_KEY" ]]; do
             read -rp "Please enter your AussieADSB Registration Key: " AUSSIEADSB_KEY
         done
@@ -284,5 +284,5 @@ case "$argv" in
         echo "Unknown option \"$1\". Please check and try again"
         exit 1
     ;;
-    
+
 esac

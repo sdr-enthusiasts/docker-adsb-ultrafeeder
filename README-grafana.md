@@ -77,7 +77,7 @@ Now paste in the following text \*):
   <summary>&lt;&dash;&dash; Click the arrow to see the <code>docker-compose.yml</code> text</summary>
 
 ```yaml
-version: '3.9'
+version: "3.9"
 
 volumes:
   grafana:
@@ -107,32 +107,32 @@ services:
     hostname: grafana
     # uncomment the following section and set the variables if you are exposing Grafana to the internet behind a rev web proxy:
     environment:
-    # windrose panel plugin is needed for polar plots:
+      # windrose panel plugin is needed for polar plots:
       - GF_INSTALL_PLUGINS=snuids-radar-panel,fatcloud-windrose-panel
-    # uncomment and set the following variables if you are exposing Grafana to the internet behind a rev web proxy:
-    #  - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana/
-    #  - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    # The following variables are needed if you want to expose and embed any dashboards publicly:
+      # uncomment and set the following variables if you are exposing Grafana to the internet behind a rev web proxy:
+      #  - GF_SERVER_ROOT_URL=https://mywebsite.com/grafana/
+      #  - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      # The following variables are needed if you want to expose and embed any dashboards publicly:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_NAME=public
       - GF_SECURITY_ALLOW_EMBEDDING=true
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
       - GF_FEATURE_TOGGLES_ENABLE=publicDashboards
-    # The following variables will allow you to "share/render" dashboards as PNG graphics.
-    # You should also enabled the renderer container below.
+      # The following variables will allow you to "share/render" dashboards as PNG graphics.
+      # You should also enabled the renderer container below.
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
       - GF_LOG_FILTERS=rendering:debug
-    # Required for iframe panels, however this has serious security implications - delete the line below if:
-    # 1. You let untrusted users or the public edit your dashboard
-    # 2. You use this Grafana instance for other (non-Ultrafeeder) dashboards
+      # Required for iframe panels, however this has serious security implications - delete the line below if:
+      # 1. You let untrusted users or the public edit your dashboard
+      # 2. You use this Grafana instance for other (non-Ultrafeeder) dashboards
       - GF_PANELS_DISABLE_SANITIZE_HTML=true
     ports:
       - 3000:3000
     volumes:
       - grafana:/var/lib/grafana
 
-# The `renderer` container is needed if you want to share images of your dashboard as a graphic:
+  # The `renderer` container is needed if you want to share images of your dashboard as a graphic:
   renderer:
     image: grafana/grafana-image-renderer:latest
 

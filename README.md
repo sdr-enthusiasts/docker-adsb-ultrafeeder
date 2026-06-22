@@ -148,9 +148,9 @@ The general principle behind the port numbering, is:
 Any of these ports can be made available to the host system by using the `ports:` directive in your `docker-compose.yml`. The container's web interface is rendered to port `80` in the container. This can be mapped to a port on the host using the docker-compose `ports` directive. In the example [`docker-compose.yml`](docker-compose.yml) file, the container's Tar1090 interface is mapped to `8080` on the host system, and ports `9273-9274` are exposed as-is:
 
 ```yaml
-    ports:
-      - 8080:80               # to expose the web interface
-      - 9273-9274:9273-9274   # to expose the statistics interface to Prometheus
+ports:
+  - 8080:80 # to expose the web interface
+  - 9273-9274:9273-9274 # to expose the statistics interface to Prometheus
 ```
 
 Json position output:
@@ -180,11 +180,11 @@ Note:
 You need to make sure that the USB device can be accessed by the container. The best way to do so, is by adding the following to your `docker-compose.yml` file:
 
 ```yaml
-    device_cgroup_rules:
-      - 'c 189:* rwm'
+device_cgroup_rules:
+  - "c 189:* rwm"
 ...
-    volumes:
-      - /dev/bus/usb:/dev/bus/usb:rw
+volumes:
+  - /dev/bus/usb:/dev/bus/usb:rw
 ```
 
 The advantage of doing this (over simply adding a `device:` directive pointing at the USB port) is that the construction above will automatically recover if you "hot plug" your dongle. ⚠️This feature requires a recent version of docker-compose (version >=2.3). Make sure your system is up to date if dongles are not found. ⚠️
@@ -204,23 +204,23 @@ The following parameters must be set (mandatory) for the container to function:
 
 ##### Optional Parameters
 
-| Environment Variable          | Description                                                                                                                      | Controls which `readsb` option | Default   |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------- |
-| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>. | Unset                          |           |
-| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          | Unset                          |           |
-| `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                       | Unset                          |           |
-| `READSB_ENABLE_BIASTEE`       | Set to `true` to enable bias tee on supporting interfaces                                                                        |                                | Unset     |
-| `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location: 0: no location / internal use only, 1: 2 decimals, 2: exact (default), 3: 1 decimals, 4: 0 decimals (remove location from heywhatsthat panorama unless set to exact)  | `--json-location-accuracy=<n>`   | `2`       |
-| `READSB_HEATMAP_INTERVAL`     | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value)   | `--heatmap=<sec>`              | `15`      |
-| `READSB_MAX_RANGE`            | Absolute maximum range for position decoding (in nm)                                                                             | `--max-range=<dist>`           | `450`     |
-| `READSB_STATS_EVERY`          | Number of seconds between showing and resetting stats.                                                                           | `--stats-every=<sec>`          | Unset     |
-| `READSB_STATS_RANGE`          | Set this to `true` to collect range statistics for polar plot.                                                                   | `--stats-range`                | Unset     |
-| `READSB_RANGE_OUTLINE_HOURS`  | Change which past timeframe the range outline is based on                                                                        | `--range-outline-hours`        | `24`      |
-| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                          |                                | Unset     |
-| `S6_SERVICES_GRACETIME`       | Optional, set shorter for faster container stop (orderly shutdown should not depend on this)                                     |                                | `3000`    |
-| `LOGLEVEL`                    | `verbose` (all messages), `error` (errors only), `none` (minimal)                                                                |                                | `verbose` |
-| `MLAT_STARTUP_STAGGER`        | mlat-client startup staggering for tidy logs (reduce for quicker startup)                                                        |                                | `15`      |
-| `MAX_GLOBE_HISTORY`           | Maximum number of days that `globe_history` data (heatmap / replay / traces) is retained. Note - this parameter doesn't affect the data used to produce `graphs1090` statistics | | Unset |
+| Environment Variable          | Description                                                                                                                                                                                         | Controls which `readsb` option | Default   |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------- |
+| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>.                                                                    | Unset                          |           |
+| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                                                                                             | Unset                          |           |
+| `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                                                                                          | Unset                          |           |
+| `READSB_ENABLE_BIASTEE`       | Set to `true` to enable bias tee on supporting interfaces                                                                                                                                           |                                | Unset     |
+| `READSB_RX_LOCATION_ACCURACY` | Accuracy of receiver location: 0: no location / internal use only, 1: 2 decimals, 2: exact (default), 3: 1 decimals, 4: 0 decimals (remove location from heywhatsthat panorama unless set to exact) | `--json-location-accuracy=<n>` | `2`       |
+| `READSB_HEATMAP_INTERVAL`     | Per plane interval for heatmap and replay (if you want to lower this, also lower json-trace-interval to this or a lower value)                                                                      | `--heatmap=<sec>`              | `15`      |
+| `READSB_MAX_RANGE`            | Absolute maximum range for position decoding (in nm)                                                                                                                                                | `--max-range=<dist>`           | `450`     |
+| `READSB_STATS_EVERY`          | Number of seconds between showing and resetting stats.                                                                                                                                              | `--stats-every=<sec>`          | Unset     |
+| `READSB_STATS_RANGE`          | Set this to `true` to collect range statistics for polar plot.                                                                                                                                      | `--stats-range`                | Unset     |
+| `READSB_RANGE_OUTLINE_HOURS`  | Change which past timeframe the range outline is based on                                                                                                                                           | `--range-outline-hours`        | `24`      |
+| `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                                                                                             |                                | Unset     |
+| `S6_SERVICES_GRACETIME`       | Optional, set shorter for faster container stop (orderly shutdown should not depend on this)                                                                                                        |                                | `3000`    |
+| `LOGLEVEL`                    | `verbose` (all messages), `error` (errors only), `none` (minimal)                                                                                                                                   |                                | `verbose` |
+| `MLAT_STARTUP_STAGGER`        | mlat-client startup staggering for tidy logs (reduce for quicker startup)                                                                                                                           |                                | `15`      |
+| `MAX_GLOBE_HISTORY`           | Maximum number of days that `globe_history` data (heatmap / replay / traces) is retained. Note - this parameter doesn't affect the data used to produce `graphs1090` statistics                     |                                | Unset     |
 
 `READSB_EXTRA_ARGS` just passes arguments to the commandline, you can check this file for more options for wiedehopf's readsb fork: <https://github.com/wiedehopf/readsb/blob/dev/help.h>
 
@@ -247,10 +247,10 @@ If you want to connect your SDR to the container, here's how to do that:
 
 ##### Optional/Additional Parameters
 
-| Variable            | Description                                                                                                                                 | Controls which `readsb` option | Default  |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | -------- |
-| `READSB_GAIN`       | Set gain (in dB). Set to `auto` to use the quickly adjusting [`readsb`'s built-in auto-gain](#using-readsbs-built-in-autogain-recommended). Use `autogain` to use the slow adjusting legacy autogain script, more on this below.               | `--gain=<value>`                  | `auto` |
-| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/#estimating-ppm) | `--ppm=<correction>`           | Unset    |
+| Variable            | Description                                                                                                                                                                                                                      | Controls which `readsb` option | Default |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------- |
+| `READSB_GAIN`       | Set gain (in dB). Set to `auto` to use the quickly adjusting [`readsb`'s built-in auto-gain](#using-readsbs-built-in-autogain-recommended). Use `autogain` to use the slow adjusting legacy autogain script, more on this below. | `--gain=<value>`               | `auto`  |
+| `READSB_RTLSDR_PPM` | Set oscillator frequency correction in PPM. See [Estimating PPM](https://github.com/sdr-enthusiasts/docker-readsb-protobuf/#estimating-ppm)                                                                                      | `--ppm=<correction>`           | Unset   |
 
 ##### Ultrafeeder AutoGain for RTLSDR Devices
 
@@ -352,7 +352,7 @@ Here, `<host>` and `<port>` are mandatory, <return_port> is optional (and can be
 
 Even though MLAT return data received from any MLAT Servers connected directly to Ultrafeeder are automatically integrated with Ultrafeeder, this is not the case if you are using external containers or software to send MLAT data to a MLAT Server. The latter would be the case if you use the FlightAware/PiAware container, RadarVirtuel container, etc. (FR24 does not provide MLAT results)
 
-It is recommended to push the MLAT results from those containers back into ultrafeeder. (for example in piaware containter: MLAT_RESULTS_BEASTHOST=ultrafeeder)
+It is recommended to push the MLAT results from those containers back into ultrafeeder. (for example in piaware container: MLAT_RESULTS_BEASTHOST=ultrafeeder)
 Or you can use the `mlathub` construct to collect MLAT return data from these external MLAT clients, and integrate them with Ultrafeeder data. You can further configure this MLAT Hub as described in the section [Configuring the built-in MLAT Hub](#configuring-the-built-in-mlat-hub).
 
 ```yaml
@@ -367,25 +367,25 @@ For example:
 
 ###### `ULTRAFEEDER_CONFIG` parameters
 
-| parameter | Description | Mandatory/Optional |
-|------|-------|-------|
-| `<host>` | an IP address/hostname/containername for incoming or outgoing connections | Mandatory |
-| `<port>` / `<return_port>` | TCP port numbers | Mandatory |
-| `protocol` | One of the following | Mandatory |
-| - `beast_reduce_out` | Beast-format output with lower data throughput (saves bandwidth and CPU) | |
-| - `beast_reduce_plus_out` | Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services | |
-| - `beast_out` | Beast-format output | |
-| - `beast_in` | Beast-format input | |
-| - `raw_out` | Raw output | |
-| - `raw_in` | Raw input | |
-| - `sbs_out` | SBS-format output | |
-| - `vrs_out` | SBS-format output | |
-| - `uat_in` | "special" RAW format input as generated by the `dump978` container on port 30978. It is advisable to use this protocol and port to get UAT data from dump978, for example: `- ULTRAFEEDER_CONFIG=adsb,dump978,30978,uat_in` | |
-| - `uuid` | Universally Unique Identifier. You can reuse the one you generated for AdsbExchange, or you can generate a new one with this Linux command: `cat /proc/sys/kernel/random/uuid`. If omitted, it will use the `UUID` environment parameter, or if that one doesn't exist, it will leave the field empty | |
-| - `name` | a friendly name (containing any character of the set \[A-Za-z0-9_-\] - do not use any spaces, quotes, or other non-alphanumeric characters!) that will be sent to the MLAT Server, used to identify the station by name. If omitted, it will use the `MLAT_USER` parameter, or if that one doesn't exist, it will leave the field empty | |
-| - `input_connect` | a `host:port` combination where the ADSB data for this MLAT connection is coming from. If omitted, it will get its input from the `readsb` instance that is present in the container | |
-| - `input_type` | the type of data that the input source provides. This can be one of these: `auto`, `dump1090`, `beast`, `radarcape_12mhz`, `radarcape_gps`, `radarcape`, `sbs`, or `avrmlat`. If omitted, the value of the `MLAT_INPUT_TYPE` variable will be used, or if that one does not exist, `auto` will be used | |
-| - `silent_fail` | if present as one of the parameters of the `adsb` or `mlathub` construct, it will mute any failure notifications for this connection. (`silent_fail` is not supported for the `mlat` construct.) | Mandatory |
+| parameter                  | Description                                                                                                                                                                                                                                                                                                                              | Mandatory/Optional |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `<host>`                   | an IP address/hostname/containername for incoming or outgoing connections                                                                                                                                                                                                                                                                | Mandatory          |
+| `<port>` / `<return_port>` | TCP port numbers                                                                                                                                                                                                                                                                                                                         | Mandatory          |
+| `protocol`                 | One of the following                                                                                                                                                                                                                                                                                                                     | Mandatory          |
+| - `beast_reduce_out`       | Beast-format output with lower data throughput (saves bandwidth and CPU)                                                                                                                                                                                                                                                                 |                    |
+| - `beast_reduce_plus_out`  | Beast-format output with extra data (UUID). This is the preferred format when feeding the "new" aggregator services                                                                                                                                                                                                                      |                    |
+| - `beast_out`              | Beast-format output                                                                                                                                                                                                                                                                                                                      |                    |
+| - `beast_in`               | Beast-format input                                                                                                                                                                                                                                                                                                                       |                    |
+| - `raw_out`                | Raw output                                                                                                                                                                                                                                                                                                                               |                    |
+| - `raw_in`                 | Raw input                                                                                                                                                                                                                                                                                                                                |                    |
+| - `sbs_out`                | SBS-format output                                                                                                                                                                                                                                                                                                                        |                    |
+| - `vrs_out`                | SBS-format output                                                                                                                                                                                                                                                                                                                        |                    |
+| - `uat_in`                 | "special" RAW format input as generated by the `dump978` container on port 30978. It is advisable to use this protocol and port to get UAT data from dump978, for example: `- ULTRAFEEDER_CONFIG=adsb,dump978,30978,uat_in`                                                                                                              |                    |
+| - `uuid`                   | Universally Unique Identifier. You can reuse the one you generated for AdsbExchange, or you can generate a new one with this Linux command: `cat /proc/sys/kernel/random/uuid`. If omitted, it will use the `UUID` environment parameter, or if that one doesn't exist, it will leave the field empty                                    |                    |
+| - `name`                   | a friendly name (containing any character of the set \[A-Za-z0-9\_-\] - do not use any spaces, quotes, or other non-alphanumeric characters!) that will be sent to the MLAT Server, used to identify the station by name. If omitted, it will use the `MLAT_USER` parameter, or if that one doesn't exist, it will leave the field empty |                    |
+| - `input_connect`          | a `host:port` combination where the ADSB data for this MLAT connection is coming from. If omitted, it will get its input from the `readsb` instance that is present in the container                                                                                                                                                     |                    |
+| - `input_type`             | the type of data that the input source provides. This can be one of these: `auto`, `dump1090`, `beast`, `radarcape_12mhz`, `radarcape_gps`, `radarcape`, `sbs`, or `avrmlat`. If omitted, the value of the `MLAT_INPUT_TYPE` variable will be used, or if that one does not exist, `auto` will be used                                   |                    |
+| - `silent_fail`            | if present as one of the parameters of the `adsb` or `mlathub` construct, it will mute any failure notifications for this connection. (`silent_fail` is not supported for the `mlat` construct.)                                                                                                                                         | Mandatory          |
 
 ##### Networking parameters
 
@@ -400,17 +400,17 @@ For example:
 
 There are several aggregators, both non-profit and commercial, that can directly be sent data from ultrafeeder without the need for an additional feeder container. We have added them in the example `docker-compose.yml` snippet above. Here is a partial list of these aggregators. All of them use the `beast_reduce_plus` format for feeding ADSB data, and `mlat-client` for feeding MLAT:
 
-| Name            | (C)ommercial/<br/>(N)on-profit | Description                                               | Feed details                                                                               | `ULTRAFEEDER_CONFIG` snippet |
-| --------------- | ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------ |
-| Airplanes.live  | N                              | Run by volunteers that used to be related to adsbexchange | adsb:`feed.airplanes.live` port `30004`<br/>mlat: `feed.airplanes.live` port `31090`       | `adsb,feed.airplanes.live,30004,beast_reduce_plus_out;`<br/>`mlat,feed.airplanes.live,31090` |
-| ADSB.fi         | N                              | Run by a Finnish IT and aviation enthusiast | adsb:`feed.adsb.fi` port `30004`<br/>mlat: `feed.adsb.fi` port `31090`                     | `adsb,feed.adsb.fi,30004,beast_reduce_plus_out;`<br/>`mlat,feed.adsb.fi,31090` |
-| ADSB.lol        | N                              | Run by an aviation enthusiast located in the Netherlands    | adsb:`in.adsb.lol` port `30004`<br/>mlat: `in.adsb.lol` port `31090`                       | `adsb,in.adsb.lol,30004,beast_reduce_plus_out;`<br/>`mlat,in.adsb.lol,31090` |
-| Planespotters   | N                              | planespotters.net                                         | adsb:`feed.planespotters.net` port `30004`<br/>mlat: `mlat.planespotters.net` port `31090` | `adsb,feed.planespotters.net,30004,beast_reduce_plus_out;`<br/>`mlat,mlat.planespotters.net,31090` |
-| The Air Traffic | N                              | Run by an aviation enthusiast                               | adsb:`feed.theairtraffic.com` port `30004`<br/>mlat: `mlat.theairtraffic.com` port `31090` | `adsb,feed.theairtraffic.om,30004,beast_reduce_plus_out;`<br/>`mlat,mlat.theairtraffic.com,31090` |
-| AVDelphi        | N                              | Aviation data-science company (non-profit)                | adsb:`data.avdelphi.com` port `24999`<br/>mlat: no MLAT                                    | `adsb,data.avdelphi.com,24999,beast_reduce_plus_out;` |
-| ADSB Exchange   | C                              | Large aggregator owned by JetNet                          | adsb:`feed1.adsbexchange.com` port `30004`<br/>mlat: `feed.adsbexchange.com` port `31090`  | `adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out;`<br/>`mlat,feed.adsbexchange.com,31090` |
-| Fly Italy ADSB  | N                              | Run by a few aviation enthusiasts in Italy                    | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   | `adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out;`<br/>`mlat,dati.flyitalyadsb.com,31090` |
-| AussieADSB | C | Small semi-commercial aggregator focused uniquely on Australia/Oceania. See <https://aussieadsb.com>. See below on how to configure a feed to them | adsb: `aussieadsb.com` port (varies)<br/>mlat: `aussieadsb.com` port `30000` | `adsb,aussieadsb.com,xxxxx,beast_reduce_plus_out;`<br/>`mlat,iassieadsb.com,30000` |
+| Name            | (C)ommercial/<br/>(N)on-profit | Description                                                                                                                                        | Feed details                                                                               | `ULTRAFEEDER_CONFIG` snippet                                                                       |
+| --------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| Airplanes.live  | N                              | Run by volunteers that used to be related to adsbexchange                                                                                          | adsb:`feed.airplanes.live` port `30004`<br/>mlat: `feed.airplanes.live` port `31090`       | `adsb,feed.airplanes.live,30004,beast_reduce_plus_out;`<br/>`mlat,feed.airplanes.live,31090`       |
+| ADSB.fi         | N                              | Run by a Finnish IT and aviation enthusiast                                                                                                        | adsb:`feed.adsb.fi` port `30004`<br/>mlat: `feed.adsb.fi` port `31090`                     | `adsb,feed.adsb.fi,30004,beast_reduce_plus_out;`<br/>`mlat,feed.adsb.fi,31090`                     |
+| ADSB.lol        | N                              | Run by an aviation enthusiast located in the Netherlands                                                                                           | adsb:`in.adsb.lol` port `30004`<br/>mlat: `in.adsb.lol` port `31090`                       | `adsb,in.adsb.lol,30004,beast_reduce_plus_out;`<br/>`mlat,in.adsb.lol,31090`                       |
+| Planespotters   | N                              | planespotters.net                                                                                                                                  | adsb:`feed.planespotters.net` port `30004`<br/>mlat: `mlat.planespotters.net` port `31090` | `adsb,feed.planespotters.net,30004,beast_reduce_plus_out;`<br/>`mlat,mlat.planespotters.net,31090` |
+| The Air Traffic | N                              | Run by an aviation enthusiast                                                                                                                      | adsb:`feed.theairtraffic.com` port `30004`<br/>mlat: `mlat.theairtraffic.com` port `31090` | `adsb,feed.theairtraffic.om,30004,beast_reduce_plus_out;`<br/>`mlat,mlat.theairtraffic.com,31090`  |
+| AVDelphi        | N                              | Aviation data-science company (non-profit)                                                                                                         | adsb:`data.avdelphi.com` port `24999`<br/>mlat: no MLAT                                    | `adsb,data.avdelphi.com,24999,beast_reduce_plus_out;`                                              |
+| ADSB Exchange   | C                              | Large aggregator owned by JetNet                                                                                                                   | adsb:`feed1.adsbexchange.com` port `30004`<br/>mlat: `feed.adsbexchange.com` port `31090`  | `adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out;`<br/>`mlat,feed.adsbexchange.com,31090`  |
+| Fly Italy ADSB  | N                              | Run by a few aviation enthusiasts in Italy                                                                                                         | adsb: `dati.flyitalyadsb.com` port `4905`<br/>mlat: `dati.flyitalyadsb.com` port `30100`   | `adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out;`<br/>`mlat,dati.flyitalyadsb.com,31090`    |
+| AussieADSB      | C                              | Small semi-commercial aggregator focused uniquely on Australia/Oceania. See <https://aussieadsb.com>. See below on how to configure a feed to them | adsb: `aussieadsb.com` port (varies)<br/>mlat: `aussieadsb.com` port `30000`               | `adsb,aussieadsb.com,xxxxx,beast_reduce_plus_out;`<br/>`mlat,iassieadsb.com,30000`                 |
 
 When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com by default. See the description of the `ADSBX_STATS` parameter on how to disable this.
 
@@ -439,10 +439,10 @@ Note: if you have a UAT dongle and use `dump978` to decode this, you should use 
 
 There are many optional parameters relating to the ingestion of data and the general networking functioning of the `readsb` program that implements this functionality.
 
-| Variable                              | Description                                                                                                                                              | Controls which `readsb` option          | Default       |
+| Variable                              | Description                                                                                                                                                                                                                                                                    | Controls which `readsb` option          | Default       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------- |
 | `READSB_NET_API_PORT`                 | <https://github.com/wiedehopf/readsb/blob/dev/README-json.md#--net-api-port-query-formats>                                                                                                                                                                                     | `--net-api-port=<ports>`                | `30152`       |
-| `READSB_ENABLE_API`                   | Adds nginx proxies api at /re-api. Use with extraargs --write-json-globe-index --tar1090-use-api to get fast map with many planes | various | disabled |
+| `READSB_ENABLE_API`                   | Adds nginx proxies api at /re-api. Use with extraargs --write-json-globe-index --tar1090-use-api to get fast map with many planes                                                                                                                                              | various                                 | disabled      |
 | `READSB_NET_BEAST_REDUCE_INTERVAL`    | BeastReduce position update interval, longer means less data (valid range: `0.000` - `14.999`)                                                                                                                                                                                 | `--net-beast-reduce-interval=<seconds>` | `0.5`         |
 | `READSB_NET_BEAST_REDUCE_FILTER_DIST` | Restrict beast-reduce output to aircraft in a radius of X nmi                                                                                                                                                                                                                  | `--net-beast-reduce-filter-dist=<nmi>`  | Unset         |
 | `READSB_NET_BEAST_REDUCE_FILTER_ALT`  | Restrict beast-reduce output to aircraft below X ft                                                                                                                                                                                                                            | `--net-beast-reduce-filter-alt=<ft>`    | Unset         |
@@ -463,12 +463,12 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_NET_SBS_DISABLE_REDUCE`       | Disable application of "reduce" logic to SBS/BaseStation output. (By default, this is enabled)                                                                                                                                                                                 | `--net-sbs-reduce`                      | Unset         |
 | `READSB_NET_VERBATIM`                 | Set this to `true` to forward messages unchanged.                                                                                                                                                                                                                              | `--net-verbatim`                        | Unset         |
 | `READSB_NET_VRS_PORT`                 | TCP VRS JSON output listen ports.                                                                                                                                                                                                                                              | `--net-vrs-port=<ports>`                | Unset         |
-| `READSB_NET_SBS_JAERO_IN_PORT`       | TCP JAERO SBS input listen port. This port accepts SBS data and has a very long time-out (see `READSB_JAERO_TIMEOUT` below) before the aircraft disappear from the map. This port is often used to receive Satellite (ADS-C) or HFDL (shortwave) data from Jaero or DumpHFDL. | `--net-sbs-jaero-in-port=<ports>`                      | 32009         |
-| `READSB_JAERO_TIMEOUT`       | Time-out (in minutes) for aircraft that are received on the Jaero In Port (see `READSB_NET_SBS_JAERO_IN_PORT` above)  | `--jaero-timeout`                      | 720         |
+| `READSB_NET_SBS_JAERO_IN_PORT`        | TCP JAERO SBS input listen port. This port accepts SBS data and has a very long time-out (see `READSB_JAERO_TIMEOUT` below) before the aircraft disappear from the map. This port is often used to receive Satellite (ADS-C) or HFDL (shortwave) data from Jaero or DumpHFDL.  | `--net-sbs-jaero-in-port=<ports>`       | 32009         |
+| `READSB_JAERO_TIMEOUT`                | Time-out (in minutes) for aircraft that are received on the Jaero In Port (see `READSB_NET_SBS_JAERO_IN_PORT` above)                                                                                                                                                           | `--jaero-timeout`                       | 720           |
 | `READSB_WRITE_STATE_ONLY_ON_EXIT`     | if set to anything, it will only write the status range outlines, etc. upon termination of `readsb`                                                                                                                                                                            | `--write-state-only-on-exit`            | Unset         |
 | `READSB_JSON_INTERVAL`                | Update interval for the webinterface in seconds / interval between aircraft.json writes                                                                                                                                                                                        | `--write-json-every=<sec>`              | `1.0`         |
 | `READSB_JSON_TRACE_INTERVAL`          | Per plane interval for json position output and trace interval for globe history                                                                                                                                                                                               | `--json-trace-interval=<sec>`           | `15`          |
-| `READSB_FORWARD_MLAT_SBS`             | If set to anything, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | `--forward_mlat_sms` | Unset                                   |
+| `READSB_FORWARD_MLAT_SBS`             | If set to anything, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | `--forward_mlat_sms`                    | Unset         |
 | `UUID`                                | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. |                                         | Unset         |
 | `ADSBX_STATS`                         | If set to `disabled`/`off`/`0`/`no`, and feeding to AdsbExchange has been configured, no special statistics will be shared with AdsbExchange. If unset or set to `enabled`/`on`/`1`/`yes`, statistics will be shared with AdsbExchange if they are configured as an aggregator |                                         | Unset         |
 
@@ -505,7 +505,7 @@ where:
 
 Note - the optional parameters can be given in any order.
 
-The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (_).
+The `MLAT_USER` parameter is passed to the MLAT Client and server, and will show up as a "friendly" name on MLAT related stats at your MLAT aggregator. This parameter can only contain alphanumeric (a-z, A-Z, 0-9) characters, dashes (-), or underscores (\_).
 
 #### MLAT troubleshooting
 
@@ -546,7 +546,7 @@ An "MLAT Hub" is an aggregator of MLAT results from several sources. Since the c
 Note - due to design limitations of `readsb`, the `tar1090` graphical interface will by default ONLY show MLAT results from the aggregators/MLAT sources that were defined with the `MLAT_NET_CONNECTOR` or `ULTRAFEEDER_CONFIG=mlat,...` parameters. If you want to show any MLAT results from sources that have their own feeder containers (for example, those from `piaware`), you should add these sources like this:
 
 ```yaml
-   - ULTRAFEEDER_CONFIG=mlathub,host,port,protocol;
+- ULTRAFEEDER_CONFIG=mlathub,host,port,protocol;
 ```
 
 Where:
@@ -558,22 +558,22 @@ Where:
 For example:
 
 ```yaml
-   - ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
+- ULTRAFEEDER_CONFIG=mlathub,piaware,30105,beast_in;
 ```
 
 Alternatively, you can push Beat formatted MLAT Results from sources external to Ultrafeeder to port 31004.
 
 Generally, there is little else to configure, but there are a few parameters that you can set or change:
 
-| Variable                        | Description                                                                                                                                                                                                                                                                        | Default if omitted |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| `MLAT_STATS_INTERVAL`           | mlat-client statistic log interval in seconds                                                                                                                                                                                                                                      | `900`              |
-| `MLATHUB_SBS_OUT_PORT`          | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format                                                                                                                                                                                         | `31003`            |
-| `MLATHUB_BEAST_IN_PORT`         | TCP port you where you can send additional MLAT results to, in Beast format                                                                                                                                                                                                        | `31004`            |
-| `MLATHUB_BEAST_OUT_PORT`        | TCP port where consolidated MLAT results will be available in Beast format                                                                                                                                                                                                         | `31005`            |
-| `MLATHUB_BEAST_REDUCE_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format with reduced data rates                                                                                                                                                                                 | `31006`            |
+| Variable                        | Description                                                                                                                                                                                                                                                                                                                                         | Default if omitted |
+| ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `MLAT_STATS_INTERVAL`           | mlat-client statistic log interval in seconds                                                                                                                                                                                                                                                                                                       | `900`              |
+| `MLATHUB_SBS_OUT_PORT`          | TCP port where the consolidated MLAT results will be available in SBS (BaseStation) format                                                                                                                                                                                                                                                          | `31003`            |
+| `MLATHUB_BEAST_IN_PORT`         | TCP port you where you can send additional MLAT results to, in Beast format                                                                                                                                                                                                                                                                         | `31004`            |
+| `MLATHUB_BEAST_OUT_PORT`        | TCP port where consolidated MLAT results will be available in Beast format                                                                                                                                                                                                                                                                          | `31005`            |
+| `MLATHUB_BEAST_REDUCE_OUT_PORT` | TCP port where consolidated MLAT results will be available in Beast format with reduced data rates                                                                                                                                                                                                                                                  | `31006`            |
 | `MLATHUB_NET_CONNECTOR`         | (Obsolete, please use `ULTRAFEEDER_CONFIG=mlathub,...` instead.) List of semi-colon (`;`) separated IP or host, port, and protocols where MLATHUB will connect to ingest or send MLAT data. It follows the same syntax as described in the [`READSB_NET_CONNECTOR` syntax section](#alternate-configuration-method-with-readsb_net_connector) above | Unset              |
-| `MLATHUB_DISABLE`               | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container                                                                                                                                                                           | Unset              |
+| `MLATHUB_DISABLE`               | If set to `true`, the MLATHUB will be disabled even if there are `mlat-client`s running in the container                                                                                                                                                                                                                                            | Unset              |
 
 ### Web Gui (`tar1090`) Configuration
 
@@ -587,32 +587,32 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 
 #### `tar1090` Core Configuration
 
-| Environment Variable       | Purpose                                                                                                                                                                                            | Default              |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `READSB_JSON_INTERVAL`     | Update data update interval for the webinterface in seconds                                                                                                                                        | `1.0`                |
-| `UPDATE_TAR1090`           | At startup update tar1090 and tar1090db to the latest versions                                                                                                                                     | `true`               |
-| `UPDATE_TAR1090_DAYS`      | Every X days update tar1090 and tar1090db to the latest versions                                                                                                                                   | disabled             |
-| `INTERVAL`                 | Interval at which the track history is saved                                                                                                                                                       | `8`                  |
-| `HISTORY_SIZE`             | How many points in time are stored in the track history                                                                                                                                            | `450`                |
-| `ENABLE_978`               | Change to yes to enable UAT/978 display in `tar1090`. This will also enable UAT-specific graphs in graphs1090                                                                                      | `no`                 |
-| `URL_978`                  | The URL needs to point at where you would normally find the skyview978 webinterface, for example `http://192.168.0.29/skyaware978`. Note -- do not use `localhost` or `127.0.0.1                   |                      |
-| `GZIP_LVL`                 | `1`-`9` are valid, lower lvl: less CPU usage, higher level: less network bandwidth used when loading the page                                                                                      | `3`                  |
-| `PTRACKS`                  | Shows the last `$PTRACKS` hours of traces you have seen at the `?pTracks` URL                                                                                                                      | `8`                  |
-| `TAR1090_FLIGHTAWARELINKS` | Set to `true` to enable FlightAware links in the web interface                                                                                                                                     | `null`               |
-| `TAR1090_ENABLE_AC_DB`     | Set to `true` to enable extra information, such as aircraft type and registration, to be included in in `aircraft.json` output. Will use more 50 MB extra memory                                   | `false`              |
-| `TAR1090_DB_LONGTYPE`      | Set to `false` to remove the "desc", "ownOp" and "year" fields from `aircraft.json` when AC_DB is enabled.                                                                                         | `true`              |
-| `HEYWHATSTHAT_PANORAMA_ID` | Your `heywhatsthat.com` panorama ID. See <https://github.com/wiedehopf/tar1090#heywhatsthatcom-range-outline> (will reveal exact location in the webinterface)                                     |                      |
-| `HEYWHATSTHAT_ALTS`        | Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please                      | `12192m` (=40000 ft) |
-| `HTTP_ACCESS_LOG`          | Optional. Set to `true` to display HTTP server access logs.                                                                                                                                        | `false`              |
-| `HTTP_ERROR_LOG`           | Optional. Set to `false` to hide HTTP server error logs.                                                                                                                                           | `true`               |
-| `TAR1090_IMAGE_CONFIG_LINK` | An optional URL shown at the top of page, designed to be used for a link back to a configuration page. The token `HOSTNAME` in the link is replaced with the current host that tar1090 is accessed on. | `null`                       |
-| `TAR1090_IMAGE_CONFIG_TEXT` | Text to display for the config link                                                                                                                                                                    | `null`                       |
-| `TAR1090_DISABLE`           | Set to `true` to disable the web server and all websites (including the map, `graphs1090`, `heatmap`, `pTracks`, etc.)                                                                                 | Unset                        |
-| `TAR1090_HISTORY_DISABLE`   | Set to `true` to disable the tar1090 track history (pTracks / non globe tracks)                                                                                                                        | Unset                        |
-| `READSB_ENABLE_HEATMAP`    | Set to `true` or leave unset to enable the HeatMap function available at `http://myip/?Heatmap`; set to `false` to disable the HeapMap function | `true` (enabled) |
-| `READSB_ENABLE_TRACES`     | Save detailed globe history traces (1 gzip compressed json file per day and airframe, use MAX_GLOBE_HISTORY so you don't run out of inodes / diskspace)                                                 | `false` |
-| `TAR1090_AISCATCHER_SERVER` | If you want to show vessels from your AIS-Catcher instance on the map, put the (externally reachable) URL of your AIS-Catcher or ShipFeeder website in this parameter (incl. `https://`). Note - if you are using "barebones" AIS-Catcher you should add `GEOJSON on` after the `-N` parameter on the `AIS-Catcher` command line. If you use [docker-shipfeeder](https://github.com/sdr-enthusiasts/docker-shipfeeder), no change is needed for that container | Empty |
-| `TAR1090_AISCATCHER_REFRESH` | Refresh rate (in seconds) of reading vessels from your AIS-Catcher instance. Defaults to 15 (secs) if omitted | `15` |
+| Environment Variable         | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Default              |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `READSB_JSON_INTERVAL`       | Update data update interval for the webinterface in seconds                                                                                                                                                                                                                                                                                                                                                                                                    | `1.0`                |
+| `UPDATE_TAR1090`             | At startup update tar1090 and tar1090db to the latest versions                                                                                                                                                                                                                                                                                                                                                                                                 | `true`               |
+| `UPDATE_TAR1090_DAYS`        | Every X days update tar1090 and tar1090db to the latest versions                                                                                                                                                                                                                                                                                                                                                                                               | disabled             |
+| `INTERVAL`                   | Interval at which the track history is saved                                                                                                                                                                                                                                                                                                                                                                                                                   | `8`                  |
+| `HISTORY_SIZE`               | How many points in time are stored in the track history                                                                                                                                                                                                                                                                                                                                                                                                        | `450`                |
+| `ENABLE_978`                 | Change to yes to enable UAT/978 display in `tar1090`. This will also enable UAT-specific graphs in graphs1090                                                                                                                                                                                                                                                                                                                                                  | `no`                 |
+| `URL_978`                    | The URL needs to point at where you would normally find the skyview978 webinterface, for example `http://192.168.0.29/skyaware978`. Note -- do not use `localhost` or `127.0.0.1                                                                                                                                                                                                                                                                               |                      |
+| `GZIP_LVL`                   | `1`-`9` are valid, lower lvl: less CPU usage, higher level: less network bandwidth used when loading the page                                                                                                                                                                                                                                                                                                                                                  | `3`                  |
+| `PTRACKS`                    | Shows the last `$PTRACKS` hours of traces you have seen at the `?pTracks` URL                                                                                                                                                                                                                                                                                                                                                                                  | `8`                  |
+| `TAR1090_FLIGHTAWARELINKS`   | Set to `true` to enable FlightAware links in the web interface                                                                                                                                                                                                                                                                                                                                                                                                 | `null`               |
+| `TAR1090_ENABLE_AC_DB`       | Set to `true` to enable extra information, such as aircraft type and registration, to be included in in `aircraft.json` output. Will use more 50 MB extra memory                                                                                                                                                                                                                                                                                               | `false`              |
+| `TAR1090_DB_LONGTYPE`        | Set to `false` to remove the "desc", "ownOp" and "year" fields from `aircraft.json` when AC_DB is enabled.                                                                                                                                                                                                                                                                                                                                                     | `true`               |
+| `HEYWHATSTHAT_PANORAMA_ID`   | Your `heywhatsthat.com` panorama ID. See <https://github.com/wiedehopf/tar1090#heywhatsthatcom-range-outline> (will reveal exact location in the webinterface)                                                                                                                                                                                                                                                                                                 |                      |
+| `HEYWHATSTHAT_ALTS`          | Comma separated altitudes for multiple outlines. Use no units or `ft` for feet, `m` for meters, or `km` for kilometers. Only integer numbers are accepted, no decimals please                                                                                                                                                                                                                                                                                  | `12192m` (=40000 ft) |
+| `HTTP_ACCESS_LOG`            | Optional. Set to `true` to display HTTP server access logs.                                                                                                                                                                                                                                                                                                                                                                                                    | `false`              |
+| `HTTP_ERROR_LOG`             | Optional. Set to `false` to hide HTTP server error logs.                                                                                                                                                                                                                                                                                                                                                                                                       | `true`               |
+| `TAR1090_IMAGE_CONFIG_LINK`  | An optional URL shown at the top of page, designed to be used for a link back to a configuration page. The token `HOSTNAME` in the link is replaced with the current host that tar1090 is accessed on.                                                                                                                                                                                                                                                         | `null`               |
+| `TAR1090_IMAGE_CONFIG_TEXT`  | Text to display for the config link                                                                                                                                                                                                                                                                                                                                                                                                                            | `null`               |
+| `TAR1090_DISABLE`            | Set to `true` to disable the web server and all websites (including the map, `graphs1090`, `heatmap`, `pTracks`, etc.)                                                                                                                                                                                                                                                                                                                                         | Unset                |
+| `TAR1090_HISTORY_DISABLE`    | Set to `true` to disable the tar1090 track history (pTracks / non globe tracks)                                                                                                                                                                                                                                                                                                                                                                                | Unset                |
+| `READSB_ENABLE_HEATMAP`      | Set to `true` or leave unset to enable the HeatMap function available at `http://myip/?Heatmap`; set to `false` to disable the HeapMap function                                                                                                                                                                                                                                                                                                                | `true` (enabled)     |
+| `READSB_ENABLE_TRACES`       | Save detailed globe history traces (1 gzip compressed json file per day and airframe, use MAX_GLOBE_HISTORY so you don't run out of inodes / diskspace)                                                                                                                                                                                                                                                                                                        | `false`              |
+| `TAR1090_AISCATCHER_SERVER`  | If you want to show vessels from your AIS-Catcher instance on the map, put the (externally reachable) URL of your AIS-Catcher or ShipFeeder website in this parameter (incl. `https://`). Note - if you are using "barebones" AIS-Catcher you should add `GEOJSON on` after the `-N` parameter on the `AIS-Catcher` command line. If you use [docker-shipfeeder](https://github.com/sdr-enthusiasts/docker-shipfeeder), no change is needed for that container | Empty                |
+| `TAR1090_AISCATCHER_REFRESH` | Refresh rate (in seconds) of reading vessels from your AIS-Catcher instance. Defaults to 15 (secs) if omitted                                                                                                                                                                                                                                                                                                                                                  | `15`                 |
 
 - For documentation on the aircraft.json format see this page: <https://github.com/wiedehopf/readsb/blob/dev/README-json.md>
 - TAR1090_ENABLE_AC_DB causes readsb to load the tar1090 database as a csv file from this repository: <https://github.com/wiedehopf/tar1090-db/tree/csv>
@@ -621,13 +621,13 @@ Note - due to design limitations of `readsb`, the `tar1090` graphical interface 
 
 `/local/custom_version` can be any folder you prefer.
 
-Clone tar1090 to a local direcotry: `git clone https://github.com/wiedehopf/tar1090 /local/custom_version`
+Clone tar1090 to a local directory: `git clone https://github.com/wiedehopf/tar1090 /local/custom_version`
 
 Make `/local/custom_version` available as `/var/tar1090_git_source` in the container:
 
 ```yaml
-    volumes:
-      - /local/custom_version:/var/tar1090_git_source
+volumes:
+  - /local/custom_version:/var/tar1090_git_source
 ```
 
 Make sure you have UPDATE_TAR1090 env var set to true.
@@ -660,46 +660,46 @@ settings be applied. The folder will be served as is with aircraft data availabl
 
 #### `tar1090` `config.js` Configuration - Map Settings
 
-| Environment Variable                        | Purpose                                                                                                                                                                                                                                                                                                                                                                    | Default           |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `TAR1090_NGINX_PORT`                        | Set the port the webserver will listen on (normally this can be left default) | `80`   |
-| `TAR1090_DEFAULTCENTERLAT`                  | Default center (latitude) of the map. This setting is overridden by any position information provided by dump1090/readsb. All positions are in decimal degrees.                                                                                                                                                                                                            | `45.0`            |
-| `TAR1090_DEFAULTCENTERLON`                  | Default center (longitude) of the map. This setting is overridden by any position information provided by dump1090/readsb. All positions are in decimal degrees.                                                                                                                                                                                                           | `9.0`             |
-| `TAR1090_DEFAULTZOOMLVL`                    | The google maps zoom level, `0` - `16`, lower is further out.                                                                                                                                                                                                                                                                                                              | `7`               |
-| `TAR1090_SITESHOW`                          | Display center marker. Setting this to false will NOT remove your location, see `READSB_RX_LOCATION_ACCURACY` for that.                                                                                                                                                                                                                                                    | `true`           |
-| `TAR1090_SITELAT`                           | Center marker. If readsb provides a receiver location, that location is used and these settings are ignored. Position of the marker (latitude).                                                                                                                                                                                                                            | `45.0`            |
-| `TAR1090_SITELON`                           | Center marker. If readsb provides a receiver location, that location is used and these settings are ignored. Position of the marker (longitude).                                                                                                                                                                                                                           | `9.0`             |
-| `TAR1090_SITENAME`                          | The tooltip of the center marker.                                                                                                                                                                                                                                                                                                                                          | `My Radar Site`   |
-| `TAR1090_RANGE_OUTLINE_COLOR`               | Colour for the range outline.                                                                                                                                                                                                                                                                                                                                              | `#0000DD`         |
-| `TAR1090_RANGE_OUTLINE_WIDTH`               | Width for the range outline.                                                                                                                                                                                                                                                                                                                                               | `1.7`             |
-| `TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE` | Range outline is coloured by altitude.                                                                                                                                                                                                                                                                                                                                     | `false`           |
-| `TAR1090_RANGE_OUTLINE_DASH`                | Range outline dashing. Syntax `[L, S]` where `L` is the pixel length of the line, and `S` is the pixel length of the space.                                                                                                                                                                                                                                                | Unset             |
-| `TAR1090_ACTUAL_RANGE_OUTLINE_COLOR`        | Colour for the actual range outline                                                                                                                                                                                                                                                                                                                                        | `#00596b`         |
-| `TAR1090_ACTUAL_RANGE_OUTLINE_WIDTH`        | Width of the actual range outline                                                                                                                                                                                                                                                                                                                                          | `1.7`             |
-| `TAR1090_ACTUAL_RANGE_OUTLINE_DASH`         | Dashed style for the actual range outline. Unset for solid line. `[5,5]` for a dashed line with 5 pixel lines and spaces in between                                                                                                                                                                                                                                        | Unset             |
+| Environment Variable                        | Purpose                                                                                                                                                                                                                                                                                                                | Default           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `TAR1090_NGINX_PORT`                        | Set the port the webserver will listen on (normally this can be left default)                                                                                                                                                                                                                                          | `80`              |
+| `TAR1090_DEFAULTCENTERLAT`                  | Default center (latitude) of the map. This setting is overridden by any position information provided by dump1090/readsb. All positions are in decimal degrees.                                                                                                                                                        | `45.0`            |
+| `TAR1090_DEFAULTCENTERLON`                  | Default center (longitude) of the map. This setting is overridden by any position information provided by dump1090/readsb. All positions are in decimal degrees.                                                                                                                                                       | `9.0`             |
+| `TAR1090_DEFAULTZOOMLVL`                    | The google maps zoom level, `0` - `16`, lower is further out.                                                                                                                                                                                                                                                          | `7`               |
+| `TAR1090_SITESHOW`                          | Display center marker. Setting this to false will NOT remove your location, see `READSB_RX_LOCATION_ACCURACY` for that.                                                                                                                                                                                                | `true`            |
+| `TAR1090_SITELAT`                           | Center marker. If readsb provides a receiver location, that location is used and these settings are ignored. Position of the marker (latitude).                                                                                                                                                                        | `45.0`            |
+| `TAR1090_SITELON`                           | Center marker. If readsb provides a receiver location, that location is used and these settings are ignored. Position of the marker (longitude).                                                                                                                                                                       | `9.0`             |
+| `TAR1090_SITENAME`                          | The tooltip of the center marker.                                                                                                                                                                                                                                                                                      | `My Radar Site`   |
+| `TAR1090_RANGE_OUTLINE_COLOR`               | Colour for the range outline.                                                                                                                                                                                                                                                                                          | `#0000DD`         |
+| `TAR1090_RANGE_OUTLINE_WIDTH`               | Width for the range outline.                                                                                                                                                                                                                                                                                           | `1.7`             |
+| `TAR1090_RANGE_OUTLINE_COLORED_BY_ALTITUDE` | Range outline is coloured by altitude.                                                                                                                                                                                                                                                                                 | `false`           |
+| `TAR1090_RANGE_OUTLINE_DASH`                | Range outline dashing. Syntax `[L, S]` where `L` is the pixel length of the line, and `S` is the pixel length of the space.                                                                                                                                                                                            | Unset             |
+| `TAR1090_ACTUAL_RANGE_OUTLINE_COLOR`        | Colour for the actual range outline                                                                                                                                                                                                                                                                                    | `#00596b`         |
+| `TAR1090_ACTUAL_RANGE_OUTLINE_WIDTH`        | Width of the actual range outline                                                                                                                                                                                                                                                                                      | `1.7`             |
+| `TAR1090_ACTUAL_RANGE_OUTLINE_DASH`         | Dashed style for the actual range outline. Unset for solid line. `[5,5]` for a dashed line with 5 pixel lines and spaces in between                                                                                                                                                                                    | Unset             |
 | `TAR1090_MAPTYPE_TAR1090`                   | Which map is displayed to new visitors. Valid values for this setting are `osm`, `esri`, `carto_light_all`, `carto_light_nolabels`, `carto_dark_all`, `carto_dark_nolabels`, `gibs`, `osm_adsbx`, `chartbundle_sec`, `chartbundle_tac`, `chartbundle_hel`, `chartbundle_enrl`, `chartbundle_enra`, `chartbundle_enrh`. | `carto_light_all` |
-| `TAR1090_MAPDIM`                            | Default map dim state, true or false.                                                                                                                                                                                                                                                                                                                                      | `true`            |
-| `TAR1090_MAPDIMPERCENTAGE`                  | The percentage amount of dimming used if the map is dimmed, `0`-`1`                                                                                                                                                                                                                                                                                                        | `0.45`            |
-| `TAR1090_MAPCONTRASTPERCENTAGE`             | The percentage amount of contrast used if the map is dimmed, `0`-`1`                                                                                                                                                                                                                                                                                                       | `0`               |
-| `TAR1090_DWDLAYERS`                         | Various map layers provided by the DWD geoserver can be added here. [Preview and available layers](https://maps.dwd.de/geoserver/web/wicket/bookmarkable/org.geoserver.web.demo.MapPreviewPage?1&filter=false). Multiple layers are also possible. Syntax: `dwd:layer1,dwd:layer2,dwd:layer3`                                                                              | `dwd:RX-Produkt`  |
-| `TAR1090_LABELZOOM`                         | Displays aircraft labels only until this zoom level, `1`-`15` (values >`15` don't really make sense)                                                                                                                                                                                                                                                                       |                   |
-| `TAR1090_LABELZOOMGROUND`                   | Displays ground traffic labels only until this zoom level, `1`-`15` (values >`15` don't really make sense)                                                                                                                                                                                                                                                                 |                   |
-| `TAR1090_JAEROLABEL`                        | Relabel data input on the readsb jaero input with this label, this data by default shows as ADS-C                                                                                                                                                                                                                                                                          |                   |
+| `TAR1090_MAPDIM`                            | Default map dim state, true or false.                                                                                                                                                                                                                                                                                  | `true`            |
+| `TAR1090_MAPDIMPERCENTAGE`                  | The percentage amount of dimming used if the map is dimmed, `0`-`1`                                                                                                                                                                                                                                                    | `0.45`            |
+| `TAR1090_MAPCONTRASTPERCENTAGE`             | The percentage amount of contrast used if the map is dimmed, `0`-`1`                                                                                                                                                                                                                                                   | `0`               |
+| `TAR1090_DWDLAYERS`                         | Various map layers provided by the DWD geoserver can be added here. [Preview and available layers](https://maps.dwd.de/geoserver/web/wicket/bookmarkable/org.geoserver.web.demo.MapPreviewPage?1&filter=false). Multiple layers are also possible. Syntax: `dwd:layer1,dwd:layer2,dwd:layer3`                          | `dwd:RX-Produkt`  |
+| `TAR1090_LABELZOOM`                         | Displays aircraft labels only until this zoom level, `1`-`15` (values >`15` don't really make sense)                                                                                                                                                                                                                   |                   |
+| `TAR1090_LABELZOOMGROUND`                   | Displays ground traffic labels only until this zoom level, `1`-`15` (values >`15` don't really make sense)                                                                                                                                                                                                             |                   |
+| `TAR1090_JAEROLABEL`                        | Relabel data input on the readsb jaero input with this label, this data by default shows as ADS-C                                                                                                                                                                                                                      |                   |
 
 #### `tar1090` `config.js` Configuration - Range Rings
 
-| Environment Variable          | Purpose                                                                                                                                                                                                                           | Default           |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| `TAR1090_RANGERINGS`          | `false` to hide range rings                                                                                                                                                                                                       | `true`            |
-| `TAR1090_RANGERINGSDISTANCES` | Distances to display range rings, in miles, nautical miles, or km (depending settings value '`TAR1090_DISPLAYUNITS`'). Accepts a comma separated list of numbers (no spaces, no quotes).                                          | `100,150,200,250` |
+| Environment Variable          | Purpose                                                                                                                                                                                                                              | Default           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `TAR1090_RANGERINGS`          | `false` to hide range rings                                                                                                                                                                                                          | `true`            |
+| `TAR1090_RANGERINGSDISTANCES` | Distances to display range rings, in miles, nautical miles, or km (depending settings value '`TAR1090_DISPLAYUNITS`'). Accepts a comma separated list of numbers (no spaces, no quotes).                                             | `100,150,200,250` |
 | `TAR1090_RANGERINGSCOLORS`    | Colours for each of the range rings specified in `TAR1090_RANGERINGSDISTANCES`. Accepts a comma separated list of hex colour values, each enclosed in single quotes (e.g., `TAR1090_RANGERINGSCOLORS='#FFFFF','#00000'`). No spaces. | Unset             |
-| `TAR1090_ENABLE_ACTUALRANGE`    | Set to `true` or leave unset to enable the outline of the actual range of your station on the map; set to `false` to disable the this outline | `true` (enabled) |
+| `TAR1090_ENABLE_ACTUALRANGE`  | Set to `true` or leave unset to enable the outline of the actual range of your station on the map; set to `false` to disable the this outline                                                                                        | `true` (enabled)  |
 
 #### `tar1090` `config.js` Configuration - Expert
 
-| Environment Variable         | Purpose                                              | Default   |
-| ---------------------------- | ---------------------------------------------------- | --------- |
-| `TAR1090_CONFIGJS_APPEND`   | Append arbitrary javascript code to config.js        | Unset     |
+| Environment Variable      | Purpose                                       | Default |
+| ------------------------- | --------------------------------------------- | ------- |
+| `TAR1090_CONFIGJS_APPEND` | Append arbitrary javascript code to config.js | Unset   |
 
 - In case a setting is available in tar1090 but not exposed via environment variable for this container
 - For a list of possible settings, see <https://github.com/wiedehopf/tar1090/blob/master/html/config.js>
@@ -747,8 +747,8 @@ docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGai
 | `GRAPHS1090_LARGE_HEIGHT`                    | Defines the height of the larger graphs. (if size is set to custom)                                                                       | `235`          |
 | `GRAPHS1090_SMALL_WIDTH`                     | Defines the width of the smaller graphs. (if size is set to custom)                                                                       | `619`          |
 | `GRAPHS1090_SMALL_HEIGHT`                    | Defines the height of the smaller graphs. (if size is set to custom)                                                                      | `324`          |
-| `GRAPHS1090_RANGE_UNITS`                     | Units for range graph: nautical, statute or metric                                                     | `nautical`     |
-| `GRAPHS1090_TEMP_UNITS`                      | Units for temperature graph: celsius or fahrenheit                                                     | `celsius`      |
+| `GRAPHS1090_RANGE_UNITS`                     | Units for range graph: nautical, statute or metric                                                                                        | `nautical`     |
+| `GRAPHS1090_TEMP_UNITS`                      | Units for temperature graph: celsius or fahrenheit                                                                                        | `celsius`      |
 | `GRAPHS1090_DISK_DEVICE`                     | Defines which disk device (`mmc0`, `sda`, `sdc`, etc) is shown. Leave empty for default device                                            | Unset          |
 | `GRAPHS1090_ETHERNET_DEVICE`                 | Defines which (wired) ethernet device (`eth0`, `enp0s`, etc) is shown. Leave empty for default device                                     | Unset          |
 | `GRAPHS1090_WIFI_DEVICE`                     | Defines which (wireless) WiFi device (`wlan0`, `wlp3s0`, etc) is shown. Leave empty for default device                                    | Unset          |
@@ -764,9 +764,9 @@ docker exec -it ultrafeeder bash -c "echo resetRangeOutline > /run/readsb/setGai
 | `GRAPHS1090_WWW_HEADER`                      | Set header text for the web page                                                                                                          | `Perf. Graphs` |
 | `GRAPHS1090_HIDE_SYSTEM`                     | Hide the system graphs and don't render them, don't collect system data                                                                   | `no`           |
 | `GRAPHS1090_DEFAULT_APPEND`                  | Append to /etc/default/graphs1090, see <https://github.com/wiedehopf/graphs1090/blob/master/default>                                      | Unset          |
-| `GRAPHS1090_CPU_TEMP`                        | container internal path to thermal zone with CPU temp. defaults to /sys/class/thermal/thermal_zone0/temp | Unset          |
-| `GRAPHS1090_OTHER_TEMP1`                     | container internal path to file that the user must update with temperature in C divided by 1000        | Unset          |
-| `GRAPHS1090_RANGE_INCLUDE_NONADSB`           | include non-ADSB positions in the range graph (HFDL, ADS-C, MLAT, TIS-B, Other)                        |  False          |
+| `GRAPHS1090_CPU_TEMP`                        | container internal path to thermal zone with CPU temp. defaults to /sys/class/thermal/thermal_zone0/temp                                  | Unset          |
+| `GRAPHS1090_OTHER_TEMP1`                     | container internal path to file that the user must update with temperature in C divided by 1000                                           | Unset          |
+| `GRAPHS1090_RANGE_INCLUDE_NONADSB`           | include non-ADSB positions in the range graph (HFDL, ADS-C, MLAT, TIS-B, Other)                                                           | False          |
 | `ENABLE_AIRSPY`                              | Optional, set to any non-empty value if you want to enable the special AirSpy graphs. See below for additional configuration requirements | Unset          |
 | `URL_AIRSPY`                                 | Optional, set to the URL where the airspy stats are available, for example `http://airspy_adsb`                                           | Unset          |
 | `URL_1090_SIGNAL`                            | Optional. Retrieve gain and signal data from an URL where the readsb stats are available, i.e. `http://192.168.2.34/tar1090`              | Unset          |
@@ -778,13 +778,13 @@ ADS-B over UAT data is transmitted in the 978 MHz band, and this is used in the 
 1. Set the following environment parameters:
 
 ```yaml
-      - ENABLE_978=yes
-      - URL_978=http://dump978/skyaware978
+- ENABLE_978=yes
+- URL_978=http://dump978/skyaware978
 ```
 
 2. Install the [`docker-dump978` container](https://github.com/sdr-enthusiasts/docker-dump978). Note - only containers downloaded/deployed on/after Feb 8, 2023 will work.
 
-Note that you *must* configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
+Note that you _must_ configure `URL_978` to point at a working skyaware978 website with `aircraft.json` data feed. This means that the URL `http://dump978/skyaware978/data/aircraft.json` must return valid JSON data to this `tar1090` container.
 
 #### Enabling AirSpy graphs
 
@@ -793,8 +793,8 @@ Users of AirSpy devices can enable extra `graphs1090` graphs by configuring the 
 1. Set the following environment parameters:
 
 ```yaml
-      - ENABLE_AIRSPY=yes
-      - URL_AIRSPY=http://airspy_adsb
+- ENABLE_AIRSPY=yes
+- URL_AIRSPY=http://airspy_adsb
 ```
 
 2. Install the [`airspy_adsb` container](https://github.com/sdr-enthusiasts/airspy_adsb). Note - only containers downloaded/deployed on/after May 9th, 2024 will work with this method.
@@ -850,7 +850,7 @@ Note - on some systems (DietPi comes to mind), `/sys/class/thermal/` may not be 
 
 #### Reducing Disk IO for Graphs1090
 
-Note - *this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly*
+Note - _this feature is still somewhat experimental. If you are really attached to your statistics/graphs1090 data, please make sure to back up your mapped drives regularly_
 
 If you are using a Raspberry Pi or another type of computer with an SD card, you may already be aware that these SD cards have a limited number of write-cycles that will determine their lifespan. In other words - a common reason for SD card failure is excessive writes to it.
 
@@ -863,18 +863,18 @@ Note -- there is a chance that the data isn't written back in time (due to power
 The feature assumes that you have mapped `/var/lib/collectd` to a volume (to ensure data is persistent across container recreations), and `/run` as a `tmpfs` RAM disk, as shown below and also as per the [`docker-compose.yml` example](docker-compose.yml):
 
 ```yaml
-    volumes:
-      - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
+volumes:
+  - /opt/adsb/ultrafeeder/globe_history:/var/globe_history
 ...
-    tmpfs:
-      - /run:exec,size=256M
+tmpfs:
+  - /run:exec,size=256M
 ...
 ```
 
-| Environment Variable              | Purpose                                                                                        | Default |
-| --------------------------------- | ---------------------------------------------------------------------------------------------- | ------- |
-| `GRAPHS1090_REDUCE_IO=`           | Optional Set to `true` to reduce the write cycles for `graphs1090`                             | Unset   |
-| `GRAPHS1090_REDUCE_IO_FLUSH_IVAL` | Interval (i.e. 1h, 6h, 24h, 1d, 2d) writing `graphs1090` data back to non-volatile storage     | `1d`    |
+| Environment Variable              | Purpose                                                                                    | Default |
+| --------------------------------- | ------------------------------------------------------------------------------------------ | ------- |
+| `GRAPHS1090_REDUCE_IO=`           | Optional Set to `true` to reduce the write cycles for `graphs1090`                         | Unset   |
+| `GRAPHS1090_REDUCE_IO_FLUSH_IVAL` | Interval (i.e. 1h, 6h, 24h, 1d, 2d) writing `graphs1090` data back to non-volatile storage | `1d`    |
 
 ### `timelapse1090` Configuration
 
@@ -953,13 +953,13 @@ If you have any issues, readsb will use verbose output if you add the `GPSD_DEBU
 
 ### Optional parameters regulating the restart of `mlat-client` when the location changes
 
-The following parameters are all optional and are subject to change.  These variables should be added to the environment section of your docker-compose.yml. They will not work if entered into the .env file. You don't need to set them unless you want to change the default behavior.
+The following parameters are all optional and are subject to change. These variables should be added to the environment section of your docker-compose.yml. They will not work if entered into the .env file. You don't need to set them unless you want to change the default behavior.
 
-| Environment Variable | Purpose | Default |
-| -------------------- | ------- | ------- |
-| `GPSD_MIN_DISTANCE` | Distance (in meters) that your station must move before it's considered moving (maximum 40 meters) | `20` (meters) |
-| `GPSD_MLAT_WAIT` | The wait period (in seconds) your station must be stationary before mlat is started (minimum 90 seconds) | `90` (seconds) |
-| `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. (minimum 5 seconds) | `30` (seconds) |
+| Environment Variable  | Purpose                                                                                                  | Default        |
+| --------------------- | -------------------------------------------------------------------------------------------------------- | -------------- |
+| `GPSD_MIN_DISTANCE`   | Distance (in meters) that your station must move before it's considered moving (maximum 40 meters)       | `20` (meters)  |
+| `GPSD_MLAT_WAIT`      | The wait period (in seconds) your station must be stationary before mlat is started (minimum 90 seconds) | `90` (seconds) |
+| `GPSD_CHECK_INTERVAL` | How often the container checks for updated location information. (minimum 5 seconds)                     | `30` (seconds) |
 
 See example below:
 
@@ -988,13 +988,13 @@ You should now be able to browse to:
 
 No paths need to be mapped through to persistent storage. However, if you don't want to lose your range outline and aircraft tracks/history and heatmap / replay data on container restart, you can optionally map these paths:
 
-| Path                                                                                                          | Purpose                                                                                                                          |
-| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`                                                      | Holds range outline data, heatmap / replay data and traces if enabled. *Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path.* |
-| `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090`                                                      | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above)                                     |
-| `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`                                                            | Holds graphs1090 & performance data                                                                                              |
-| `/proc/diskstats:/proc/diskstats:ro`                                                                          | Makes disk statistics available to `graphs1090`                                                                                  |
-| `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro`                                        | Only needed on some systems to display the CPU temperature in `graphs1090`, see [here](#configuring-the-core-temperature-graphs) |
+| Path                                                                   | Purpose                                                                                                                                                                              |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/opt/adsb/ultrafeeder/globe_history:/var/globe_history`               | Holds range outline data, heatmap / replay data and traces if enabled. _Note: this data won't be automatically deleted, you will need to delete it eventually if you map this path._ |
+| `/opt/adsb/ultrafeeder/timelapse1090:/var/timelapse1090`               | Holds timelapse1090 data if enabled. (We recommend against enabling this feature, see above)                                                                                         |
+| `/opt/adsb/ultrafeeder/collectd:/var/lib/collectd`                     | Holds graphs1090 & performance data                                                                                                                                                  |
+| `/proc/diskstats:/proc/diskstats:ro`                                   | Makes disk statistics available to `graphs1090`                                                                                                                                      |
+| `/sys/class/thermal/thermal_zone8:/sys/class/thermal/thermal_zone0:ro` | Only needed on some systems to display the CPU temperature in `graphs1090`, see [temp configuration](#configuring-the-core-temperature-graphs)                                       |
 
 ## Display of Metrics with Grafana and Prometheus/InfluxDB
 
@@ -1051,7 +1051,7 @@ docker exec -it ultrafeeder /usr/local/bin/viewadsb --cpr-focus 3D3ED0
 
 ## Minimalist setup
 
-If you want to use `ultrafeeder` *only* as a SDR decoder but without any mapping or stats/graph websites, without MLAT connections or MLAT-hub, etc., for example to minimize CPU and RAM needs on a low CPU/memory single board computer, then do the following:
+If you want to use `ultrafeeder` _only_ as a SDR decoder but without any mapping or stats/graph websites, without MLAT connections or MLAT-hub, etc., for example to minimize CPU and RAM needs on a low CPU/memory single board computer, then do the following:
 
 - in the `ULTRAFEEDER_CONFIG` parameter, remove any entry that starts with `mlat` or `mlathub`. This will prevent any `mlat-client`s or `mlathub` instances to be launched. If you still want to connect the `mlat-client`(s) to external MLAT servers but you don't want to run the overhead of a MLATHUB, you can leave any entries starting with `mlat` in the `ULTRAFEEDER_CONFIG` parameter, and set `MLATHUB_DISABLE=true`
 - Set the parameter `TAR1090_DISABLE=true`. This will prevent the `nginx` webserver and any websites to be launched and no graphs1090 or heatmap data to be collected.
@@ -1061,12 +1061,12 @@ If you want to use `ultrafeeder` *only* as a SDR decoder but without any mapping
 
 There is the option to use some basic offline maps limited in zoom:
 
-- Download  the tiles (don't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
+- Download the tiles (don't install tar1090): <https://github.com/wiedehopf/adsb-wiki/wiki/offline-map-tiles-tar1090>
 - Add a volume mapping so the container can access the tiles. (If you're using an [ADSB.im](https://my.adsb.im/home) image this is already complete at first boot):
 
 ```yaml
-    volumes:
-        - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
+volumes:
+  - /usr/local/share/osm_tiles_offline:/usr/local/share/osm_tiles_offline
 ```
 
 - Find the container ID of ultrafeeder:
@@ -1112,11 +1112,11 @@ the Free Software Foundation, either version 3 of the License, or
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ### Trademarks
 

@@ -64,10 +64,12 @@ elif [ -n "${READSB_LON}" ]; then
 fi
 
 if [ -n "${MLATHOST}" ]; then
+    # shellcheck disable=SC2153  # MLATPORT is a user-supplied runtime env var, not a typo
     READSB_CMD+=("--net-connector=${MLATHOST},${MLATPORT},beast_in")
 fi
 
 if [ -n "${BEASTHOST}" ]; then
+    # shellcheck disable=SC2153  # BEASTPORT is a user-supplied runtime env var, not a typo
     READSB_CMD+=("--net-connector=${BEASTHOST},${BEASTPORT},beast_in")
 fi
 

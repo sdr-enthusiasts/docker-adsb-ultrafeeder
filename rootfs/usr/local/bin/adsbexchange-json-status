@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=all  # vendored upstream ADSBx script; preserve as-is, do not relint
 
 #
 # Upload output data from decoder to remote server
@@ -358,4 +359,3 @@ while true; do
 		sleep $(( 5 + RANDOM % 15 ))
 	fi
 done
-
