@@ -46,7 +46,7 @@ jobs:
     name: Run hadolint against docker files
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: Pull hadolint/hadolint:latest Image
         run: docker pull hadolint/hadolint:latest
       - name: Run hadolint against Dockerfiles
@@ -54,7 +54,7 @@ jobs:
 
   deploy:
     name: Deploy without telegraf
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@7e2533c291e2ecc614b06bd20c3a0c5ada779c59 # main
     with:
       push_enabled: true
       push_destinations: ghcr.io
@@ -69,7 +69,7 @@ jobs:
 
   deploy_with_telegraf:
     name: Deploy with telegraf and healthcheck
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@7e2533c291e2ecc614b06bd20c3a0c5ada779c59 # main
     with:
       push_enabled: true
       push_destinations: ghcr.io
