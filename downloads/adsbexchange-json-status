@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=all  # vendored upstream ADSBx script; preserve as-is, do not relint
 
 # DEPRECATED, see ./rootfs/usr/local/bin/adsbexchange-json-status
 
@@ -362,4 +363,3 @@ while true; do
 		sleep $(( 5 + RANDOM % 15 ))
 	fi
 done
-

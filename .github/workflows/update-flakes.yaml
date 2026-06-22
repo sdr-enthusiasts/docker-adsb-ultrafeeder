@@ -1,0 +1,64 @@
+---
+name: update-flakes
+
+on:
+  schedule:
+    - cron: "0 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  get-flake-inputs:
+    name: Get Flake Inputs
+    runs-on: ubuntu-latest
+    outputs:
+      flake-inputs: ${{ steps.get-flake-inputs.outputs.flake-inputs }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          sparse-checkout: flake.lock
+          persist-credentials: false
+
+      - id: get-flake-inputs
+        run: |
+          flake_inputs="$(jq -c '.nodes.root.inputs | {flake: keys}' flake.lock)"
+          echo "flake-inputs=${flake_inputs}" >> "$GITHUB_OUTPUT"
+
+  update-flake:
+    name: update-${{ matrix.flake }}
+    runs-on: ubuntu-latest
+    needs: get-flake-inputs
+
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.get-flake-inputs.outputs.flake-inputs) }}
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+          ref: main
+
+      - uses: DeterminateSystems/nix-installer-action@ef8a148080ab6020fd15196c2084a2eea5ff2d25 # v22
+        with:
+          extra-conf: accept-flake-config = true
+
+      - name: Configure Git identity
+        run: |
+          git config --global user.email "noreply@github.com"
+          git config --global user.name "github[bot]"
+
+      - uses: fredsystems/flake-update-action@76d4f6b1d4d924c9ff073075b685d96474fb87f2 # v3.0.4
+        with:
+          dependency: ${{ matrix.flake }}
+          pull-request-token: ${{ secrets.PAT }}
+          pull-request-author: github[bot] <noreply@github.com>
+          delete-branch: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-branch-prefix: update-
+          automerge: true

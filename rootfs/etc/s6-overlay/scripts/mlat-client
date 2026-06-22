@@ -34,7 +34,7 @@ MLAT_CMD="/usr/bin/mlat-client"
 LOGLEVEL="${LOGLEVEL,,}"
 LOGLEVEL="${LOGLEVEL:-verbose}"
 chk_disabled "$LOGLEVEL" && LOGLEVEL="none" || true
-if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then 
+if ! [[ "$LOGLEVEL" =~ ^(verbose|error|none)$ ]]; then
     [[ -n "$LOGLEVEL" ]] && "${s6wrap[@]}" --args echo "[WARNING] LOGLEVEL set to an unknown value. Defaulting to \"verbose\"" || true
     LOGLEVEL="verbose"
 fi

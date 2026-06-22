@@ -1,0 +1,36 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "config:best-practices",
+    "default:pinDigestsDisabled"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "schedule": ["* 0 1 * *"]
+  },
+  "timezone": "Etc/UTC",
+  "schedule": ["* 0 1 * *"],
+  "enabledManagers": ["nix", "github-actions", "dockerfile"],
+  "prConcurrentLimit": 0,
+  "prHourlyLimit": 0,
+  "prCreation": "immediate",
+  "automerge": true,
+  "platformAutomerge": true,
+  "nix": {
+    "enabled": true
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions", "nix"],
+      "matchUpdateTypes": ["major", "minor", "patch", "pin"],
+      "automerge": true
+    },
+    {
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["/^ghcr\\.io/sdr-enthusiasts/.*$/"],
+      "enabled": false
+    }
+  ]
+}

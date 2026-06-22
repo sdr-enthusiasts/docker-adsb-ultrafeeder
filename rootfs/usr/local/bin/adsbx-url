@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 #
 # utility to print AdsbExchange Map and/or Stats URL
 # © 2024 by Ramon F. Kolb, kx1t, all rights reserved
@@ -19,14 +19,14 @@ AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "ADSBx Anyw
 if [[ "${1,,}" == "-m" ]] || [[ "${1,,}" == "--map" ]]; then
   if [[ -n "$AnywhereMap" ]]; then
     echo "$AnywhereMap"
-  else 
+  else
     echo "[ERROR] Anywhere Map not available"
     exit 1
   fi
 elif [[ "${1,,}" == "-s" ]] || [[ "${1,,}" == "--stats" ]]; then
   if [[ -n "$AnywhereStats" ]]; then
     echo "$AnywhereStats"
-  else 
+  else
     echo "[ERROR] Anywhere Stats not available"
     exit 1
   fi
