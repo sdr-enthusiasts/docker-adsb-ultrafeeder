@@ -350,15 +350,20 @@ PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","user":"%s","host":"%s",
     "$LON" \
     "$ALT")
 
+CURL_HEADERS=(-H "Content-Type: application/json")
+if (( HAD_PREV_CONF == 1 )); then
+    CURL_HEADERS+=(-H "X-Register-Token: ${FEEDER_TOKEN}")
+fi
+
 if (( TEST_MODE != 1 )) && curl -fsS \
-    -H "Content-Type: application/json" \
+    "${CURL_HEADERS[@]}" \
     -d "$PAYLOAD" \
     "$REGISTER_URL" >/dev/null; then
 
     msg "Feeder registration request sent successfully."
 elif (( TEST_MODE != 1 )); then
     msg "Registration failed or was rejected by the server."
-    msg "Installation will continue anyway."
+    msg "Ultrafeeder will feed adsbitalia without registration."
 else
     msg "Test mode: registration request not sent."
     msg "Payload message that would have been sent:"
