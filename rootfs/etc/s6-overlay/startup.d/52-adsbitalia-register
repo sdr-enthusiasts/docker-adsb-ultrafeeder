@@ -1,5 +1,5 @@
 #!/command/with-contenv bash
-# shellcheck shell=bash disable=SC1091
+# shellcheck shell=bash disable=SC1091,SC2154
 
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
@@ -303,37 +303,35 @@ if (( TEST_MODE == 1 )); then
     else
         msg "Judgement: values have changed"
     fi
+else
 
-    msg "Test mode: skipping state file update and registration request"
-    exit 0
+    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )); then
+        msg "ADSBItalia registration values unchanged; skipping"
+        exit 0
+    fi
+
+    if ! {
+        printf 'FEEDER_ID=%q\n' "$FEEDER_ID"
+        printf 'FEEDER_TOKEN=%q\n' "$FEEDER_TOKEN"
+        printf 'FEEDER_NAME=%q\n' "$FEEDER_NAME"
+        printf 'PUBLIC_IP=%q\n' "$PUBLIC_IP"
+        printf 'HOSTNAME_LOCAL=%q\n' "$HOSTNAME_LOCAL"
+        printf 'LOCAL_BEAST_PORT=%q\n' "$LOCAL_BEAST_PORT"
+        printf 'FEED_HOST=%q\n' "$FEED_HOST"
+        printf 'FEED_PORT=%q\n' "$FEED_PORT"
+        printf 'MLAT_HOST=%q\n' "$MLAT_HOST"
+        printf 'MLAT_PORT=%q\n' "$MLAT_PORT"
+        printf 'MLAT_RETURN_PORT=%q\n' "$MLAT_RETURN_PORT"
+        printf 'LAT=%q\n' "$LAT"
+        printf 'LON=%q\n' "$LON"
+        printf 'ALT=%q\n' "$ALT"
+    } > "$STATE_FILE"; then
+        msg "Could not write $STATE_FILE; skipping ADSBItalia registration"
+        exit 0
+    fi
+
+    chmod 600 "$STATE_FILE" || true
 fi
-
-if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )); then
-    msg "ADSBItalia registration values unchanged; skipping"
-    exit 0
-fi
-
-if ! {
-    printf 'FEEDER_ID=%q\n' "$FEEDER_ID"
-    printf 'FEEDER_TOKEN=%q\n' "$FEEDER_TOKEN"
-    printf 'FEEDER_NAME=%q\n' "$FEEDER_NAME"
-    printf 'PUBLIC_IP=%q\n' "$PUBLIC_IP"
-    printf 'HOSTNAME_LOCAL=%q\n' "$HOSTNAME_LOCAL"
-    printf 'LOCAL_BEAST_PORT=%q\n' "$LOCAL_BEAST_PORT"
-    printf 'FEED_HOST=%q\n' "$FEED_HOST"
-    printf 'FEED_PORT=%q\n' "$FEED_PORT"
-    printf 'MLAT_HOST=%q\n' "$MLAT_HOST"
-    printf 'MLAT_PORT=%q\n' "$MLAT_PORT"
-    printf 'MLAT_RETURN_PORT=%q\n' "$MLAT_RETURN_PORT"
-    printf 'LAT=%q\n' "$LAT"
-    printf 'LON=%q\n' "$LON"
-    printf 'ALT=%q\n' "$ALT"
-} > "$STATE_FILE"; then
-    msg "Could not write $STATE_FILE; skipping ADSBItalia registration"
-    exit 0
-fi
-
-chmod 600 "$STATE_FILE" || true
 
 PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
     "$FEEDER_ID" \
@@ -352,15 +350,19 @@ PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","user":"%s","host":"%s",
     "$LON" \
     "$ALT")
 
-if curl -fsS \
+if (( TEST_MODE != 1 )) && curl -fsS \
     -H "Content-Type: application/json" \
     -d "$PAYLOAD" \
     "$REGISTER_URL" >/dev/null; then
 
     msg "Feeder registration request sent successfully."
-else
+elif (( TEST_MODE != 1 )); then
     msg "Registration failed or was rejected by the server."
     msg "Installation will continue anyway."
+else
+    msg "Test mode: registration request not sent."
+    msg "Payload message that would have been sent:"
+    msg "$(jq . <<< "$PAYLOAD")"
 fi
 
 exit 0
