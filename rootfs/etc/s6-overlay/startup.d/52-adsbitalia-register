@@ -87,9 +87,17 @@ STATE_FILE="$STATE_DIR/adsbitalia.conf"
 FIXED_MLAT_RETURN_PORT="33106"
 
 TEST_MODE=0
-if [[ "${1:-}" == "test" ]]; then
-    TEST_MODE=1
-fi
+FORCE_UPDATE=0
+for arg in "$@"; do
+    case "$arg" in
+        test)
+            TEST_MODE=1
+            ;;
+        force-update)
+            FORCE_UPDATE=1
+            ;;
+    esac
+done
 
 ULTRA_CFG="${ULTRAFEEDER_CONFIG:-}"
 if [[ -z "$ULTRA_CFG" ]]; then
@@ -305,9 +313,13 @@ if (( TEST_MODE == 1 )); then
     fi
 else
 
-    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )); then
+    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 0 )); then
         msg "ADSBItalia registration values unchanged; skipping"
         exit 0
+    fi
+
+    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 1 )); then
+        msg "ADSBItalia registration force-update requested; sending update despite unchanged values"
     fi
 
     if ! {
