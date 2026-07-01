@@ -4,11 +4,23 @@
 source /scripts/common
 source /scripts/interpret_ultrafeeder_config
 
-SCRIPT_NAME="${SCRIPT_NAME:-$(basename "$0")}"  # usually provided by s6, fallback for local tests
-s6wrap=(s6wrap --quiet --timestamps --prepend="$SCRIPT_NAME")
 
 msg() {
     "${s6wrap[@]}" echo "$*"
+}
+
+print_compare() {
+    local key="$1"
+    local old_val="$2"
+    local new_val="$3"
+
+    if [[ "$old_val" == "$new_val" ]]; then
+        msg "$key: unchanged (\"$new_val\")"
+    else
+        msg "$key: changed"
+        msg "  old: \"$old_val\""
+        msg "  new: \"$new_val\""
+    fi
 }
 
 trim() {
@@ -73,6 +85,11 @@ REGISTER_URL="https://adsbitalia.it/api/register-feeder"
 STATE_DIR="/var/globe_history/adsbitalia"
 STATE_FILE="$STATE_DIR/adsbitalia.conf"
 FIXED_MLAT_RETURN_PORT="33106"
+
+TEST_MODE=0
+if [[ "${1:-}" == "test" ]]; then
+    TEST_MODE=1
+fi
 
 ULTRA_CFG="${ULTRAFEEDER_CONFIG:-}"
 if [[ -z "$ULTRA_CFG" ]]; then
@@ -257,6 +274,39 @@ if [[ "$MLAT_RETURN_PORT" != "$PREV_MLAT_RETURN_PORT" ]]; then changed=1; fi
 if [[ "$LAT" != "$PREV_LAT" ]]; then changed=1; fi
 if [[ "$LON" != "$PREV_LON" ]]; then changed=1; fi
 if [[ "$ALT" != "$PREV_ALT" ]]; then changed=1; fi
+
+if (( TEST_MODE == 1 )); then
+    msg "ADSBItalia registration test mode enabled"
+    if (( HAD_PREV_CONF == 1 )); then
+        msg "Loaded existing state from $STATE_FILE"
+    else
+        msg "No existing state file found at $STATE_FILE"
+    fi
+
+    print_compare "FEEDER_ID" "$PREV_FEEDER_ID" "$FEEDER_ID"
+    print_compare "FEEDER_TOKEN" "$PREV_FEEDER_TOKEN" "$FEEDER_TOKEN"
+    print_compare "FEEDER_NAME" "$PREV_FEEDER_NAME" "$FEEDER_NAME"
+    print_compare "PUBLIC_IP" "$PREV_PUBLIC_IP" "$PUBLIC_IP"
+    print_compare "HOSTNAME_LOCAL" "$PREV_HOSTNAME_LOCAL" "$HOSTNAME_LOCAL"
+    print_compare "LOCAL_BEAST_PORT" "$PREV_LOCAL_BEAST_PORT" "$LOCAL_BEAST_PORT"
+    print_compare "FEED_HOST" "$PREV_FEED_HOST" "$FEED_HOST"
+    print_compare "FEED_PORT" "$PREV_FEED_PORT" "$FEED_PORT"
+    print_compare "MLAT_HOST" "$PREV_MLAT_HOST" "$MLAT_HOST"
+    print_compare "MLAT_PORT" "$PREV_MLAT_PORT" "$MLAT_PORT"
+    print_compare "MLAT_RETURN_PORT" "$PREV_MLAT_RETURN_PORT" "$MLAT_RETURN_PORT"
+    print_compare "LAT" "$PREV_LAT" "$LAT"
+    print_compare "LON" "$PREV_LON" "$LON"
+    print_compare "ALT" "$PREV_ALT" "$ALT"
+
+    if (( changed == 0 )); then
+        msg "Judgement: values are unchanged"
+    else
+        msg "Judgement: values have changed"
+    fi
+
+    msg "Test mode: skipping state file update and registration request"
+    exit 0
+fi
 
 if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )); then
     msg "ADSBItalia registration values unchanged; skipping"
