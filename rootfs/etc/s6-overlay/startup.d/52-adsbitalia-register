@@ -360,7 +360,7 @@ if (( TEST_MODE != 1 )) && curl -fsS \
     -d "$PAYLOAD" \
     "$REGISTER_URL" >/dev/null; then
 
-    msg "Feeder registration request sent successfully."
+    msg "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )request sent successfully."
 elif (( TEST_MODE != 1 )); then
     msg "Registration failed or was rejected by the server."
     msg "Ultrafeeder will feed adsbitalia without registration."
