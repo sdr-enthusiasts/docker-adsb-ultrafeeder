@@ -145,6 +145,7 @@ fi
 PREV_FEEDER_ID=""
 PREV_FEEDER_TOKEN=""
 PREV_FEEDER_NAME=""
+PREV_FEEDER_VERSION=""
 PREV_PUBLIC_IP=""
 PREV_HOSTNAME_LOCAL=""
 PREV_LOCAL_BEAST_PORT=""
@@ -166,6 +167,7 @@ if [[ -f "$STATE_FILE" ]]; then
     PREV_FEEDER_ID="${FEEDER_ID:-}"
     PREV_FEEDER_TOKEN="${FEEDER_TOKEN:-}"
     PREV_FEEDER_NAME="${FEEDER_NAME:-}"
+    PREV_FEEDER_VERSION="${FEEDER_VERSION:-}"
     PREV_PUBLIC_IP="${PUBLIC_IP:-}"
     PREV_HOSTNAME_LOCAL="${HOSTNAME_LOCAL:-}"
     PREV_LOCAL_BEAST_PORT="${LOCAL_BEAST_PORT:-}"
@@ -228,6 +230,8 @@ fi
 
 FEEDER_NAME="${MLAT_USER:-$FEEDER_ID}"
 
+FEEDER_VERSION="ultrafeeder_$(< /.CONTAINER_VERSION)"
+
 PUBLIC_IP="$(detect_public_ip || true)"
 if [[ -z "$PUBLIC_IP" ]]; then
     PUBLIC_IP="${PREV_PUBLIC_IP:-}"
@@ -271,6 +275,7 @@ changed=0
 if [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then changed=1; fi
 if [[ "$FEEDER_TOKEN" != "$PREV_FEEDER_TOKEN" ]]; then changed=1; fi
 if [[ "$FEEDER_NAME" != "$PREV_FEEDER_NAME" ]]; then changed=1; fi
+if [[ "$FEEDER_VERSION" != "$PREV_FEEDER_VERSION" ]]; then changed=1; fi
 if [[ "$PUBLIC_IP" != "$PREV_PUBLIC_IP" ]]; then changed=1; fi
 if [[ "$HOSTNAME_LOCAL" != "$PREV_HOSTNAME_LOCAL" ]]; then changed=1; fi
 if [[ "$LOCAL_BEAST_PORT" != "$PREV_LOCAL_BEAST_PORT" ]]; then changed=1; fi
@@ -294,6 +299,7 @@ if (( TEST_MODE == 1 )); then
     print_compare "FEEDER_ID" "$PREV_FEEDER_ID" "$FEEDER_ID"
     print_compare "FEEDER_TOKEN" "$PREV_FEEDER_TOKEN" "$FEEDER_TOKEN"
     print_compare "FEEDER_NAME" "$PREV_FEEDER_NAME" "$FEEDER_NAME"
+    print_compare "FEEDER_VERSION" "$PREV_FEEDER_VERSION" "$FEEDER_VERSION"
     print_compare "PUBLIC_IP" "$PREV_PUBLIC_IP" "$PUBLIC_IP"
     print_compare "HOSTNAME_LOCAL" "$PREV_HOSTNAME_LOCAL" "$HOSTNAME_LOCAL"
     print_compare "LOCAL_BEAST_PORT" "$PREV_LOCAL_BEAST_PORT" "$LOCAL_BEAST_PORT"
@@ -326,6 +332,7 @@ else
         printf 'FEEDER_ID=%q\n' "$FEEDER_ID"
         printf 'FEEDER_TOKEN=%q\n' "$FEEDER_TOKEN"
         printf 'FEEDER_NAME=%q\n' "$FEEDER_NAME"
+        printf 'FEEDER_VERSION=%q\n' "$FEEDER_VERSION"
         printf 'PUBLIC_IP=%q\n' "$PUBLIC_IP"
         printf 'HOSTNAME_LOCAL=%q\n' "$HOSTNAME_LOCAL"
         printf 'LOCAL_BEAST_PORT=%q\n' "$LOCAL_BEAST_PORT"
@@ -345,9 +352,10 @@ else
     chmod 600 "$STATE_FILE" || true
 fi
 
-PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
+PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
     "$FEEDER_ID" \
     "$FEEDER_TOKEN" \
+    "$FEEDER_VERSION" \
     "$FEEDER_NAME" \
     "$PUBLIC_IP" \
     "$HOSTNAME_LOCAL" \
