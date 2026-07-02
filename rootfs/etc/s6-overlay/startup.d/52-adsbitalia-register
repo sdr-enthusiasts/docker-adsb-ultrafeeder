@@ -101,7 +101,7 @@ done
 
 ULTRA_CFG="${ULTRAFEEDER_CONFIG:-}"
 if [[ -z "$ULTRA_CFG" ]]; then
-    msg "ULTRAFEEDER_CONFIG is empty; skipping ADSBItalia registration"
+#    msg "ULTRAFEEDER_CONFIG is empty; skipping ADSBItalia registration"
     exit 0
 fi
 
@@ -133,7 +133,7 @@ for raw_entry in "${cfg_entries[@]}"; do
 done
 
 if [[ -z "$ADSB_ENTRY" ]] && [[ -z "$MLAT_ENTRY" ]]; then
-    msg "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
+#    msg "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
     exit 0
 fi
 
