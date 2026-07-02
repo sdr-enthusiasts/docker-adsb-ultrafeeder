@@ -472,6 +472,7 @@ There are many optional parameters relating to the ingestion of data and the gen
 | `READSB_FORWARD_MLAT_SBS`             | If set to anything, it will include MLAT results in the SBS/BaseStation output. This may be desirable if you feed SBS data to applications like [VRS](https://github.com/sdr-enthusiasts/docker-virtualradarserver) or [PlaneFence](https://github.com/kx1t/docker-planefence) | `--forward_mlat_sms`                    | Unset         |
 | `UUID`                                | Sets the UUID that is sent on the `beast_reduce_plus` port if no individual UUIDs have been defined with the `READSB_NET_CONNECTOR` parameter. Similarly, it's also used with `mlat-client` (see below) if no individual UUIDs have been set with the `MLAT_CONFIG` parameter. |                                         | Unset         |
 | `ADSBX_STATS`                         | If set to `disabled`/`off`/`0`/`no`, and feeding to AdsbExchange has been configured, no special statistics will be shared with AdsbExchange. If unset or set to `enabled`/`on`/`1`/`yes`, statistics will be shared with AdsbExchange if they are configured as an aggregator |                                         | Unset         |
+| `ADSBITALIA_REGISTRATION`             | If set to `disabled`/`off`/`0`/`no`, and feeding to AdsbItalia has been configured, no registration messages will be shared with AdsbItalia. If unset or set to `enabled`/`on`/`1`/`yes`, and sending data to AdsbItalia has been configured, a registration message will be sent to AdsbItalia on initial configuration and when your location, `MLAT_USER`, or `UUID` has been changed |                                         | Unset         |
 
 #### MLAT configuration
 
@@ -1104,7 +1105,7 @@ We also have a [Discord channel](https://discord.gg/sTf9uYF), feel free to [join
 
 ### GPLv3 License
 
-Copyright (C) 2023-2024, Ramon F. Kolb kx1t, and other contributors
+Copyright (C) 2023-2026, Ramon F. Kolb kx1t, and other contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
