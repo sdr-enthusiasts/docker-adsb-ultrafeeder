@@ -88,6 +88,8 @@ STATE_DIR="/var/globe_history/adsbitalia"
 STATE_FILE="$STATE_DIR/adsbitalia.conf"
 FIXED_MLAT_RETURN_PORT="33106"
 
+TMPFILE="$(mktemp)"
+
 TEST_MODE=0
 FORCE_UPDATE=0
 for arg in "$@"; do
@@ -353,12 +355,11 @@ else
         printf 'LAT=%q\n' "$LAT"
         printf 'LON=%q\n' "$LON"
         printf 'ALT=%q\n' "$ALT"
-    } > "$STATE_FILE"; then
-        msg "Could not write $STATE_FILE; skipping ADSBItalia registration"
+    } > "$TMPFILE"; then
+        msg "Could not write the config file; skipping ADSBItalia registration"
+        rm -f "$TMPFILE"
         exit 0
     fi
-
-    chmod 600 "$STATE_FILE" || true
 fi
 
 PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
@@ -398,6 +399,9 @@ if (( TEST_MODE != 1 )); then
         msg "Feeder Name: $FEEDER_NAME"
         msg "Feeder ID: $FEEDER_ID"
         msg "Feeder Token: $FEEDER_TOKEN"
+
+        mv -f "$TMPFILE" "$STATE_FILE"
+        chmod 600 "$STATE_FILE" || true
     else
         msg "Registration failed or was rejected by the server."
         msg "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
