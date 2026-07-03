@@ -148,6 +148,7 @@ PREV_FEEDER_ID=""
 PREV_FEEDER_TOKEN=""
 PREV_FEEDER_NAME=""
 PREV_FEEDER_VERSION=""
+PREV_FEEDER_CONFIGSTRING=""
 PREV_PUBLIC_IP=""
 PREV_HOSTNAME_LOCAL=""
 PREV_LOCAL_BEAST_PORT=""
@@ -170,6 +171,7 @@ if [[ -f "$STATE_FILE" ]]; then
     PREV_FEEDER_TOKEN="${FEEDER_TOKEN:-}"
     PREV_FEEDER_NAME="${FEEDER_NAME:-}"
     PREV_FEEDER_VERSION="${FEEDER_VERSION:-}"
+    PREV_FEEDER_CONFIGSTRING="${FEEDER_CONFIGSTRING:-}"
     PREV_PUBLIC_IP="${PUBLIC_IP:-}"
     PREV_HOSTNAME_LOCAL="${HOSTNAME_LOCAL:-}"
     PREV_LOCAL_BEAST_PORT="${LOCAL_BEAST_PORT:-}"
@@ -178,6 +180,7 @@ if [[ -f "$STATE_FILE" ]]; then
     PREV_MLAT_HOST="${MLAT_HOST:-}"
     PREV_MLAT_PORT="${MLAT_PORT:-}"
     PREV_MLAT_RETURN_PORT="${MLAT_RETURN_PORT:-}"
+    PREV_MLAT_ENTRY="${MLAT_ENTRY:-}"
     PREV_LAT="${LAT:-}"
     PREV_LON="${LON:-}"
     PREV_ALT="${ALT:-}"
@@ -195,7 +198,8 @@ if [[ -n "$ADSB_ENTRY" ]]; then
     ADSB_PROTOCOL="$(trim "$ADSB_PROTOCOL")"
     ADSB_UUID="$(extract_uuid_from_entry "$ADSB_ENTRY" || true)"
 fi
-
+FEEDER_CONFIGSTRING="${ADSB_ENTRY:-}${MLAT_ENTRY:-}"
+FEEDER_CONFIGSTRING="${FEEDER_CONFIGSTRING//[$'\n'\"\']/}"
 MLAT_UUID=""
 MLAT_HOST_CFG=""
 MLAT_PORT_CFG=""
@@ -289,6 +293,7 @@ if [[ "$MLAT_RETURN_PORT" != "$PREV_MLAT_RETURN_PORT" ]]; then changed=1; fi
 if [[ "$LAT" != "$PREV_LAT" ]]; then changed=1; fi
 if [[ "$LON" != "$PREV_LON" ]]; then changed=1; fi
 if [[ "$ALT" != "$PREV_ALT" ]]; then changed=1; fi
+if [[ "$FEEDER_CONFIGSTRING" != "$PREV_FEEDER_CONFIGSTRING" ]]; then changed=1; fi
 
 if (( TEST_MODE == 1 )); then
     msg "ADSBItalia registration test mode enabled"
@@ -302,6 +307,7 @@ if (( TEST_MODE == 1 )); then
     print_compare "FEEDER_TOKEN" "$PREV_FEEDER_TOKEN" "$FEEDER_TOKEN"
     print_compare "FEEDER_NAME" "$PREV_FEEDER_NAME" "$FEEDER_NAME"
     print_compare "FEEDER_VERSION" "$PREV_FEEDER_VERSION" "$FEEDER_VERSION"
+    print_compare "FEEDER_CONFIGSTRING" "$PREV_FEEDER_CONFIGSTRING" "$FEEDER_CONFIGSTRING"
     print_compare "PUBLIC_IP" "$PREV_PUBLIC_IP" "$PUBLIC_IP"
     print_compare "HOSTNAME_LOCAL" "$PREV_HOSTNAME_LOCAL" "$HOSTNAME_LOCAL"
     print_compare "LOCAL_BEAST_PORT" "$PREV_LOCAL_BEAST_PORT" "$LOCAL_BEAST_PORT"
@@ -335,6 +341,7 @@ else
         printf 'FEEDER_TOKEN=%q\n' "$FEEDER_TOKEN"
         printf 'FEEDER_NAME=%q\n' "$FEEDER_NAME"
         printf 'FEEDER_VERSION=%q\n' "$FEEDER_VERSION"
+        printf 'FEEDER_CONFIGSTRING=%q\n' "$FEEDER_CONFIGSTRING"
         printf 'PUBLIC_IP=%q\n' "$PUBLIC_IP"
         printf 'HOSTNAME_LOCAL=%q\n' "$HOSTNAME_LOCAL"
         printf 'LOCAL_BEAST_PORT=%q\n' "$LOCAL_BEAST_PORT"
@@ -354,10 +361,11 @@ else
     chmod 600 "$STATE_FILE" || true
 fi
 
-PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
+PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
     "$FEEDER_ID" \
     "$FEEDER_TOKEN" \
     "$FEEDER_VERSION" \
+    "$FEEDER_CONFIGSTRING" \
     "$FEEDER_NAME" \
     "$PUBLIC_IP" \
     "$HOSTNAME_LOCAL" \
