@@ -426,7 +426,7 @@ if (( TEST_MODE != 1 )); then
     else
         echo "Registration failed or was rejected by the server."
         echo "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
-        echo "Server returned: $TMPRESULT"
+        echo "Server returned: $(<"$TMPRESULT")"
         echo "Ultrafeeder will feed adsbitalia without registration."
     fi
 else
