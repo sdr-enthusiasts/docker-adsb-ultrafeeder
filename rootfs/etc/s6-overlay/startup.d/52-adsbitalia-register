@@ -10,11 +10,11 @@ print_compare() {
     local new_val="$3"
 
     if [[ "$old_val" == "$new_val" ]]; then
-        "${s6wrap[@]}" echo "$key: unchanged (\"$new_val\")"
+        echo "$key: unchanged (\"$new_val\")"
     else
-        "${s6wrap[@]}" echo "$key: changed"
-        "${s6wrap[@]}" echo "  old: \"$old_val\""
-        "${s6wrap[@]}" echo "  new: \"$new_val\""
+        echo "$key: changed"
+        echo "  old: \"$old_val\""
+        echo "  new: \"$new_val\""
     fi
 }
 
@@ -86,14 +86,14 @@ FIXED_MLAT_RETURN_PORT=""
 # ensure the STATE_FILE can be written to persistent storage
 # if not, complain and exit
 if ! mkdir -p "$STATE_DIR"; then
-    "${s6wrap[@]}" echo "Could not create $STATE_DIR; skipping ADSBItalia registration"
+    echo "Could not create $STATE_DIR; skipping ADSBItalia registration"
     exit 0
 fi
 if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
 TARGET_PATH=$(readlink -f "$STATE_FILE")
 MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
 if [ "$MOUNT_POINT" = "/" ]; then
-    "${s6wrap[@]}" echo "[FATAL] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
+    echo "[FATAL] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
     exit 0
 fi
 
@@ -114,7 +114,7 @@ done
 
 ULTRA_CFG="${ULTRAFEEDER_CONFIG:-}"
 if [[ -z "$ULTRA_CFG" ]]; then
-#    "${s6wrap[@]}" echo "ULTRAFEEDER_CONFIG is empty; skipping ADSBItalia registration"
+#    echo "ULTRAFEEDER_CONFIG is empty; skipping ADSBItalia registration"
     exit 0
 fi
 
@@ -146,7 +146,7 @@ for raw_entry in "${cfg_entries[@]}"; do
 done
 
 if [[ -z "$ADSB_ENTRY" ]] && [[ -z "$MLAT_ENTRY" ]]; then
-#    "${s6wrap[@]}" echo "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
+#    echo "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
     exit 0
 fi
 
@@ -222,7 +222,7 @@ if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="${MLAT_UUID:-}"; fi
 if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="${UUID:-}"; fi
 if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || true)"; fi
 if [[ -z "$FEEDER_ID" ]]; then
-    "${s6wrap[@]}" echo "No FEEDER_ID available; skipping ADSBItalia registration"
+    echo "No FEEDER_ID available; skipping ADSBItalia registration"
     exit 0
 fi
 
@@ -236,7 +236,7 @@ if [[ -n "$PREV_FEEDER_ID" ]] && [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then
 fi
 
 if [[ -z "$FEEDER_TOKEN" ]]; then
-    "${s6wrap[@]}" echo "Could not generate FEEDER_TOKEN; skipping ADSBItalia registration"
+    echo "Could not generate FEEDER_TOKEN; skipping ADSBItalia registration"
     exit 0
 fi
 
@@ -302,11 +302,11 @@ if [[ "$ALT" != "$PREV_ALT" ]]; then changed=1; fi
 if [[ "$FEEDER_CONFIGSTRING" != "$PREV_FEEDER_CONFIGSTRING" ]]; then changed=1; fi
 
 if (( TEST_MODE == 1 )); then
-    "${s6wrap[@]}" echo "ADSBItalia registration test mode enabled"
+    echo "ADSBItalia registration test mode enabled"
     if (( HAD_PREV_CONF == 1 )); then
-        "${s6wrap[@]}" echo "Loaded existing state from $STATE_FILE"
+        echo "Loaded existing state from $STATE_FILE"
     else
-        "${s6wrap[@]}" echo "No existing state file found at $STATE_FILE"
+        echo "No existing state file found at $STATE_FILE"
     fi
 
     print_compare "FEEDER_ID" "$PREV_FEEDER_ID" "$FEEDER_ID"
@@ -327,19 +327,19 @@ if (( TEST_MODE == 1 )); then
     print_compare "ALT" "$PREV_ALT" "$ALT"
 
     if (( changed == 0 )); then
-        "${s6wrap[@]}" echo "Judgement: values are unchanged"
+        echo "Judgement: values are unchanged"
     else
-        "${s6wrap[@]}" echo "Judgement: values have changed"
+        echo "Judgement: values have changed"
     fi
 else
 
     if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 0 )); then
-        "${s6wrap[@]}" echo "ADSBItalia registration values unchanged; skipping"
+        echo "ADSBItalia registration values unchanged; skipping"
         exit 0
     fi
 
     if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 1 )); then
-        "${s6wrap[@]}" echo "ADSBItalia registration force-update requested; sending update despite unchanged values"
+        echo "ADSBItalia registration force-update requested; sending update despite unchanged values"
     fi
 
     if ! {
@@ -360,13 +360,13 @@ else
         printf 'LON=%q\n' "$LON"
         printf 'ALT=%q\n' "$ALT"
     } > "$TMPFILE"; then
-        "${s6wrap[@]}" echo "Could not write the config file; skipping ADSBItalia registration"
+        echo "Could not write the config file; skipping ADSBItalia registration"
         rm -f "$TMPFILE"
         exit 0
     fi
 fi
 
-PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port","%s","lat":"%s","lon":"%s","alt":"%s"}' \
+PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":"%s","lat":"%s","lon":"%s","alt":"%s"}' \
     "$FEEDER_ID" \
     "$FEEDER_TOKEN" \
     "$FEEDER_VERSION" \
@@ -398,23 +398,23 @@ if (( TEST_MODE != 1 )); then
     CURL_EXIT_CODE=$?
 
     if (( CURL_EXIT_CODE == 0 )) && [[ "$HTTP_STATUS_CODE" =~ ^2[0-9]{2}$ ]]; then
-        "${s6wrap[@]}" echo "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )request sent successfully."
-        "${s6wrap[@]}" echo "Registration API HTTP status: $HTTP_STATUS_CODE"
-        "${s6wrap[@]}" echo "Feeder Name: $FEEDER_NAME"
-        "${s6wrap[@]}" echo "Feeder ID: $FEEDER_ID"
-        "${s6wrap[@]}" echo "Feeder Token: $FEEDER_TOKEN"
+        echo "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )request sent successfully."
+        echo "Registration API HTTP status: $HTTP_STATUS_CODE"
+        echo "Feeder Name: $FEEDER_NAME"
+        echo "Feeder ID: $FEEDER_ID"
+        echo "Feeder Token: $FEEDER_TOKEN"
 
         mv -f "$TMPFILE" "$STATE_FILE"
         chmod 600 "$STATE_FILE" || true
     else
-        "${s6wrap[@]}" echo "Registration failed or was rejected by the server."
-        "${s6wrap[@]}" echo "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
-        "${s6wrap[@]}" echo "Ultrafeeder will feed adsbitalia without registration."
+        echo "Registration failed or was rejected by the server."
+        echo "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
+        echo "Ultrafeeder will feed adsbitalia without registration."
     fi
 else
-    "${s6wrap[@]}" echo "Test mode: registration request not sent."
-    "${s6wrap[@]}" echo "Payload message that would have been sent:"
-    "${s6wrap[@]}" echo "$(jq . <<< "$PAYLOAD")"
+    echo "Test mode: registration request not sent."
+    echo "Payload message that would have been sent:"
+    echo "$(jq . <<< "$PAYLOAD")"
 fi
 
 exit 0
