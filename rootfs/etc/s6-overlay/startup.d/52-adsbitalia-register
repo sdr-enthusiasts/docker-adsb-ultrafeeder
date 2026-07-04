@@ -114,7 +114,7 @@ if [ "$MOUNT_POINT" = "/" ]; then
 fi
 
 TMPFILE="$(mktemp)"
-
+TMPRESULT="$(mktemp)"
 TEST_MODE=0
 FORCE_UPDATE=0
 for arg in "$@"; do
@@ -407,24 +407,26 @@ if (( HAD_PREV_CONF == 1 )); then
 fi
 
 if (( TEST_MODE != 1 )); then
-    HTTP_STATUS_CODE="$(curl -sS -o /dev/null -w "%{http_code}" \
+    HTTP_STATUS_CODE="$(curl -sSL -o "$TMPRESULT" -w "%{http_code}" \
         "${CURL_HEADERS[@]}" \
         -d "$PAYLOAD" \
         "$REGISTER_URL")"
     CURL_EXIT_CODE=$?
 
     if (( CURL_EXIT_CODE == 0 )) && [[ "$HTTP_STATUS_CODE" =~ ^2[0-9]{2}$ ]]; then
-        echo "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )request sent successfully."
-        echo "Registration API HTTP status: $HTTP_STATUS_CODE"
-        echo "Feeder Name: $FEEDER_NAME"
-        echo "Feeder ID: $FEEDER_ID"
-        echo "Feeder Token: $FEEDER_TOKEN"
+        echo "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )successful."
+#        echo "Registration API HTTP status: $HTTP_STATUS_CODE"
+#        echo "Feeder Name: $FEEDER_NAME"
+#        echo "Feeder ID: $FEEDER_ID"
+#        echo "Feeder Token: $FEEDER_TOKEN"
 
         mv -f "$TMPFILE" "$STATE_FILE"
+        rm -f "$TMPRESULT"
         chmod 600 "$STATE_FILE" || true
     else
         echo "Registration failed or was rejected by the server."
         echo "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
+        echo "Server returned: $TMPRESULT"
         echo "Ultrafeeder will feed adsbitalia without registration."
     fi
 else
