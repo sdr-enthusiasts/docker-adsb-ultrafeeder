@@ -90,6 +90,11 @@ FIXED_MLAT_RETURN_PORT="33106"
 
 # ensure the STATE_FILE can be written to persistent storage
 # if not, complain and exit
+if ! mkdir -p "$STATE_DIR"; then
+    msg "Could not create $STATE_DIR; skipping ADSBItalia registration"
+    exit 0
+fi
+if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
 TARGET_PATH=$(readlink -f "$STATE_FILE")
 MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
 if [ "$MOUNT_POINT" = "/" ]; then
@@ -147,11 +152,6 @@ done
 
 if [[ -z "$ADSB_ENTRY" ]] && [[ -z "$MLAT_ENTRY" ]]; then
 #    msg "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
-    exit 0
-fi
-
-if ! mkdir -p "$STATE_DIR"; then
-    msg "Could not create $STATE_DIR; skipping ADSBItalia registration"
     exit 0
 fi
 
