@@ -81,7 +81,7 @@ if chk_disabled "$ADSBITALIA_REGISTRATION"; then exit 0; fi
 REGISTER_URL="https://adsbitalia.it/api/register-feeder"
 STATE_DIR="/var/globe_history/adsbitalia"
 STATE_FILE="$STATE_DIR/adsbitalia.conf"
-FIXED_MLAT_RETURN_PORT="33106"
+FIXED_MLAT_RETURN_PORT=""
 
 # ensure the STATE_FILE can be written to persistent storage
 # if not, complain and exit
@@ -366,7 +366,7 @@ else
     fi
 fi
 
-PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"lat":"%s","lon":"%s","alt":"%s"}' \
+PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port","%s","lat":"%s","lon":"%s","alt":"%s"}' \
     "$FEEDER_ID" \
     "$FEEDER_TOKEN" \
     "$FEEDER_VERSION" \
@@ -380,6 +380,7 @@ PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","f
     "$FEED_PORT_NUM" \
     "$MLAT_HOST" \
     "$MLAT_PORT_NUM" \
+    "$MLAT_RETURN_PORT" \
     "$LAT" \
     "$LON" \
     "$ALT")
