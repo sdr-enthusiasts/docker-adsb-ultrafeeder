@@ -47,16 +47,15 @@ services:
         adsb,data.avdelphi.com,24999,beast_reduce_plus_out;
         adsb,skyfeed.hpradar.com,30004,beast_reduce_plus_out;
         adsb,dati.flyitalyadsb.com,4905,beast_reduce_plus_out;
-        mlat,feed.adsb.fi,31090,39000;
-        mlat,in.adsb.lol,31090,39001;
-        mlat,feed.airplanes.live,31090,39002;
-        mlat,mlat.planespotters.net,31090,39003;
-        mlat,feed.theairtraffic.com,31090,39004;
-        mlat,mlatfeed.hpradar.com,31090,39005;
-        mlat,dati.flyitalyadsb.com,30100,39007;
-      # If you really want to feed ADSBExchange, you can do so by adding this above:
-      #        adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out,uuid=${ADSBX_UUID};
-      #        mlat,feed.adsbexchange.com,31090,39008,uuid=${ADSBX_UUID}
+        adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out;
+        mlat,feed.adsb.fi,31090;
+        mlat,in.adsb.lol,31090;
+        mlat,feed.airplanes.live,31090;
+        mlat,mlat.planespotters.net,31090;
+        mlat,feed.theairtraffic.com,31090;
+        mlat,mlatfeed.hpradar.com,31090;
+        mlat,dati.flyitalyadsb.com,30100;
+        mlat,feed.adsbexchange.com,31090,39008,uuid=${ADSBX_UUID}
       #
       # --------------------------------------------------
       - UUID=${MULTIFEEDER_UUID}
