@@ -52,7 +52,7 @@ services:
         mlat,feed.airplanes.live,31090,39002;
         mlat,mlat.planespotters.net,31090,39003;
         mlat,feed.theairtraffic.com,31090,39004;
-        mlat,skyfeed.hpradar.com,31090,39005;
+        mlat,mlatfeed.hpradar.com,31090,39005;
         mlat,dati.flyitalyadsb.com,30100,39007;
       # If you really want to feed ADSBExchange, you can do so by adding this above:
       #        adsb,feed1.adsbexchange.com,30004,beast_reduce_plus_out,uuid=${ADSBX_UUID};
