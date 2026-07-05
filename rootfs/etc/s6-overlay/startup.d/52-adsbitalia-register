@@ -353,7 +353,7 @@ if (( TEST_MODE == 1 )); then
 else
 
     if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 0 )); then
-        echo "ADSBItalia registration values unchanged; skipping"
+#        echo "ADSBItalia registration values unchanged; skipping"
         exit 0
     fi
 
