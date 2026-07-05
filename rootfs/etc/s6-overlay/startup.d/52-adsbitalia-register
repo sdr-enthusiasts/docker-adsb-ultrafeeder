@@ -205,7 +205,6 @@ if [[ -f "$STATE_FILE" ]]; then
     PREV_MLAT_HOST="${MLAT_HOST:-}"
     PREV_MLAT_PORT="${MLAT_PORT:-}"
     PREV_MLAT_RETURN_PORT="${MLAT_RETURN_PORT:-}"
-    PREV_MLAT_ENTRY="${MLAT_ENTRY:-}"
     PREV_LAT="${LAT:-}"
     PREV_LON="${LON:-}"
     PREV_ALT="${ALT:-}"
@@ -300,8 +299,6 @@ ALT="${ALT:-${READSB_ALT:-${PREV_ALT:-}}}"
 LOCAL_BEAST_PORT_NUM="$(safe_num "$LOCAL_BEAST_PORT")"
 FEED_PORT_NUM="$(safe_num "$FEED_PORT")"
 MLAT_PORT_NUM="$(safe_num "$MLAT_PORT")"
-MLAT_RETURN_PORT_NUM="$(safe_num "$MLAT_RETURN_PORT")"
-
 changed=0
 if [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then changed=1; fi
 if [[ "$FEEDER_TOKEN" != "$PREV_FEEDER_TOKEN" ]]; then changed=1; fi
@@ -417,7 +414,11 @@ if (( TEST_MODE != 1 )); then
     CURL_EXIT_CODE=$?
 
     if (( CURL_EXIT_CODE == 0 )) && [[ "$HTTP_STATUS_CODE" =~ ^2[0-9]{2}$ ]]; then
-        echo "Feeder registration $( (( HAD_PREV_CONF == 1 )) && echo "update " || true )successful."
+        registration_action=""
+        if (( HAD_PREV_CONF == 1 )); then
+            registration_action="update "
+        fi
+        echo "Feeder registration ${registration_action}successful."
 #        echo "Registration API HTTP status: $HTTP_STATUS_CODE"
 #        echo "Feeder Name: $FEEDER_NAME"
 #        echo "Feeder ID: $FEEDER_ID"
@@ -435,7 +436,7 @@ if (( TEST_MODE != 1 )); then
 else
     echo "Test mode: registration request not sent."
     echo "Payload message that would have been sent:"
-    echo "$(jq . <<< "$PAYLOAD")"
+    jq . <<< "$PAYLOAD"
 fi
 
 exit 0
