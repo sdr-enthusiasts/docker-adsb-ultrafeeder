@@ -4,7 +4,7 @@
 
 [[ "$1" != "" ]] && BRANCH="$1" || BRANCH="$(git branch --show-current)"
 [[ "$BRANCH" == "main" ]] && TAG="latest" || TAG="$BRANCH"
-[[ "$ARCHS" == "" ]] && ARCHS="linux/armhf,linux/arm64,linux/amd64"
+[[ "$ARCHS" == "" ]] && ARCHS="linux/arm64,linux/amd64"
 
 BASETARGET1=ghcr.io/sdr-enthusiasts
 #BASETARGET2=kx1t

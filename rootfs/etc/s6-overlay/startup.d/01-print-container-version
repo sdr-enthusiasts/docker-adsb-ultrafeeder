@@ -5,7 +5,7 @@ source /scripts/common
 
 # Print container version
 #---------------------------------------------------------------------------------------------
-# Copyright (C) 2023-2024, Ramon F. Kolb (kx1t) and contributors
+# Copyright (C) 2023-2026, Ramon F. Kolb (kx1t) and contributors
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -20,4 +20,4 @@ source /scripts/common
 # If not, see <https://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------------------------
 
-[[ -f /.CONTAINER_VERSION ]] && "${s6wrap[@]}" echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true
+[[ -f /.CONTAINER_VERSION ]] && echo "Container Version: $(cat /.CONTAINER_VERSION), build date $(stat -c '%y' /.CONTAINER_VERSION |sed 's|\(.*\)\.[0-9]* \(.*\)|\1 \2|g')" || true

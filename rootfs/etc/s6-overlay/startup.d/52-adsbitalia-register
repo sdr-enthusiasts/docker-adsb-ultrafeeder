@@ -1,0 +1,442 @@
+#!/command/with-contenv bash
+# shellcheck shell=bash disable=SC1091,SC2154
+
+#---------------------------------------------------------------------------------------------
+# Copyright (C) 2023-2026, Ramon F. Kolb (kx1t) and contributors
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your option)
+# any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with this program.
+# If not, see <https://www.gnu.org/licenses/>.
+#---------------------------------------------------------------------------------------------
+
+source /scripts/common
+source /scripts/interpret_ultrafeeder_config
+
+print_compare() {
+    local key="$1"
+    local old_val="$2"
+    local new_val="$3"
+
+    if [[ "$old_val" == "$new_val" ]]; then
+        echo "$key: unchanged (\"$new_val\")"
+    else
+        echo "$key: changed"
+        echo "  old: \"$old_val\""
+        echo "  new: \"$new_val\""
+    fi
+}
+
+trim() {
+    local s="$1"
+    s="${s#"${s%%[![:space:]]*}"}"
+    s="${s%"${s##*[![:space:]]}"}"
+    printf '%s' "$s"
+}
+
+extract_uuid_from_entry() {
+    local entry="$1"
+    local -a parts
+    local part
+
+    readarray -td "," parts < <(printf '%s' "$entry")
+    for part in "${parts[@]}"; do
+        part="$(trim "$part")"
+        if [[ "${part,,}" == uuid=* ]]; then
+            printf '%s' "${part#*=}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+detect_public_ip() {
+    local ip
+    local provider
+
+    for provider in \
+        "https://api.ipify.org" \
+        "https://ifconfig.me/ip" \
+        "https://icanhazip.com"
+    do
+        ip="$(curl -fsS --max-time 10 "$provider" 2>/dev/null | tr -d '[:space:]' || true)"
+        if [[ "$ip" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]; then
+            printf '%s' "$ip"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+generate_token() {
+    python3 - <<'PY'
+import secrets
+print(secrets.token_urlsafe(48))
+PY
+}
+
+safe_num() {
+    local n="$1"
+    if [[ "$n" =~ ^[0-9]+$ ]]; then
+        printf '%s' "$n"
+    else
+        printf '0'
+    fi
+}
+
+if chk_disabled "$ADSBITALIA_REGISTRATION"; then exit 0; fi
+
+REGISTER_URL="https://adsbitalia.it/api/register-feeder"
+STATE_DIR="/var/globe_history/adsbitalia"
+STATE_FILE="$STATE_DIR/adsbitalia.conf"
+FIXED_MLAT_RETURN_PORT=""
+
+TMPFILE="$(mktemp)"
+TMPRESULT="$(mktemp)"
+TEST_MODE=0
+FORCE_UPDATE=0
+for arg in "$@"; do
+    case "$arg" in
+        test)
+            TEST_MODE=1
+            ;;
+        force-update)
+            FORCE_UPDATE=1
+            ;;
+    esac
+done
+
+ULTRA_CFG="${ULTRAFEEDER_CONFIG:-}"
+if [[ -z "$ULTRA_CFG" ]]; then
+#    echo "ULTRAFEEDER_CONFIG is empty; skipping ADSBItalia registration"
+    exit 0
+fi
+
+ULTRA_CFG="${ULTRA_CFG//$'\n'/}"
+ULTRA_CFG="${ULTRA_CFG//$'\r'/}"
+
+ADSB_ENTRY=""
+MLAT_ENTRY=""
+
+readarray -td ";" cfg_entries < <(printf '%s' "$ULTRA_CFG")
+for raw_entry in "${cfg_entries[@]}"; do
+    entry="$(trim "$raw_entry")"
+    [[ -z "$entry" ]] && continue
+
+    readarray -td "," parts < <(printf '%s' "$entry")
+    type="$(trim "${parts[0]:-}")"
+    host="$(trim "${parts[1]:-}")"
+
+    if [[ "${host,,}" != *"adsbitalia.it"* ]]; then
+        continue
+    fi
+
+    if [[ "${type,,}" == "adsb" ]] && [[ -z "$ADSB_ENTRY" ]]; then
+        ADSB_ENTRY="$entry"
+    elif [[ "${type,,}" == "mlat" ]] && [[ -z "$MLAT_ENTRY" ]]; then
+        MLAT_ENTRY="$entry"
+    fi
+
+done
+
+if [[ -z "$ADSB_ENTRY" ]] && [[ -z "$MLAT_ENTRY" ]]; then
+#    echo "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
+    exit 0
+fi
+
+# ensure the STATE_FILE can be written to persistent storage
+# if not, complain and exit
+if ! mkdir -p "$STATE_DIR"; then
+    echo "[ERROR] Could not create $STATE_DIR; skipping ADSBItalia registration"
+    exit 0
+fi
+if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
+# Resolve the absolute path of the state file
+TARGET_PATH=$(readlink -f "$STATE_FILE")
+MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
+# Check if the mount point is explicitly declared kas a bind/volume mount in kernel mountinfo.
+# If the mount point is '/' then we're not on a mounted volume!
+if [[ "$MOUNT_POINT" == "/" ]]; then
+    echo "[ERROR] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
+    exit 0
+fi
+
+PREV_FEEDER_ID=""
+PREV_FEEDER_TOKEN=""
+PREV_FEEDER_NAME=""
+PREV_FEEDER_VERSION=""
+PREV_FEEDER_CONFIGSTRING=""
+PREV_PUBLIC_IP=""
+PREV_HOSTNAME_LOCAL=""
+PREV_LOCAL_BEAST_PORT=""
+PREV_FEED_HOST=""
+PREV_FEED_PORT=""
+PREV_MLAT_HOST=""
+PREV_MLAT_PORT=""
+PREV_MLAT_RETURN_PORT=""
+PREV_LAT=""
+PREV_LON=""
+PREV_ALT=""
+
+HAD_PREV_CONF=0
+if [[ -f "$STATE_FILE" ]]; then
+    HAD_PREV_CONF=1
+    # shellcheck disable=SC1090
+    source "$STATE_FILE" || true
+
+    PREV_FEEDER_ID="${FEEDER_ID:-}"
+    PREV_FEEDER_TOKEN="${FEEDER_TOKEN:-}"
+    PREV_FEEDER_NAME="${FEEDER_NAME:-}"
+    PREV_FEEDER_VERSION="${FEEDER_VERSION:-}"
+    PREV_FEEDER_CONFIGSTRING="${FEEDER_CONFIGSTRING:-}"
+    PREV_PUBLIC_IP="${PUBLIC_IP:-}"
+    PREV_HOSTNAME_LOCAL="${HOSTNAME_LOCAL:-}"
+    PREV_LOCAL_BEAST_PORT="${LOCAL_BEAST_PORT:-}"
+    PREV_FEED_HOST="${FEED_HOST:-}"
+    PREV_FEED_PORT="${FEED_PORT:-}"
+    PREV_MLAT_HOST="${MLAT_HOST:-}"
+    PREV_MLAT_PORT="${MLAT_PORT:-}"
+    PREV_MLAT_RETURN_PORT="${MLAT_RETURN_PORT:-}"
+    PREV_LAT="${LAT:-}"
+    PREV_LON="${LON:-}"
+    PREV_ALT="${ALT:-}"
+fi
+
+ADSB_UUID=""
+ADSB_HOST=""
+ADSB_PORT=""
+ADSB_PROTOCOL=""
+if [[ -n "$ADSB_ENTRY" ]]; then
+    readarray -td "," adsb_parts < <(printf '%s' "$ADSB_ENTRY")
+    ADSB_HOST="$(trim "${adsb_parts[1]:-}")"
+    ADSB_PORT="$(trim "${adsb_parts[2]:-}")"
+    ADSB_PROTOCOL="${adsb_parts[3]:-}"
+    ADSB_PROTOCOL="$(trim "$ADSB_PROTOCOL")"
+    ADSB_UUID="$(extract_uuid_from_entry "$ADSB_ENTRY" || true)"
+fi
+FEEDER_CONFIGSTRING="${ADSB_ENTRY:-}${ADSB_ENTRY:+;}${MLAT_ENTRY:-}"
+FEEDER_CONFIGSTRING="${FEEDER_CONFIGSTRING//[$'\n'\"\']/}"
+MLAT_UUID=""
+MLAT_HOST_CFG=""
+MLAT_PORT_CFG=""
+if [[ -n "$MLAT_ENTRY" ]]; then
+    readarray -td "," mlat_parts < <(printf '%s' "$MLAT_ENTRY")
+    MLAT_HOST_CFG="$(trim "${mlat_parts[1]:-}")"
+    MLAT_PORT_CFG="$(trim "${mlat_parts[2]:-}")"
+    MLAT_UUID="$(extract_uuid_from_entry "$MLAT_ENTRY" || true)"
+fi
+
+FEEDER_ID="${PREV_FEEDER_ID:-}"
+if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="${ADSB_UUID:-}"; fi
+if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="${MLAT_UUID:-}"; fi
+if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="${UUID:-}"; fi
+if [[ -z "$FEEDER_ID" ]]; then FEEDER_ID="$(cat /proc/sys/kernel/random/uuid 2>/dev/null || true)"; fi
+if [[ -z "$FEEDER_ID" ]]; then
+    echo "No FEEDER_ID available; skipping ADSBItalia registration"
+    exit 0
+fi
+
+FEEDER_TOKEN="${PREV_FEEDER_TOKEN:-}"
+if [[ -z "$FEEDER_TOKEN" ]]; then
+    FEEDER_TOKEN="$(generate_token 2>/dev/null || true)"
+fi
+
+if [[ -n "$PREV_FEEDER_ID" ]] && [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then
+    FEEDER_TOKEN="$(generate_token 2>/dev/null || true)"
+fi
+
+if [[ -z "$FEEDER_TOKEN" ]]; then
+    echo "[ERROR] Could not generate FEEDER_TOKEN; skipping ADSBItalia registration"
+    exit 0
+fi
+
+FEEDER_NAME="${MLAT_USER:-$FEEDER_ID}"
+
+FEEDER_VERSION="ultrafeeder_$(< /.CONTAINER_VERSION)"
+
+PUBLIC_IP="$(detect_public_ip || true)"
+if [[ -z "$PUBLIC_IP" ]]; then
+    PUBLIC_IP="${PREV_PUBLIC_IP:-}"
+fi
+
+HOSTNAME_LOCAL="$(hostname -f 2>/dev/null || hostname 2>/dev/null || true)"
+
+case "${ADSB_PROTOCOL,,}" in
+    beast_reduce_plus_out|beast_out)
+        LOCAL_BEAST_PORT="${READSB_NET_BEAST_OUTPUT_PORT:-30005}"
+        ;;
+    beast_reduce_out)
+        LOCAL_BEAST_PORT="${READSB_NET_BEAST_REDUCE_OUT_PORT:-30006}"
+        ;;
+    *)
+        LOCAL_BEAST_PORT="${READSB_NET_BEAST_OUTPUT_PORT:-30005}"
+        ;;
+esac
+LOCAL_BEAST_PORT="${LOCAL_BEAST_PORT%%,*}"
+LOCAL_BEAST_PORT="$(trim "$LOCAL_BEAST_PORT")"
+if [[ -z "$LOCAL_BEAST_PORT" ]]; then
+    LOCAL_BEAST_PORT="30005"
+fi
+
+FEED_HOST="$ADSB_HOST"
+FEED_PORT="$ADSB_PORT"
+MLAT_HOST="$MLAT_HOST_CFG"
+MLAT_PORT="$MLAT_PORT_CFG"
+MLAT_RETURN_PORT="$FIXED_MLAT_RETURN_PORT"
+
+LAT="${LAT:-${READSB_LAT:-${PREV_LAT:-}}}"
+LON="${LON:-${LONG:-${READSB_LON:-${PREV_LON:-}}}}"
+ALT="${ALT:-${READSB_ALT:-${PREV_ALT:-}}}"
+
+LOCAL_BEAST_PORT_NUM="$(safe_num "$LOCAL_BEAST_PORT")"
+FEED_PORT_NUM="$(safe_num "$FEED_PORT")"
+MLAT_PORT_NUM="$(safe_num "$MLAT_PORT")"
+changed=0
+if [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then changed=1; fi
+if [[ "$FEEDER_TOKEN" != "$PREV_FEEDER_TOKEN" ]]; then changed=1; fi
+if [[ "$FEEDER_NAME" != "$PREV_FEEDER_NAME" ]]; then changed=1; fi
+if [[ "$FEEDER_VERSION" != "$PREV_FEEDER_VERSION" ]]; then changed=1; fi
+if [[ "$PUBLIC_IP" != "$PREV_PUBLIC_IP" ]]; then changed=1; fi
+if [[ "$HOSTNAME_LOCAL" != "$PREV_HOSTNAME_LOCAL" ]]; then changed=1; fi
+if [[ "$LOCAL_BEAST_PORT" != "$PREV_LOCAL_BEAST_PORT" ]]; then changed=1; fi
+if [[ "$FEED_HOST" != "$PREV_FEED_HOST" ]]; then changed=1; fi
+if [[ "$FEED_PORT" != "$PREV_FEED_PORT" ]]; then changed=1; fi
+if [[ "$MLAT_HOST" != "$PREV_MLAT_HOST" ]]; then changed=1; fi
+if [[ "$MLAT_PORT" != "$PREV_MLAT_PORT" ]]; then changed=1; fi
+if [[ "$MLAT_RETURN_PORT" != "$PREV_MLAT_RETURN_PORT" ]]; then changed=1; fi
+if [[ "$LAT" != "$PREV_LAT" ]]; then changed=1; fi
+if [[ "$LON" != "$PREV_LON" ]]; then changed=1; fi
+if [[ "$ALT" != "$PREV_ALT" ]]; then changed=1; fi
+if [[ "$FEEDER_CONFIGSTRING" != "$PREV_FEEDER_CONFIGSTRING" ]]; then changed=1; fi
+
+if (( TEST_MODE == 1 )); then
+    echo "ADSBItalia registration test mode enabled"
+    if (( HAD_PREV_CONF == 1 )); then
+        echo "Loaded existing state from $STATE_FILE"
+    else
+        echo "No existing state file found at $STATE_FILE"
+    fi
+
+    print_compare "FEEDER_ID" "$PREV_FEEDER_ID" "$FEEDER_ID"
+    print_compare "FEEDER_TOKEN" "$PREV_FEEDER_TOKEN" "$FEEDER_TOKEN"
+    print_compare "FEEDER_NAME" "$PREV_FEEDER_NAME" "$FEEDER_NAME"
+    print_compare "FEEDER_VERSION" "$PREV_FEEDER_VERSION" "$FEEDER_VERSION"
+    print_compare "FEEDER_CONFIGSTRING" "$PREV_FEEDER_CONFIGSTRING" "$FEEDER_CONFIGSTRING"
+    print_compare "PUBLIC_IP" "$PREV_PUBLIC_IP" "$PUBLIC_IP"
+    print_compare "HOSTNAME_LOCAL" "$PREV_HOSTNAME_LOCAL" "$HOSTNAME_LOCAL"
+    print_compare "LOCAL_BEAST_PORT" "$PREV_LOCAL_BEAST_PORT" "$LOCAL_BEAST_PORT"
+    print_compare "FEED_HOST" "$PREV_FEED_HOST" "$FEED_HOST"
+    print_compare "FEED_PORT" "$PREV_FEED_PORT" "$FEED_PORT"
+    print_compare "MLAT_HOST" "$PREV_MLAT_HOST" "$MLAT_HOST"
+    print_compare "MLAT_PORT" "$PREV_MLAT_PORT" "$MLAT_PORT"
+    print_compare "MLAT_RETURN_PORT" "$PREV_MLAT_RETURN_PORT" "$MLAT_RETURN_PORT"
+    print_compare "LAT" "$PREV_LAT" "$LAT"
+    print_compare "LON" "$PREV_LON" "$LON"
+    print_compare "ALT" "$PREV_ALT" "$ALT"
+
+    if (( changed == 0 )); then
+        echo "Judgement: values are unchanged"
+    else
+        echo "Judgement: values have changed"
+    fi
+else
+
+    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 0 )); then
+#        echo "ADSBItalia registration values unchanged; skipping"
+        exit 0
+    fi
+
+    if (( HAD_PREV_CONF == 1 )) && (( changed == 0 )) && (( FORCE_UPDATE == 1 )); then
+        echo "ADSBItalia registration force-update requested; sending update despite unchanged values"
+    fi
+
+    if ! {
+        printf 'FEEDER_ID=%q\n' "$FEEDER_ID"
+        printf 'FEEDER_TOKEN=%q\n' "$FEEDER_TOKEN"
+        printf 'FEEDER_NAME=%q\n' "$FEEDER_NAME"
+        printf 'FEEDER_VERSION=%q\n' "$FEEDER_VERSION"
+        printf 'FEEDER_CONFIGSTRING=%q\n' "$FEEDER_CONFIGSTRING"
+        printf 'PUBLIC_IP=%q\n' "$PUBLIC_IP"
+        printf 'HOSTNAME_LOCAL=%q\n' "$HOSTNAME_LOCAL"
+        printf 'LOCAL_BEAST_PORT=%q\n' "$LOCAL_BEAST_PORT"
+        printf 'FEED_HOST=%q\n' "$FEED_HOST"
+        printf 'FEED_PORT=%q\n' "$FEED_PORT"
+        printf 'MLAT_HOST=%q\n' "$MLAT_HOST"
+        printf 'MLAT_PORT=%q\n' "$MLAT_PORT"
+        printf 'MLAT_RETURN_PORT=%q\n' "$MLAT_RETURN_PORT"
+        printf 'LAT=%q\n' "$LAT"
+        printf 'LON=%q\n' "$LON"
+        printf 'ALT=%q\n' "$ALT"
+    } > "$TMPFILE"; then
+        echo "Could not write the config file; skipping ADSBItalia registration"
+        rm -f "$TMPFILE"
+        exit 0
+    fi
+fi
+
+PAYLOAD=$(printf '{"feeder_id":"%s","feeder_token":"%s","feeder_version":"%s","feeder_configstring":"%s","user":"%s","host":"%s","hostname":"%s","beast_port":%s,"local_beast_port":%s,"feed_host":"%s","feed_port":%s,"feed_mode":"push","mlat_host":"%s","mlat_port":%s,"mlat_return_port":"%s","lat":"%s","lon":"%s","alt":"%s"}' \
+    "$FEEDER_ID" \
+    "$FEEDER_TOKEN" \
+    "$FEEDER_VERSION" \
+    "$FEEDER_CONFIGSTRING" \
+    "$FEEDER_NAME" \
+    "$PUBLIC_IP" \
+    "$HOSTNAME_LOCAL" \
+    "$LOCAL_BEAST_PORT_NUM" \
+    "$LOCAL_BEAST_PORT_NUM" \
+    "$FEED_HOST" \
+    "$FEED_PORT_NUM" \
+    "$MLAT_HOST" \
+    "$MLAT_PORT_NUM" \
+    "$MLAT_RETURN_PORT" \
+    "$LAT" \
+    "$LON" \
+    "$ALT")
+
+CURL_HEADERS=(-H "Content-Type: application/json")
+if (( HAD_PREV_CONF == 1 )); then
+    CURL_HEADERS+=(-H "X-Register-Token: ${FEEDER_TOKEN}")
+fi
+
+if (( TEST_MODE != 1 )); then
+    HTTP_STATUS_CODE="$(curl -sSL -o "$TMPRESULT" -w "%{http_code}" \
+        "${CURL_HEADERS[@]}" \
+        -d "$PAYLOAD" \
+        "$REGISTER_URL")"
+    CURL_EXIT_CODE=$?
+
+    if (( CURL_EXIT_CODE == 0 )) && [[ "$HTTP_STATUS_CODE" =~ ^2[0-9]{2}$ ]]; then
+        registration_action=""
+        if (( HAD_PREV_CONF == 1 )); then
+            registration_action="update "
+        fi
+        echo "Feeder registration ${registration_action}successful."
+#        echo "Registration API HTTP status: $HTTP_STATUS_CODE"
+#        echo "Feeder Name: $FEEDER_NAME"
+#        echo "Feeder ID: $FEEDER_ID"
+#        echo "Feeder Token: $FEEDER_TOKEN"
+
+        mv -f "$TMPFILE" "$STATE_FILE"
+        rm -f "$TMPRESULT"
+        chmod 600 "$STATE_FILE" || true
+    else
+        echo "[ERROR] Registration failed or was rejected by the server."
+        echo "[ERROR] Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
+        echo "[ERROR] Server returned: $(<"$TMPRESULT")"
+        echo "[ERROR] Ultrafeeder will attemp to feed AdsbItalia without registration."
+    fi
+else
+    echo "Test mode: registration request not sent."
+    echo "Payload message that would have been sent:"
+    jq . <<< "$PAYLOAD"
+fi
+
+exit 0
