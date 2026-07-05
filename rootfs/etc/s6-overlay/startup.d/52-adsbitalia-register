@@ -155,7 +155,7 @@ fi
 # ensure the STATE_FILE can be written to persistent storage
 # if not, complain and exit
 if ! mkdir -p "$STATE_DIR"; then
-    echo "Could not create $STATE_DIR; skipping ADSBItalia registration"
+    echo "[ERROR] Could not create $STATE_DIR; skipping ADSBItalia registration"
     exit 0
 fi
 if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
@@ -165,7 +165,7 @@ MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
 # Check if the mount point is explicitly declared kas a bind/volume mount in kernel mountinfo.
 # If the mount point is '/' then we're not on a mounted volume!
 if [[ "$MOUNT_POINT" == "/" ]]; then
-    echo "[FATAL] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
+    echo "[ERROR] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
     exit 0
 fi
 
@@ -255,7 +255,7 @@ if [[ -n "$PREV_FEEDER_ID" ]] && [[ "$FEEDER_ID" != "$PREV_FEEDER_ID" ]]; then
 fi
 
 if [[ -z "$FEEDER_TOKEN" ]]; then
-    echo "Could not generate FEEDER_TOKEN; skipping ADSBItalia registration"
+    echo "[ERROR] Could not generate FEEDER_TOKEN; skipping ADSBItalia registration"
     exit 0
 fi
 
@@ -427,10 +427,10 @@ if (( TEST_MODE != 1 )); then
         rm -f "$TMPRESULT"
         chmod 600 "$STATE_FILE" || true
     else
-        echo "Registration failed or was rejected by the server."
-        echo "Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
-        echo "Server returned: $(<"$TMPRESULT")"
-        echo "Ultrafeeder will feed adsbitalia without registration."
+        echo "[ERROR] Registration failed or was rejected by the server."
+        echo "[ERROR] Registration API HTTP status: ${HTTP_STATUS_CODE:-000}"
+        echo "[ERROR] Server returned: $(<"$TMPRESULT")"
+        echo "[ERROR] Ultrafeeder will attemp to feed AdsbItalia without registration."
     fi
 else
     echo "Test mode: registration request not sent."
