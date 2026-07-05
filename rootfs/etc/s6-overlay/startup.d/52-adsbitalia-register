@@ -99,20 +99,6 @@ STATE_DIR="/var/globe_history/adsbitalia"
 STATE_FILE="$STATE_DIR/adsbitalia.conf"
 FIXED_MLAT_RETURN_PORT=""
 
-# ensure the STATE_FILE can be written to persistent storage
-# if not, complain and exit
-if ! mkdir -p "$STATE_DIR"; then
-    echo "Could not create $STATE_DIR; skipping ADSBItalia registration"
-    exit 0
-fi
-if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
-TARGET_PATH=$(readlink -f "$STATE_FILE")
-MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
-if [ "$MOUNT_POINT" = "/" ]; then
-    echo "[FATAL] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
-    exit 0
-fi
-
 TMPFILE="$(mktemp)"
 TMPRESULT="$(mktemp)"
 TEST_MODE=0
@@ -163,6 +149,23 @@ done
 
 if [[ -z "$ADSB_ENTRY" ]] && [[ -z "$MLAT_ENTRY" ]]; then
 #    echo "No adsb or mlat entry for adsbitalia.it in ULTRAFEEDER_CONFIG; skipping"
+    exit 0
+fi
+
+# ensure the STATE_FILE can be written to persistent storage
+# if not, complain and exit
+if ! mkdir -p "$STATE_DIR"; then
+    echo "Could not create $STATE_DIR; skipping ADSBItalia registration"
+    exit 0
+fi
+if [[ ! -f "$STATE_FILE" ]]; then touch "$STATE_FILE"; fi
+# Resolve the absolute path of the state file
+TARGET_PATH=$(readlink -f "$STATE_FILE")
+MOUNT_POINT=$(df "$TARGET_PATH" | awk 'NR==2 {print $6}')
+# Check if the mount point is explicitly declared kas a bind/volume mount in kernel mountinfo.
+# If the mount point is '/' then we're not on a mounted volume!
+if [[ "$MOUNT_POINT" == "/" ]]; then
+    echo "[FATAL] $STATE_DIR is not on a mounted docker volume and we won't be able to store the registration data persistently"
     exit 0
 fi
 
