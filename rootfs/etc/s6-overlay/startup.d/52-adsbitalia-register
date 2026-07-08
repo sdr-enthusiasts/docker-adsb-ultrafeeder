@@ -18,6 +18,9 @@
 #---------------------------------------------------------------------------------------------
 
 source /scripts/common
+
+if ! chk_enabled "$ADSBITALIA_REGISTRATION"; then exit 0; fi
+
 source /scripts/interpret_ultrafeeder_config
 
 print_compare() {
@@ -91,8 +94,6 @@ safe_num() {
         printf '0'
     fi
 }
-
-if chk_disabled "$ADSBITALIA_REGISTRATION"; then exit 0; fi
 
 REGISTER_URL="https://adsbitalia.it/api/register-feeder"
 STATE_DIR="/var/globe_history/adsbitalia"
