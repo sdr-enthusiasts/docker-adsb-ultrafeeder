@@ -13,7 +13,7 @@
 # bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh)
 #
 #---------------------------------------------------------------------------------------------
-# Copyright (C) 2024 Ramon F. Kolb (kx1t) and contributors
+# Copyright (C) 2024-2026 Ramon F. Kolb (kx1t), Dominic Hubert, and contributors
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
