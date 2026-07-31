@@ -7,13 +7,13 @@
 #
 # AussieADSB is an Australian aggregator focused on feeders in Australia/Oceania.
 # If you are in this region and are interested in feeding to them, please see:
-# http://aussieadsb.com/
+# https://aussieadsb.com/
 #
 # You can run this script from any modern Debian Linux machine with this command:
 # bash <(wget -qO - https://raw.githubusercontent.com/sdr-enthusiasts/docker-adsb-ultrafeeder/main/aussieadsb.sh)
 #
 #---------------------------------------------------------------------------------------------
-# Copyright (C) 2024 Ramon F. Kolb (kx1t) and contributors
+# Copyright (C) 2024-2026 Ramon F. Kolb (kx1t), Dominic Hubert, and contributors
 #
 # This program is free software: you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -29,13 +29,13 @@
 #---------------------------------------------------------------------------------------------
 #
 
-AAClientVersion="1.1.0-ultrafeeder"
+AAClientVersion="ultrafeeder/1.1"
 argv="${1,,}"
 if [[ "${argv:0:1}" != "-" ]]; then argv="-$argv"; fi
 
 while [[ "$argv" == "-" ]]; do
     echo "AussieADSB registration utility"
-    echo "Visit http://aussieadsb.com for info"
+    echo "Visit https://aussieadsb.com for info"
     echo
     echo "Select an option:"
     echo "(r)egister      -- register a new receiver"
@@ -117,7 +117,7 @@ case "$argv" in
         fi
         echo ""
         echo "Registering receiver..."
-        response="$(printf '{"ReceiverToken":null,"ClientVersion":"%s","MessageType":"register","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
+        response="$(printf '{"ReceiverToken":null,"ClientVersion":"%s","MessageType":"register","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s","IsMlatEnabled":true}}' \
             "$AAClientVersion" \
             "$(uname -s -r -v)" \
             "$(ifconfig -a | sed -n 's/^\s*ether \([0-9a-f:]\+\) .*$/\1/p' | head -1)" \
@@ -138,15 +138,15 @@ case "$argv" in
         echo "Your receiver is registered! Please add the following to your Ultrafeeder environment parameters in docker-compose.yml:"
         echo
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
-        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
-        echo "   mlat,aussieadsb.com,30000,name=$rcvr_token;"
+        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out,uuid=$rcvr_token;"
+        echo "   mlat,aussieadsb.com,30000,name=$rcvr_token,uuid=$rcvr_token;"
         echo
         echo "After adding these, please recreate your Ultrafeeder container to start feeding AussieADSB!"
         echo
-        echo "Visit http://aussieadsb.com/status to check feeding status"
+        echo "Visit https://aussieadsb.com/status to check feeding status"
         echo "Currently, your receiver name is \"$rcvr_name\", but it will soon be renamed by the admins to your location."
         echo
-        echo "Please keep your AUSSIEADSB_KEY value ($rcvr_token) and Port Number ($port) in a safe place - you will need it to reinstate your station if you ever update your system"
+        echo "Please keep your AUSSIEADSB_KEY value ($rcvr_token) in a safe place - you will need it to reinstate your station if you ever update your system"
         echo
     ;;
 
@@ -220,8 +220,8 @@ case "$argv" in
         echo "Server Port to send Beast data to: $port"
         echo ""
         echo "In ULTRAFEEDER_CONFIG, please add these lines:"
-        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out;"
-        echo "   mlat,aussieadsb.com,30000,name=$AUSSIEADSB_KEY;"
+        echo "   adsb,aussieadsb.com,$port,beast_reduce_plus_out,uuid=$AUSSIEADSB_KEY;"
+        echo "   mlat,aussieadsb.com,30000,name=$AUSSIEADSB_KEY,uuid=$AUSSIEADSB_KEY;"
         echo
         exit 0
     ;;
@@ -261,7 +261,7 @@ case "$argv" in
         fi
         echo ""
         echo "Updating receiver..."
-        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"update","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s"}}' \
+        response="$(printf '{"ReceiverToken":"%s","ClientVersion":"%s","MessageType":"update","Data":{"LocalSourcePort":30005,"OSDescription":"%s","MacAddress":"%s","Suburb":"%s","Email":"%s","Name":"%s","IsMlatEnabled":true}}' \
             "$AUSSIEADSB_KEY" \
             "$AAClientVersion" \
             "$(uname -s -r -v)" \
