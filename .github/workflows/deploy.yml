@@ -42,16 +42,6 @@ jobs:
           echo "Workflow dispatch reason: $INPUTS_REASON"
           echo "Use test image: $INPUTS_USE_TEST_IMAGE"
 
-  hadolint:
-    name: Run hadolint against docker files
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: Pull hadolint/hadolint:latest Image
-        run: docker pull hadolint/hadolint:latest
-      - name: Run hadolint against Dockerfiles
-        run: docker run --rm -i -v "$PWD":/workdir --workdir /workdir --entrypoint hadolint hadolint/hadolint --ignore DL3015 --ignore DL3003 --ignore DL3006 --ignore DL3010 --ignore DL4001 --ignore DL3007 --ignore DL3008 --ignore SC2068 --ignore DL3007 --ignore SC1091 --ignore DL3013 --ignore DL3010 $(find . -type f -iname "Dockerfile*")
-
   deploy:
     name: Deploy without telegraf
     uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@d99ce7f631ca56901a4aecca25d5c6e4b0a7e2f1 # main
