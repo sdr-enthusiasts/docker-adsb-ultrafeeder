@@ -13,6 +13,10 @@ FROM ghcr.io/sdr-enthusiasts/docker-tar1090:latest
 
 LABEL org.opencontainers.image.source="https://github.com/sdr-enthusiasts/docker-adsb-ultrafeeder"
 
+# DL3064 matches on the variable *name* containing "PRIVATE", regardless of its
+# value. PRIVATE_MLAT is a boolean toggle for the mlat-client privacy flag, not
+# a credential, so this is a false positive.
+# hadolint ignore=DL3064
 ENV \
     PRIVATE_MLAT="false" \
     MLAT_INPUT_TYPE="auto"
