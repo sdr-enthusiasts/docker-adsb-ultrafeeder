@@ -74,7 +74,7 @@ if [ -n "${BEASTHOST}" ]; then
 fi
 
 if [ -n "${UUID}" ]; then
-    READSB_CMD+=("--uuid-file=/run/uuid")
+    READSB_CMD+=("--uuid=${UUID}")
 fi
 
 READSB_CMD+=("--write-json=/run/readsb")
