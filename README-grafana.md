@@ -122,6 +122,7 @@ services:
       # You should also enabled the renderer container below.
       - GF_RENDERING_SERVER_URL=http://renderer:8081/render
       - GF_RENDERING_CALLBACK_URL=http://grafana:3000/
+      - GF_RENDERING_RENDERER_TOKEN=token
       - GF_LOG_FILTERS=rendering:debug
       # Required for iframe panels, however this has serious security implications - delete the line below if:
       # 1. You let untrusted users or the public edit your dashboard
@@ -135,6 +136,8 @@ services:
   # The `renderer` container is needed if you want to share images of your dashboard as a graphic:
   renderer:
     image: grafana/grafana-image-renderer:latest
+    environment:
+      - AUTH_TOKEN=token
 
   prometheus:
     image: prom/prometheus
