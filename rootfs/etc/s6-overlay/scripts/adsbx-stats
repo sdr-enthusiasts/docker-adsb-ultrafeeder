@@ -38,7 +38,6 @@ mkdir -p /run/adsbexchange-stats
 # set the UUID:
 # get UUID from ULTRAFEEDER_CONFIG if it exists
 for entry in "${READSB_CONF_ARR[@]}"; do
-echo "$entry"
     if echo "$entry" | grep -q 'adsbexchange.*uuid'; then
         ADSBX_UUID="$(sed  's|.*adsbexchange.*uuid=\([a-f0-9-]\+\).*|\1|g' <<< "$entry")"
     fi
