@@ -98,11 +98,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1792252732,
-        "narHash": "sha256-LMCCoRb8qDhQ1W0AmcHsU84sxi7cIB5LqnD0xghNwJc=",
+        "lastModified": 1792752918,
+        "narHash": "sha256-xfqoW1xqFaXoSAVjPVz9FneyVCH0P0ZLReyGsNhRBT4=",
         "owner": "FredSystems",
         "repo": "pre-commit-checks",
-        "rev": "e04ae0e38016bd830598db6151b0b447fc17677d",
+        "rev": "583246b4ae2ba44fabd2bbb002364ff4d91c818e",
         "type": "github"
       },
       "original": {
@@ -122,11 +122,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1792133817,
-        "narHash": "sha256-LivT78KkZ18adR5daoXj2nlIOxuLw6B96nvW4FOl4d0=",
+        "lastModified": 1792739799,
+        "narHash": "sha256-M2rr/yPbTHvgAzCyZ+zHJHflFM0XU7t42Sw2skA3TQM=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "ec07af44be2e0ce4e1a17e00a97d44232607c1ec",
+        "rev": "b0829a2cc9f7b596583331d78a942c1e5170d8a0",
         "type": "github"
       },
       "original": {
