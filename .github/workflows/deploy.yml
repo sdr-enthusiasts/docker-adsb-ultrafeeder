@@ -51,7 +51,7 @@ jobs:
 
   deploy:
     name: Deploy without telegraf
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@6fe78a4f1b7ab06ae480c7d2bb304f3a6c39055b # main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@662dadfa94ef654eefa453cdd224697b6282ab7a # main
     with:
       push_enabled: true
       push_destinations: ghcr.io
@@ -67,7 +67,7 @@ jobs:
 
   deploy_with_telegraf:
     name: Deploy with telegraf and healthcheck
-    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@6fe78a4f1b7ab06ae480c7d2bb304f3a6c39055b # main
+    uses: sdr-enthusiasts/common-github-workflows/.github/workflows/sdre.yml@662dadfa94ef654eefa453cdd224697b6282ab7a # main
     with:
       push_enabled: true
       push_destinations: ghcr.io
