@@ -101,7 +101,7 @@ volumes:
 
 services:
   grafana:
-    image: grafana/grafana-oss:latest
+    image: grafana/grafana:latest
     restart: unless-stopped
     container_name: grafana
     hostname: grafana
