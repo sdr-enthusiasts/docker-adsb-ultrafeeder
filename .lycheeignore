@@ -1,0 +1,3 @@
+# The DWD GeoServer layer preview redirects (302) into a session URL;
+# it works in a browser but not for a link checker.
+^https://maps\.dwd\.de/geoserver/

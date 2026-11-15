@@ -206,7 +206,7 @@ The following parameters must be set (mandatory) for the container to function:
 
 | Environment Variable          | Description                                                                                                                                                                                         | Controls which `readsb` option | Default   |
 | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | --------- |
-| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/>.                                                                    | Unset                          |           |
+| `ENABLE_TIMELAPSE1090`        | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via `http://dockerhost:port/timelapse/`.                                                                    | Unset                          |           |
 | `READSB_EXTRA_ARGS`           | Optional, allows to specify extra parameters for readsb                                                                                                                                             | Unset                          |           |
 | `READSB_DEBUG`                | Optional, used to set debug mode. `n`: network, `P`: CPR, `S`: speed check                                                                                                                          | Unset                          |           |
 | `READSB_ENABLE_BIASTEE`       | Set to `true` to enable bias tee on supporting interfaces                                                                                                                                           |                                | Unset     |
@@ -262,7 +262,7 @@ As of November 2024, we are recommending to set the `READSB_GAIN` parameter to `
 
 ###### Using the original AutoGain algorithm
 
-You can still use the original autogain algorithm by setting `READSB_GAIN=autogain`. That algorithm is built into the container and it will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/autogain). AutoGain will only work with `rtlsdr` style receivers.
+You can still use the original autogain algorithm by setting `READSB_GAIN=autogain`. That algorithm is built into the container and it will take signal strength measurements to determine the optimal gain. The AutoGain functionality is based on a (slightly) modified version of [Wiedehopf's AutoGain](https://github.com/wiedehopf/adsb-scripts/wiki/Automatic-gain-optimization-for-readsb-and-dump1090-fa). AutoGain will only work with `rtlsdr` style receivers.
 
 Note that AutoGain is not related to the SDR's AGC setting (controlled with the `READSB_RTLSDR_ENABLE_AGC` variable). We do not recommend enabling AGC for Ultrafeeder or any other ADS-B decoder.
 
@@ -413,7 +413,7 @@ There are several aggregators, both non-profit and commercial, that can directly
 | AussieADSB      | C                              | Small semi-commercial aggregator focused uniquely on Australia/Oceania. See <https://aussieadsb.com>. See below on how to configure a feed to them | adsb: `aussieadsb.com` port (varies)<br/>mlat: `aussieadsb.com` port `30000`               | `adsb,aussieadsb.com,xxxxx,beast_reduce_plus_out;`<br/>`mlat,aussieadsb.com,30000`                 |
 | ADSBItalia      | N                              | New adsb network from Italy. See <https://www.adsbitalia.it>. See below on how to configure a feed to them                                         | adsb: `feed.adsbitalia.it` port `31108`<br/>mlat: `mlat.adsbitalia.it` port `41113`        | `adsb,feed.adsbitalia.it,31108,beast_reduce_plus_out;`<br/>`mlat,mlat.adsbitalia.it,41113;`        |
 | PlaneTrack      | C                              | Independent flight tracker run by a single aviation enthusiast. See <https://planetrack.ai/feed.html>                                              | adsb: `feed.planetrack.ai` port `30004`<br/>mlat: `feed.planetrack.ai` port `31090`        | `adsb,feed.planetrack.ai,30004,beast_reduce_plus_out;`<br/>`mlat,feed.planetrack.ai,31090`         |
-| Skydex          | N                              | Browser flight game on live ADS-B: feeding turns an antenna into a public station page with stats. See <https://feed.skydex.online/>. Please use the UUID that is provided when you add your station on this website.              | adsb: `feed.skydex.online` port `30004`<br/>mlat: `feed.skydex.online` port `31090`                                 | `adsb,feed.skydex.online,30004,beast_reduce_plus_out,uuid=xxxx-xxxx-xxxx;`<br/>`mlat,feed.skydex.online,31090,uuid=xxxx-xxxx-xxxx;`                                            |
+| Skydex          | N                              | Browser flight game on live ADS-B: feeding turns an antenna into a public station page with stats. See <https://skydex.online/>. Please use the UUID that is provided when you add your station on this website.              | adsb: `feed.skydex.online` port `30004`<br/>mlat: `feed.skydex.online` port `31090`                                 | `adsb,feed.skydex.online,30004,beast_reduce_plus_out,uuid=xxxx-xxxx-xxxx;`<br/>`mlat,feed.skydex.online,31090,uuid=xxxx-xxxx-xxxx;`                                            |
 | map.flights     | N                              | Independent flight tracker running its own receiver network, free for feeders. See <https://map.flights/stations/build>                            | adsb: `feed.map.flights` port `30004`<br/>mlat: no MLAT                                    | `adsb,feed.map.flights,30004,beast_reduce_plus_out;`                                               |
 
 When feeding AdsbExchange, Ultrafeeder will send statistics to adsbexchange.com by default. See the description of the `ADSBX_STATS` parameter on how to disable this.
@@ -884,11 +884,11 @@ tmpfs:
 
 ### `timelapse1090` Configuration
 
-Legacy: **We recommend AGAINST enabling this feature** as it has been replaced with <http://dockerhost:port/?replay>. `timelapse1090` writes a lot of data to disk, which could shorten the lifespan of your Raspiberry Pi SD card. The replacement functionality is better and doesn't cause any additional disk writes.
+Legacy: **We recommend AGAINST enabling this feature** as it has been replaced with `http://dockerhost:port/?replay`. `timelapse1090` writes a lot of data to disk, which could shorten the lifespan of your Raspiberry Pi SD card. The replacement functionality is better and doesn't cause any additional disk writes.
 
 | Environment Variable     | Purpose                                                                                                                         | Default |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `ENABLE_TIMELAPSE1090`   | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via <http://dockerhost:port/timelapse/> | Unset   |
+| `ENABLE_TIMELAPSE1090`   | Optional / Legacy. Set to `true` to enable timelapse1090. Once enabled, can be accessed via `http://dockerhost:port/timelapse/` | Unset   |
 | `TIMELAPSE1090_INTERVAL` | Snapshot interval in seconds                                                                                                    | `10`    |
 | `TIMELAPSE1090_HISTORY`  | Time saved in hours                                                                                                             | `24`    |
 
