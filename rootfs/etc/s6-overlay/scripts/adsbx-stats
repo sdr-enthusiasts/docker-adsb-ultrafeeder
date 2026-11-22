@@ -68,12 +68,12 @@ if ! pgrep readsb >/dev/null; then
 fi
 
 # Let adsbexchange-json-status start up, and then print the Anywhere Map and Anywhere Stats URLs to the container logs:
-{   sleep 15
+( {   sleep 15
     AnywhereMap="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://globe.adsbexchange.com/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
     AnywhereStats="$(curl -sSL https://www.adsbexchange.com/myip/ | grep "https://www.adsbexchange.com/api/feeders/?feed=" | sed -n 's|.*\(https.*\)\"|\1|p')"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Map URL is $AnywhereMap"
     "${s6wrap[@]}" echo "Your AdsbExchange Anywhere Stats URL is $AnywhereStats"
-} &
+} & )
 
 "${s6wrap[@]}" echo "invoking: /usr/local/bin/adsbexchange-json-status"
 exec "${s6wrap[@]}" /usr/local/bin/adsbexchange-json-status
